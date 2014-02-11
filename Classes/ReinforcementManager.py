@@ -1,0 +1,2 @@
+class ReinforcementManager:
+    pass
