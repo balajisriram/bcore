@@ -27,7 +27,7 @@ class Station:
 
 
 class StandardVisionBehaviorStation(Station):
-            """
+    """
         STANDARDVISIONBEHAVIORSTATION defines a subclass of STATION.
         It defines a station with a standard display, a parallel port for i/o
         with standard pin-out settings, sounds settings which can only be
@@ -38,13 +38,13 @@ class StandardVisionBehaviorStation(Station):
             display          : dictionary containing details about the
                                display unit
             soundOn          : True/False
-            para
-
+            parallelPort     : dictionary containing details about the parallel
+                               port
     """
 
     def __init__(self, **kwargs):
         super(StandardVisionBehaviorStation, self).__init__(
             stationID=kwargs['stationID'])
-
-
-
+        self.display = kwargs['display']
+        self.soundOn = kwargs['soundOn']
+        self.parallelPort = kwargs['parallelPort']
