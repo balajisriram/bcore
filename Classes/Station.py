@@ -1,7 +1,13 @@
 import os
+import time
+
 from uuid import getnode
 
 from BCore import getBaseDirectory
+from BCore.Classes.Hardware import ParallelPort
+
+PPORT_LO = 0
+PPORT_HI = 1
 
 
 class Station:
@@ -25,6 +31,13 @@ class Station:
             os.path.mkdir(self.stationPath)
         self.MACAddress = getnode()
 
+    def initializeParallelPort(st):
+        try:
+            pPort = ParallelPort(pPortAddr=st.parallelPort['pPortAddr'])
+            return (pPort)
+        except:
+            return (None)
+
 
 class StandardVisionBehaviorStation(Station):
     """
@@ -42,9 +55,44 @@ class StandardVisionBehaviorStation(Station):
                                port
     """
 
-    def __init__(self, **kwargs):
-        super(StandardVisionBehaviorStation, self).__init__(
+    def __init__(st, **kwargs):
+        super(StandardVisionBehaviorStation, st).__init__(
             stationID=kwargs['stationID'])
-        self.display = kwargs['display']
-        self.soundOn = kwargs['soundOn']
-        self.parallelPort = kwargs['parallelPort']
+        st.display = kwargs['display']
+        st.soundOn = kwargs['soundOn']
+        st.parallelPort = kwargs['parallelPort']
+        pPort = st.initializeParallelPort()
+        if pPort:
+            st.parallelPort['pPort'] = pPort
+            st.closeAllValves()
+        else:
+            st.parallelPort = None
+
+    def closeAllValves(st):
+        st.parallelPort['pPort'].setPins(st.parallelPort['valvePins'], PPORT_LO)
+
+    def readPorts(st):
+        st.parallelPort['pPort'].readPins(st.parallelPort['portPins'])
+
+    def openValve(st, valve):
+        st.parallelPort['pPort'].writePin(st.parallelPort[valve], PPORT_HI)
+
+    def closeValve(st, valve):
+        st.parallelPort['pPort'].writePin(st.parallelPort[valve], PPORT_LO)
+
+    def flushValves(st, dur):
+        st.parallelPort['pPort'].setPins(st.parallelPort['valvePins'], PPORT_HI)
+        time.sleep(dur)
+        st.parallelPort['pPort'].setPins(st.parallelPort['valvePins'], PPORT_LO)
+
+    def startGL(st):
+        pass
+
+    def stopGL(st):
+        pass
+
+    def getDisplaySize(st):
+        pass
+
+    def doTrials(st, bServer, numTrials):
+        pass
