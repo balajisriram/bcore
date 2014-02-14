@@ -1,0 +1,1 @@
+This library was obtained from "http://sourceforge.net/p/pyserial/code/HEAD/tree/trunk/pyparallel/" as a snapshot 2/13/2014

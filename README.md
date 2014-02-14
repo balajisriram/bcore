@@ -8,4 +8,4 @@ pyopengl
 os
 sys
 numpy
-parallel ( not sure if this is the right package...)
+pyparallel (http://pyserial.sourceforge.net/pyparallel.html)
