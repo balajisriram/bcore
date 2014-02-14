@@ -72,32 +72,32 @@ class StandardParallelPort(Parallel):
             that need to be written
         """
         if state:
-            pPort.setData(pPort.port.PPRDATA() | (2 ** (pin - 2)))
+            pPort.setData(pPort.PPRDATA() | (2 ** (pin - 2)))
             # pin 2 is the 0th bit in the data sream
         else:
-            pPort.setData(pPort.port.PPRDATA() & (255 ^ 2 ** (pin - 2)))
+            pPort.setData(pPort.PPRDATA() & (255 ^ 2 ** (pin - 2)))
 
-    def readData(self):
+    def readData(pPort):
         """Return the value currently set on the data pins (2-9)"""
-        return (self.port.PPRDATA())
+        return (pPort.PPRDATA())
 
-    def readPin(self, pin):
+    def readPin(pPort, pin):
         """
             STANDARDPARALLELPORT.READPIN(PIN)
             only certain pins are readable
         """
         if pin == 10:
-            return self.port.getInAcknowledge()
+            return pPort.getInAcknowledge()
         elif pin == 11:
-            return self.port.getInBusy()
+            return pPort.getInBusy()
         elif pin == 12:
-            return self.port.getInPaperOut()
+            return pPort.getInPaperOut()
         elif pin == 13:
-            return self.port.getInSelected()
+            return pPort.getInSelected()
         elif pin == 15:
-            return self.port.getInError()
+            return pPort.getInError()
         elif pin >= 2 and pin <= 9:
-            return (self.port.PPRDATA() >> (pin - 2)) & 1
+            return (pPort.PPRDATA() >> (pin - 2)) & 1
         else:
             print (('Pin %i cannot be read (by PParallelLinux.readPin() yet)'
             % (pin)))
