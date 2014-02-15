@@ -1,7 +1,4 @@
-class TrialManager:
-
-    def __init__(tm):
-        pass
+from BCore.Classes.TrialManagers.TrialManager import TrialManager
 
 
 class StandardVisionBehaviorTrialManager(TrialManager):
