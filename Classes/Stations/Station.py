@@ -20,12 +20,16 @@ class Station:
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
         self.stationID = kwargs['stationID']
+        self.stationName = kwargs['stationName']
         self.stationPath = os.path.join(
             getBaseDirectory(), 'BServerData', 'StationData',
             str(self.stationID))
         if not os.path.isdir(self.stationPath):
             os.path.mkdir(self.stationPath)
         self.MACAddress = getnode()
+        
+    def getSubject(st):
+        raise NotImplementedError()
 
     def initializeParallelPort(st):
         try:

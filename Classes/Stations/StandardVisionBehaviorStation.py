@@ -1,10 +1,12 @@
 import time
 import sys
+import socket
 
 import openGL.GL as gl
 import openGL.GLUT as glut
 
 from BCore.Classes.Stations.Station import Station
+from BCore.Classes.Hardware.Ports import ServerConnect
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -50,11 +52,13 @@ class StandardVisionBehaviorStation(Station):
         parallelPort['centerPort'] = 10
         parallelPort['rightPort'] = 12
         parallelPort['leftPort'] = 13
+        parallelPort['portPins'] = (12, 10, 13)
     """
 
     def __init__(st, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(
-            stationID=kwargs['stationID'])
+            stationID=kwargs['stationID'], 
+            stationName=kwargs['stationName'])
         st.display = kwargs['display']
         st.soundOn = kwargs['soundOn']
         st.parallelPort = kwargs['parallelPort']
@@ -64,6 +68,47 @@ class StandardVisionBehaviorStation(Station):
             st.closeAllValves()
         else:
             st.parallelPort = None
+        st.BServerConnection = []
+        
+    def initializeParallelPort(st):
+        if st.parallelPort == 'standardVisionBehaviorDefault':
+            pPort = {}
+            pPort['rightValve'] = 2
+            pPort['centerValve'] = 3
+            pPort['leftValve'] = 4
+            pPort['valvePins'] = (2, 3, 4)
+            pPort['centerPort'] = 10
+            pPort['rightPort'] = 12
+            pPort['leftPort'] = 13
+            pPort['portPins'] = (12, 10, 13)
+            st.parallelPort = pPort
+            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
+        else: 
+            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
+        
+    def run(st):
+        # initialize connection with BServer
+        pass
+    
+    def connectToBServer(st):
+        while True:
+            # make connection
+            try:
+                st.BServerConnection = ServerConnect() # use default settings
+            except socket.error:
+                print(('Station unable to find BServer connection'))
+                time.sleep(1)
+            else:
+                print(('Found Error. Stopping NOW!'))
+                raise Error()
+                break
+
+    def getSubject(st):
+        """
+            For STANDARDVISIONBEHAVIORSTATION.GETSUBJECT(), get data from
+            BServer
+        """
+        pass
 
     def closeAllValves(st):
         st.parallelPort['pPort'].writePins(

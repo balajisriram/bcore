@@ -1,5 +1,7 @@
-from BCore.Util.parallel.parallelppdev import Parallel
+import socket
 
+from BCore.Util.parallel.parallelppdev import Parallel
+ 
 
 class StandardParallelPort(Parallel):
     """
@@ -101,3 +103,7 @@ class StandardParallelPort(Parallel):
         else:
             print (('Pin %i cannot be read (by PParallelLinux.readPin() yet)'
             % (pin)))
+
+
+class ServerConnection:
+    pass
