@@ -16,18 +16,17 @@ class Station:
         MACAddress      : unique mac address for the processor/ethernet
                           card. string identifier
     """
-    def __init__(self, **kwargs):
+    def __init__(st, **kwargs):
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
-        self.stationID = kwargs['stationID']
-        self.stationName = kwargs['stationName']
-        self.stationPath = os.path.join(
+        st.stationID = kwargs['stationID']
+        st.stationName = kwargs['stationName']
+        st.stationPath = os.path.join(
             getBaseDirectory(), 'BServerData', 'StationData',
-            str(self.stationID))
-        if not os.path.isdir(self.stationPath):
-            os.path.mkdir(self.stationPath)
-        self.MACAddress = getnode()
-        
+            str(st.stationID))
+        st._setupPaths()
+        st.MACAddress = getnode()
+
     def getSubject(st):
         raise NotImplementedError()
 
@@ -37,3 +36,7 @@ class Station:
             return (pPort)
         except:
             return (None)
+
+    def _setupPaths(st):
+        if not os.path.isdir(st.stationPath):
+            os.path.mkdir(st.stationPath)

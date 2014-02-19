@@ -57,7 +57,7 @@ class StandardVisionBehaviorStation(Station):
 
     def __init__(st, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(
-            stationID=kwargs['stationID'], 
+            stationID=kwargs['stationID'],
             stationName=kwargs['stationName'])
         st.display = kwargs['display']
         st.soundOn = kwargs['soundOn']
@@ -69,7 +69,7 @@ class StandardVisionBehaviorStation(Station):
         else:
             st.parallelPort = None
         st.BServerConnection = []
-        
+
     def initializeParallelPort(st):
         if st.parallelPort == 'standardVisionBehaviorDefault':
             pPort = {}
@@ -82,25 +82,27 @@ class StandardVisionBehaviorStation(Station):
             pPort['leftPort'] = 13
             pPort['portPins'] = (12, 10, 13)
             st.parallelPort = pPort
-            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
-        else: 
-            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
-        
+            return super(
+                StandardVisionBehaviorStation, st).initializeParallelPort()
+        else:
+            return super(
+                StandardVisionBehaviorStation, st).initializeParallelPort()
+
     def run(st):
         # initialize connection with BServer
         pass
-    
+
     def connectToBServer(st):
         while True:
             # make connection
             try:
-                st.BServerConnection = ServerConnect() # use default settings
+                st.BServerConnection = ServerConnect()  # use default settings
             except socket.error:
-                print(('Station unable to find BServer connection'))
+                print(('Station unable to find BServer connection. \
+                Trying again...'))
                 time.sleep(1)
             else:
-                print(('Found Error. Stopping NOW!'))
-                raise Error()
+                raise RuntimeError('Found Error. Stopping NOW!')
                 break
 
     def getSubject(st):

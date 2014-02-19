@@ -1,5 +1,6 @@
 import os
 import sys
+import socket
 
 
 def getBaseDirectory():
@@ -19,3 +20,10 @@ def addPaths():
                   # make a list of all the directories
     sys.path.append(baseDirTree)
     print('INFO:: added module fodlers to path')
+
+
+def getIPAddr():
+    return ([
+        ip for ip in socket.gethostbyname_ex(
+            socket.gethostname()
+            )[2] if not ip.startswith("127.")][:1])

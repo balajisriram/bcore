@@ -1,15 +1,14 @@
 import os
+from BCore import getBaseDirectory
+from BCore.Classes.ClientAndServer.BServer import BServer
 
-from BCore import getBaseDirectory, getIPAddr
 
-
-class BServer:
+class BServerLocal(BServer):
     """
-        BSERVER  keeps track of all the stations that it commands,
+        BSERVERLOCAL  is a BServer which defaults to using *localhost*,
         which subjects are allowed in which station and data storage locations.
             serverID            : string Identifier
             serverDataPath      : allowed data storage location
-            serverIP            : IPV4 value
             stations            : list of stations
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
@@ -19,29 +18,7 @@ class BServer:
     """
 
     def __init__(server, **kwargs):
-        if len(kwargs) == 0:
-            # use standard location for path
-            server = os.path.join(
-                getBaseDirectory(), 'BServerData', 'database')
-        elif len(kwargs) == 1 and 'BServerPath' in kwargs:
-            pass
-            #server = load
-        if (
-            len(kwargs) > 2) or (
-                'serverID' not in kwargs) or (
-                    'serverDataPath' not in kwargs):
-            raise ValueError(
-                'No more than 2 arguments to BServer\
-                (''serverID'' and ''serverDataPath'') for initialization')
-        server.version = '0.0.1'  # Feb 5, 2014
-        server.serverID = kwargs['serverID']
-        server.serverDataPath = kwargs['serverDataPath']
-        server.serverIP = getIPAddr()
-        server.log = []
-        server.stations = []
-        server.subjects = []
-        server.assignments = {}
-        server.database = []
+        super(BServerLocal, server).__init__(**kwargs)
 
     def _setupPaths(server):
         # create 'BServerData'
