@@ -1,6 +1,7 @@
 import os
 import sys
 import socket
+import time
 
 
 def getBaseDirectory():
@@ -27,3 +28,25 @@ def getIPAddr():
         ip for ip in socket.gethostbyname_ex(
             socket.gethostname()
             )[2] if not ip.startswith("127.")][:1])
+
+
+def getTimeStamp(*arg):
+    if len(arg) > 1:
+        raise ValueError('only a single timestamp in a single run')
+    elif len(arg) == 0:
+        t = time.time()
+    else:
+        t = arg[0]
+
+    try:
+        localtime = time.localtime(t)
+    except TypeError:  # check if a localtime 9-item seq was sent
+        try:
+            # use mktime to convert if possible
+            t = time.mktime(t)
+            localtime = time.localtime(t)
+        except Exception:
+            raise Exception
+    else:
+        milliseconds = '%03d' % int((t - int(t)) * 1000)
+        return time.strftime('D%m%d%YT%H%M%SM', localtime) + milliseconds

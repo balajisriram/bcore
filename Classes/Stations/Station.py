@@ -1,12 +1,14 @@
 import os
 
 from uuid import getnode
+from verlib import NormalizedVersion as Ver
+
 
 from BCore import getBaseDirectory
 from BCore.Classes.Hardware import StandardParallelPort
 
 
-class Station:
+class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
         trials from a particular station. This is an abstract class.
@@ -19,6 +21,7 @@ class Station:
     def __init__(st, **kwargs):
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
+        st.version = Ver('0.0.1')
         st.stationID = kwargs['stationID']
         st.stationName = kwargs['stationName']
         st.stationPath = os.path.join(

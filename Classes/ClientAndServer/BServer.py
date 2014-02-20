@@ -1,9 +1,13 @@
 import os
+import time
+import cPickle as pickle
+import shutil
 
-from BCore import getBaseDirectory, getIPAddr
+from verlib import NormalizedVersion as Ver
+from BCore import getBaseDirectory, getIPAddr, getTimeStamp
 
 
-class BServer:
+class BServer(object):
     """
         BSERVER  keeps track of all the stations that it commands,
         which subjects are allowed in which station and data storage locations.
@@ -19,54 +23,99 @@ class BServer:
     """
 
     def __init__(server, **kwargs):
-        if len(kwargs) == 0:
-            # use standard location for path
-            server = os.path.join(
-                getBaseDirectory(), 'BServerData', 'database')
-        elif len(kwargs) == 1 and 'BServerPath' in kwargs:
-            pass
-            #server = load
-        if (
-            len(kwargs) > 2) or (
-                'serverID' not in kwargs) or (
-                    'serverDataPath' not in kwargs):
-            raise ValueError(
-                'No more than 2 arguments to BServer\
-                (''serverID'' and ''serverDataPath'') for initialization')
-        server.version = '0.0.1'  # Feb 5, 2014
-        server.serverID = kwargs['serverID']
-        server.serverDataPath = kwargs['serverDataPath']
-        server.serverIP = getIPAddr()
-        server.log = []
-        server.stations = []
-        server.subjects = []
-        server.assignments = {}
-        server.database = []
+        if len(kwargs) in (0, 1):
+            server = server.loadServer()
+            if 'requireVersion' in kwargs:
+                if server.version < Ver(kwargs['requireVersion']):
+                    raise ValueError('you are trying to load an old version.')
+        else:
+            server.version = Ver('0.0.1')  # Feb 5, 2014
+            server.serverID = kwargs['serverID']
+            server.serverName = kwargs['serverName']
+            server.serverDataPath = os.path.join(
+                getBaseDirectory, 'BCoreData', 'ServerData')
+            server.serverIP = getIPAddr()
+            server.creationTime = time.time()
+            server.log = []
+            server.stations = []
+            server.subjects = []
+            server.assignments = {}
+            server.database = []
+            server.saveServer()
+
+    def loadServer(server):
+        # use standard location for path,
+        # make sure to never modify server here:
+        dbLoc = os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData', 'db.BServer')
+        if os.path.isfile(dbLoc):
+            return pickle.load(dbLoc)
+        else:
+            raise RuntimeError('db.Server not found. Ensure it exists before \
+                calling loadServer')
+
+    def saveServer(server):
+        srcDir = os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData')
+        desDir = os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
+        if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
+            old = BServer()  # standardLoad to old
+            desName = 'db_' + getTimeStamp(old.creationTime) + '.BServer'
+            shutil.copyfile(
+                os.path.join(srcDir, 'db.BServer'),  # source
+                os.path.join(desDir, desName)  # destination
+                )
+            os.remove(os.path.join(srcDir, 'db.BServer'))
+        pickle.dump(server, os.path.join(srcDir, 'db.BServer'))
+
+    def loadBackup(server):
+        """
+            Use this only if you specifically require the deletion of current
+            db.BServer and replacement with an older backup. Only the latest
+            back up is used.
+        """
+        desDir = os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData')
+        srcDir = os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
+        # delete the original database
+        os.remove(os.path.join(desDir, 'db.BServer'))
+        # find the latest file in the backupDBs
+        newestBkup = max(os.listdir(srcDir), key=os.path.getctime)
+        shutil.copyfile(
+                os.path.join(srcDir, newestBkup),  # source
+                os.path.join(desDir, 'db.BServer')  # destination
+                )
+        # delete the newest backup
+        os.remove(os.path.join(srcDir, newestBkup))
 
     def _setupPaths(server):
         # create 'BServerData'
-        os.path.mkdir(os.path.join(getBaseDirectory, 'BServerData'))
+        os.path.mkdir(os.path.join(getBaseDirectory, 'BCoreData'))
         # create 'ServerData','Stations','PermanentTrialRecordStore' in
         # BServerData
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'ServerData'))
+            getBaseDirectory, 'BCoreData', 'ServerData'))
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'StationData'))
+            getBaseDirectory, 'BCoreData', 'StationData'))
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'TrialData'))
+            getBaseDirectory, 'BCoreData', 'TrialData'))
         # create 'replacedDBs' in 'ServerData'
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'ServerData', 'replacedDBs'))
+            getBaseDirectory, 'BCoreData', 'ServerData', 'backupDBs'))
         # create 'Full' and 'Compiled' in 'TrialData'
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'TrialData', 'Full'))
+            getBaseDirectory, 'BCoreData', 'TrialData', 'Full'))
         os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BServerData', 'TrialData', 'Compiled'))
+            getBaseDirectory, 'BCoreData', 'TrialData', 'Compiled'))
 
     def addStation(server, newStation):
-        if newStation.stationID in server.getStationIDs():
-            raise ValueError('Station IDs have to be unique')
+        if (newStation.stationID in server.getStationIDs() or
+            newStation.stationName in server.getStationNames()):
+            raise ValueError('Station IDs and Station Names have to be unique')
         server.stations.append(newStation)
+        # now enable station specific data
 
     def addSubject(server, newSubject, newAssignment):
         if newSubject in server.subjects:
@@ -89,6 +138,12 @@ class BServer:
         for station in server.stations:
             stationIDs.append(station.stationID)
         return stationIDs
+
+    def getStationNames(server):
+        stationNames = []
+        for station in server.stations:
+            stationNames.append(station.stationName)
+        return stationNames
 
     def getSubjectIDs(server):
         subjectIDs = []
