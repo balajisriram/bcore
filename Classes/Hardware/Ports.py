@@ -1,5 +1,6 @@
 import socket
 import cPickle
+import time
 
 from BCore.Util.parallel.parallelppdev import Parallel
 
@@ -109,8 +110,8 @@ class StandardParallelPort(Parallel):
 class TCPConnection(object):
     """
         TCPCONNECTION defines a class that determines the read/write protocol
-        for data streamed through its channels. It cannot be used directly 
-        because it cannot be started directly. This works because the only 
+        for data streamed through its channels. It cannot be used directly
+        because it cannot be started directly. This works because the only
         difference between server and client is the way connections are started
     """
 
@@ -131,12 +132,12 @@ class TCPConnection(object):
 
     def close(conn):
         conn.connection.close()
-        
+
     def __del__(conn):
         print(('Closing connection...'))
         conn.connection.close()
         print(('done.'))
-        
+
     def recvData(conn):
         """
             Enforces a max conn.DEFAULT_BUFFER_SIZE message from the client.
@@ -144,9 +145,10 @@ class TCPConnection(object):
         """
         while True:
             BITSTR = conn.connection.recv(conn.DEFAULT_BUFFER_SIZE)
-            if not BITSTR: break
+            if not BITSTR:
+                break
         return cPickle.loads(BITSTR)
-        
+
     def sendData(conn, DATA):
         """
             Pickles and sends the data through the socket connection.
@@ -157,10 +159,10 @@ class TCPConnection(object):
 class TCPServerConnection(TCPConnection):
     """
         TCPSERVERCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a server, conn.TCP_IP and 
+        the initiation of the connection. As a server, conn.TCP_IP and
         conn.TCP_PORT are bound to the socket and listened to until connection
-        is established. 
-        
+        is established.
+
         One extra attribute is defined:
             conn.clientIP           :               IP address of client
     """
@@ -185,7 +187,7 @@ class TCPServerConnection(TCPConnection):
 class TCPClientConnection(TCPConnection):
     """
         TCPCLIENTCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a client, conn.TCP_IP and 
+        the initiation of the connection. As a client, conn.TCP_IP and
         conn.TCP_PORT is the location of the server. conn.start() performs
         a socket.connect() until a connection is established
     """
@@ -195,9 +197,10 @@ class TCPClientConnection(TCPConnection):
 
     def start(conn):
         conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(('Connecting to server at %s::%s...' % ((conn.TCP_IP, conn.TCP_PORT))))
+        print(('Connecting to server at %s::%s...' % (
+            (conn.TCP_IP, conn.TCP_PORT))))
         Connected = False
-        while not Connected
+        while not Connected:
             try:
                 conn.connection.connect((conn.TCP_IP, conn.TCP_PORT))
                 Connected = True
@@ -206,10 +209,12 @@ class TCPClientConnection(TCPConnection):
                 time.sleep(1)
         print(('Connected.'))
 
-        
+
 class BehaviorServerConnection(TCPServerConnection):
     pass
-    
+
 
 class BehaviorClientConnection(TCPClientConnection):
-    pass
+
+    def __init__(conn, **kwargs):
+        super(BehaviorClientConnection, conn).__init__(**kwargs)
