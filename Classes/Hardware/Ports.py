@@ -1,3 +1,5 @@
+import socket
+
 from BCore.Util.parallel.parallelppdev import Parallel
 
 
@@ -103,5 +105,74 @@ class StandardParallelPort(Parallel):
             % (pin)))
 
 
-class ServerConnection(object):
-    pass
+class TCPServerConnection(object):
+    """
+        TCPSERVERCONNECTION defines a TCP connection that will establish a
+        direct communication channel with the Stations. This class just does
+        a good job of pickling/unpickling data through the TCP stream and
+        performs the necessary job of communicating with the
+    """
+
+    def __init__(conn, **kwargs):
+
+        if not kwargs:
+            conn.TCP_IP = '127.0.0.1'
+            conn.TCP_PORT = 5005
+        else:
+            conn.TCP_IP = kwargs['ipaddr']
+            conn.TCP_PORT = kwargs['port']
+        conn.BUFFER_SIZE = 1024
+
+    def start(conn):
+        conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn.connection.bind((conn.TCP_IP, conn.TCP_PORT))
+        print(('Binding socket connection to given IP::port'))
+        conn.connection.listen(True)
+
+        print(('Accepting connections at %s::%04d' %
+            (conn.TCP_IP, conn.TCP_PORT)))
+
+        (conn.connection, conn.serverIP) = conn.connection.accept()
+
+        print(('Connected to server at %s' % conn.serverIP))
+
+    def close(conn):
+        conn.connection.close()
+
+
+class TCPClientConnection(object):
+    """
+
+        TCPCLIENTCONNECTION defines a TCP connection that will establish a
+        direct communication channel with the BServer. This is designed to be
+        run primarily on the Station side. But due to the vagaries of the
+        BServer model, (because BServer will have a list of all the associated
+        Stations while the Stations will have no idea about BServer)
+        TCPClientConnection will act like a socket server
+    """
+
+    def __init__(conn, **kwargs):
+
+        if not kwargs:
+            conn.TCP_IP = '127.0.0.1'
+            conn.TCP_PORT = 5005
+        else:
+            conn.TCP_IP = kwargs['ipaddr']
+            conn.TCP_PORT = kwargs['port']
+        conn.BUFFER_SIZE = 1024
+
+    def start(conn):
+        conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn.connection.connect((conn.TCP_IP, conn.TCP_PORT))
+        print(('Binding socket connection to given IP::port'))
+        conn.connection.listen(True)
+
+        print(('Accepting connections at %s::%04d' %
+            (conn.TCP_IP, conn.TCP_PORT)))
+
+        (conn.connection, conn.serverIP) = conn.connection.accept()
+
+        print(('Connected to server at %s' % conn.serverIP))
+
+    def close(conn):
+        conn.connection.close()
