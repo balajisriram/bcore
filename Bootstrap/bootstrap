@@ -1,3 +1,4 @@
+#! /usr/bin/python
 import sys
 
 from BCore.Classes.Stations.StandardVisionBehaviorStation \
@@ -28,7 +29,6 @@ def bootstrap(mode='init', procType='client', **kwargs):
             pass
         elif procType == 'localServer':
             pass
-        st = StandardVisionBehaviorStation()
     else:
         raise NotImplementedError('Unknown bootstrap mode:: \
             You sent %s. Allowed {''init'',''run''}')
@@ -58,18 +58,23 @@ if __name__ == '__main__':
         elif arg == 'mode' or arg == '-mode' or arg == '--mode':
             arg = next(args)
             mode = arg
-        elif arg == 'procType':
+            print 'mode::', mode
+        elif arg == 'procType' or arg == '-procType' or arg == '--procType':
             arg = next(args)
             procType = arg
+            print 'procType::', procType
         elif (arg == 'stationID') or (  # all the integers
             arg == 'serverID'):
             bootstrapKWArgs[arg] = int(next(args))
+            print arg, '::', bootstrapKWArgs[arg]
         elif (arg == 'stationName') or (  # all the strings
             arg == 'display') or (
             arg == 'parallelPort') or (
             arg == 'serverName'):
             bootstrapKWArgs[arg] = next(args)
+            print arg, '::', bootstrapKWArgs[arg]
         elif (arg == 'soundOn'):  # all the bools
             bootstrapKWArgs[arg] = next(args)
+            print arg, '::', bootstrapKWArgs[arg]
 
     bootstrap(mode, procType, **bootstrapKWArgs)
