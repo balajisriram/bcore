@@ -7,7 +7,6 @@ from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr
 from BCore.Classes.Hardware.Ports import StandardParallelPort
 
-
 class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
