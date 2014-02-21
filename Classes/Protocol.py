@@ -1,4 +1,4 @@
-class Protocol:
+class Protocol(object):
     """
             PROTOCOL contains a list of training steps
                     protocolName    : stringIdentifier

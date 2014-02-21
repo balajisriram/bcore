@@ -1,2 +1,2 @@
-class SessionManager:
+class SessionManager(object):
     pass

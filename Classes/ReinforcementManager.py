@@ -1,2 +1,2 @@
-class ReinforcementManager:
+class ReinforcementManager(object):
     pass

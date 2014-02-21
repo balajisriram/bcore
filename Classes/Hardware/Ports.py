@@ -1,7 +1,5 @@
-import socket
-
 from BCore.Util.parallel.parallelppdev import Parallel
- 
+
 
 class StandardParallelPort(Parallel):
     """
@@ -105,5 +103,5 @@ class StandardParallelPort(Parallel):
             % (pin)))
 
 
-class ServerConnection:
+class ServerConnection(object):
     pass

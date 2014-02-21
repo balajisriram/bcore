@@ -1,2 +1,2 @@
-class TrainingStep:
+class TrainingStep(object):
     pass
