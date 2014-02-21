@@ -5,7 +5,7 @@ from verlib import NormalizedVersion as Ver
 
 
 from BCore import getBaseDirectory
-from BCore.Classes.Hardware import StandardParallelPort
+from BCore.Classes.Hardware.Ports import StandardParallelPort
 
 
 class Station(object):
@@ -42,4 +42,4 @@ class Station(object):
 
     def _setupPaths(st):
         if not os.path.isdir(st.stationPath):
-            os.path.mkdir(st.stationPath)
+            os.makedirs(st.stationPath)
