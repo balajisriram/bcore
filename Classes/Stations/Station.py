@@ -4,7 +4,7 @@ from uuid import getnode
 from verlib import NormalizedVersion as Ver
 
 
-from BCore import getBaseDirectory
+from BCore import getBaseDirectory, getIPAddr
 from BCore.Classes.Hardware.Ports import StandardParallelPort
 
 
@@ -29,6 +29,8 @@ class Station(object):
             str(st.stationID))
         st._setupPaths()
         st.MACAddress = getnode()
+        st.IPAddr = getIPAddr()
+        st.port = 5005  # standard for all stations.
 
     def getSubject(st):
         raise NotImplementedError()

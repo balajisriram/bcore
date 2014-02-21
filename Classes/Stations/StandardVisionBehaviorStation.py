@@ -4,7 +4,7 @@ import os
 import pygame
 
 from BCore.Classes.Stations.Station import Station
-from BCore.Classes.Hardware.Ports import ServerConnection
+from BCore.Classes.Hardware.Ports import TCPClientConnection
 from BCore import getBaseDirectory
 
 PPORT_LO = 0
@@ -94,19 +94,11 @@ class StandardVisionBehaviorStation(Station):
     def run(st):
         # currently just show a splash
         st.splash()
+        st.connectToBServer()
 
     def connectToBServer(st):
-        while True:
-            # make connection
-            try:
-                st.BServerConnection = ServerConnection()
-            except IOError:
-                print(('Station unable to find BServer connection. \
-                Trying again...'))
-                time.sleep(1)
-            else:
-                raise RuntimeError('Found Error. Stopping NOW!')
-                break
+        st.BServerConnection = TCPClientConnection()
+        st.BServerConnection.start()
 
     def getSubject(st):
         """
@@ -149,7 +141,7 @@ class StandardVisionBehaviorStation(Station):
         screen.blit(splashTex, [0, 0])
         pygame.display.flip()
 
-        time.sleep(5)
+        time.sleep(1)
 
     def getDisplaySize(st):
         pass
