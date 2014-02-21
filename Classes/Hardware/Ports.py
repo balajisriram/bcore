@@ -1,5 +1,4 @@
 import socket
-import cPickle
 
 from BCore.Util.parallel.parallelppdev import Parallel
 
@@ -106,12 +105,12 @@ class StandardParallelPort(Parallel):
             % (pin)))
 
 
-class TCPConnection(object):
+class TCPServerConnection(object):
     """
-        TCPCONNECTION defines a class that determines the read/write protocol
-        for data streamed through its channels. It cannot be used directly 
-        because it cannot be started directly. This works because the only 
-        difference between server and client is the way connections are started
+        TCPSERVERCONNECTION defines a TCP connection that will establish a
+        direct communication channel with the Stations. This class just does
+        a good job of pickling/unpickling data through the TCP stream and
+        performs the necessary job of communicating with the
     """
 
     def __init__(conn, **kwargs):
@@ -122,51 +121,7 @@ class TCPConnection(object):
         else:
             conn.TCP_IP = kwargs['ipaddr']
             conn.TCP_PORT = kwargs['port']
-        conn.DEFAULT_BUFFER_SIZE = 1024
-
-    def start(conn):
-        raise NotImplementedError('TCPConnection needs to be started as a \
-            server or as a client. Look at TCPServerConnection and \
-            TCPClientConnection')
-
-    def close(conn):
-        conn.connection.close()
-        
-    def __del__(conn):
-        print(('Closing connection...'))
-        conn.connection.close()
-        print(('done.'))
-        
-    def recvData(conn):
-        """
-            Enforces a max conn.DEFAULT_BUFFER_SIZE message from the client.
-            Assumes that the data sent is cPickled at the client end.
-        """
-        while True:
-            BITSTR = conn.connection.recv(conn.DEFAULT_BUFFER_SIZE)
-            if not BITSTR: break
-        return cPickle.loads(BITSTR)
-        
-    def sendData(conn, DATA):
-        """
-            Pickles and sends the data through the socket connection.
-        """
-        conn.connection.sendall(cPickle.dumps(DATA))
-
-
-class TCPServerConnection(TCPConnection):
-    """
-        TCPSERVERCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a server, conn.TCP_IP and 
-        conn.TCP_PORT are bound to the socket and listened to until connection
-        is established. 
-        
-        One extra attribute is defined:
-            conn.clientIP           :               IP address of client
-    """
-
-    def __init__(conn, **kwargs):
-        super(TCPServerConnection, conn).__init__(**kwargs)
+        conn.BUFFER_SIZE = 1024
 
     def start(conn):
         conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -177,39 +132,47 @@ class TCPServerConnection(TCPConnection):
         print(('Accepting connections at %s::%04d' %
             (conn.TCP_IP, conn.TCP_PORT)))
 
-        (conn.connection, conn.clientIP) = conn.connection.accept()
+        (conn.connection, conn.serverIP) = conn.connection.accept()
 
-        print(('Connected to destination at %s' % conn.serverIP))
+        print(('Connected to server at %s' % conn.serverIP))
+
+    def close(conn):
+        conn.connection.close()
 
 
-class TCPClientConnection(TCPConnection):
+class TCPClientConnection(object):
     """
-        TCPCLIENTCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a client, conn.TCP_IP and 
-        conn.TCP_PORT is the location of the server. conn.start() performs
-        a socket.connect() until a connection is established
+
+        TCPCLIENTCONNECTION defines a TCP connection that will establish a
+        direct communication channel with the BServer. This is designed to be
+        run primarily on the Station side. But due to the vagaries of the
+        BServer model, (because BServer will have a list of all the associated
+        Stations while the Stations will have no idea about BServer)
+        TCPClientConnection will act like a socket server
     """
 
     def __init__(conn, **kwargs):
-        super(TCPServerConnection, conn).__init__(**kwargs)
+
+        if not kwargs:
+            conn.TCP_IP = '127.0.0.1'
+            conn.TCP_PORT = 5005
+        else:
+            conn.TCP_IP = kwargs['ipaddr']
+            conn.TCP_PORT = kwargs['port']
+        conn.BUFFER_SIZE = 1024
 
     def start(conn):
         conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(('Connecting to server at %s::%s...' % ((conn.TCP_IP, conn.TCP_PORT))))
-        Connected = False
-        while not Connected
-            try:
-                conn.connection.connect((conn.TCP_IP, conn.TCP_PORT))
-                Connected = True
-            except socket.error:
-                print(('Server busy...retrying ...'))
-                time.sleep(1)
-        print(('Connected.'))
+        conn.connection.connect((conn.TCP_IP, conn.TCP_PORT))
+        print(('Binding socket connection to given IP::port'))
+        conn.connection.listen(True)
 
-        
-class BehaviorServerConnection(TCPServerConnection):
-    pass
-    
+        print(('Accepting connections at %s::%04d' %
+            (conn.TCP_IP, conn.TCP_PORT)))
 
-class BehaviorClientConnection(TCPClientConnection):
-    pass
+        (conn.connection, conn.serverIP) = conn.connection.accept()
+
+        print(('Connected to server at %s' % conn.serverIP))
+
+    def close(conn):
+        conn.connection.close()
