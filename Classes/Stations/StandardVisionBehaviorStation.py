@@ -4,8 +4,8 @@ import os
 import pygame
 
 from BCore.Classes.Stations.Station import Station
-from BCore.Classes.Hardware.Ports import TCPServerConnection, 
-    BehaviorClientConnection
+from BCore.Classes.Hardware.Ports import TCPServerConnection
+from BCore.Classes.Hardware.Ports import BehaviorClientConnection
 from BCore import getBaseDirectory
 
 PPORT_LO = 0
@@ -99,18 +99,18 @@ class StandardVisionBehaviorStation(Station):
 
     def connectToBServer(st):
         """
-            This is a somewhat complicated handshake. Initially, the 
+            This is a somewhat complicated handshake. Initially, the
             station acts as a server exposing its IP::port to the server.
             Since the server knows this IP::port it can create a client
             connection easily. Upon connection, BServer(currently client)
             sends a connection info for a separate connection(BServer will
             reserve the space for this connection) to the station and the
-            station will connect to the BServer now as a client. This way 
+            station will connect to the BServer now as a client. This way
             new stations can be added to the server without any
             station-side code modification. BServer can dynamically manage
             its resources. Along with threaded TCP server connections on
-            the server side, this should provide scalable, TCP communications 
-            with the server 
+            the server side, this should provide scalable, TCP communications
+            with the server
         """
         st.BServerConnection = TCPServerConnection(ipaddr=st.IPAddr,
             port=st.port)
@@ -120,11 +120,11 @@ class StandardVisionBehaviorStation(Station):
         print('Closing connection as server...')
         st.BServerConnection.stop()
         st.BServerConnection = BehaviorClientConnection(
-            ipaddr=BServerConnDetails['ipaddr'], 
+            ipaddr=BServerConnDetails['ipaddr'],
             port=BServerConnDetails['port'])
         print(('Starting connection as client...'))
         st.BServerConnection.start()
-        
+
     def getSubject(st):
         """
             For STANDARDVISIONBEHAVIORSTATION.GETSUBJECT(), get data from
