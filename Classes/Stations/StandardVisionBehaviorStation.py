@@ -1,12 +1,11 @@
 import time
-import sys
-import socket
+import os
 
-import openGL.GL as gl
-import openGL.GLUT as glut
+import pygame
 
 from BCore.Classes.Stations.Station import Station
-from BCore.Classes.Hardware.Ports import ServerConnect
+from BCore.Classes.Hardware.Ports import ServerConnection
+from BCore import getBaseDirectory
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -81,6 +80,10 @@ class StandardVisionBehaviorStation(Station):
             pPort['rightPort'] = 12
             pPort['leftPort'] = 13
             pPort['portPins'] = (12, 10, 13)
+            pPort['indexPin'] = 8
+            pPort['frampPin'] = 9
+            pPort['LED0'] = 5
+            pPort['LED1'] = 7
             st.parallelPort = pPort
             return super(
                 StandardVisionBehaviorStation, st).initializeParallelPort()
@@ -89,15 +92,15 @@ class StandardVisionBehaviorStation(Station):
                 StandardVisionBehaviorStation, st).initializeParallelPort()
 
     def run(st):
-        # initialize connection with BServer
-        pass
+        # currently just show a splash
+        st.splash()
 
     def connectToBServer(st):
         while True:
             # make connection
             try:
-                st.BServerConnection = ServerConnect()  # use default settings
-            except socket.error:
+                st.BServerConnection = ServerConnection()
+            except IOError:
                 print(('Station unable to find BServer connection. \
                 Trying again...'))
                 time.sleep(1)
@@ -135,29 +138,18 @@ class StandardVisionBehaviorStation(Station):
         st.parallelPort['pPort'].writePins(
             st.parallelPort['valvePins'], PPORT_LO)
 
-    def startGL(st):
-        glut.glutInit(sys.argv)
-        glut.glutInitDisplayMode(glut.GLUT_DOUBLE | glut.GLUT_RGBA)
+    def splash(st):
+        pygame.init()
+        size = width, height = 600, 400
 
-    def stopGL(st):
-        pass
+        screen = pygame.display.set_mode(size)
+        splashTex = pygame.image.load(os.path.join(
+            getBaseDirectory(), 'BCore', 'Util', 'Resources', 'splash.png'))
 
-    def testGL(st):
-
-        def drawTest():
-            gl.glClear(gl.GL_CLEAR_BUFFER_BIT)
-            glut.glutWireTeapot(0.5)
-
-        st.startGL()
-        glut.glutInitWindowSize(250, 250)
-        glut.glutInitWindowPosition(100, 100)
-        glut.glutCreateWindow("Station Test")
-        glut.glutDisplayFunc(drawTest)
-        glut.glutMainLoop()
+        screen.blit(splashTex, [0, 0])
+        pygame.display.flip()
 
         time.sleep(5)
-
-        glut.glutLeaveMainLoop()
 
     def getDisplaySize(st):
         pass
