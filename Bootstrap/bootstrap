@@ -5,9 +5,12 @@ from BCore.Classes.Stations.StandardVisionBehaviorStation \
     import StandardVisionBehaviorStation
 from BCore.Classes.Stations.Station \
     import Station
+from BCore import gitpull
 
 
 def bootstrap(mode='init', procType='client', **kwargs):
+    print(('Currently bootstrap automatically calls git pull'))
+    gitpull()
     if mode == 'init':
         if procType == 'client':
             st = Station(**kwargs)
