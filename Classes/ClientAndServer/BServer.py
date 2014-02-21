@@ -2,6 +2,7 @@ import os
 import time
 import cPickle as pickle
 import shutil
+import copy
 
 from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr, getTimeStamp
@@ -11,9 +12,12 @@ class BServer(object):
     """
         BSERVER  keeps track of all the stations that it commands,
         which subjects are allowed in which station and data storage locations.
+            version             : string identifier
             serverID            : string Identifier
+            serverName          : string identifier
             serverDataPath      : allowed data storage location
             serverIP            : IPV4 value
+            creationTime        : time.time()
             stations            : list of stations
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
@@ -36,12 +40,17 @@ class BServer(object):
                 getBaseDirectory, 'BCoreData', 'ServerData')
             server.serverIP = getIPAddr()
             server.creationTime = time.time()
-            server.log = []
             server.stations = []
             server.subjects = []
             server.assignments = {}
-            server.database = []
+            server.StationConnections = {}
             server.saveServer()
+
+    def load(server):
+        """
+            Alias for server.loadServer
+        """
+        return server.loadServer()
 
     def loadServer(server):
         # use standard location for path,
@@ -54,20 +63,35 @@ class BServer(object):
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
 
+    def save(server):
+        """
+            Alias for server.saveServer
+        """
+        server.saveServer()
+
     def saveServer(server):
         srcDir = os.path.join(
             getBaseDirectory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
             getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
+            print(('Old db.Bserver found. moving to backup'))
             old = BServer()  # standardLoad to old
             desName = 'db_' + getTimeStamp(old.creationTime) + '.BServer'
             shutil.copyfile(
                 os.path.join(srcDir, 'db.BServer'),  # source
                 os.path.join(desDir, desName)  # destination
                 )
+            print(('Moved to backup... deleting old copy'))
             os.remove(os.path.join(srcDir, 'db.BServer'))
-        pickle.dump(server, os.path.join(srcDir, 'db.BServer'))
+
+        # there might be some attributes that need to be deleted
+        # delete them here before continuing
+        print(('Cleaning and pickling object'))
+        cleanedBServer = copy.deepcopy(server)
+        cleanedBServer.StationConnections = {}
+
+        pickle.dump(cleanedBServer, os.path.join(srcDir, 'db.BServer'))
 
     def loadBackup(server):
         """
