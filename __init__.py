@@ -2,6 +2,8 @@ import os
 import sys
 import socket
 import time
+import fcntl
+import struct
 
 import git
 
@@ -25,11 +27,21 @@ def addPaths():
     print('INFO:: added module fodlers to path')
 
 
-def getIPAddr():
-    return ([
-        ip for ip in socket.gethostbyname_ex(
-            socket.gethostname()
-            )[2] if not ip.startswith("127.")][:1])
+def getIPAddr(*args):
+    """
+        Code from : http://code.activestate.com/recipes/439094/
+    """
+    if not args:
+        ifname = 'eth0'
+    else:
+        ifname = args[0]
+
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    return socket.inet_ntoa(fcntl.ioctl(
+        s.fileno(),
+        0x8915,  # SIOCGIFADDR
+        struct.pack('256s', ifname[:15])
+        )[20:24])
 
 
 def getTimeStamp(*arg):
