@@ -130,7 +130,7 @@ class StandardVisionBehaviorStation(Station):
             For STANDARDVISIONBEHAVIORSTATION.GETSUBJECT(), get data from
             BServer
         """
-        pass
+        raise NotImplementedError()
 
     def closeAllValves(st):
         st.parallelPort['pPort'].writePins(

@@ -26,6 +26,9 @@ class Station(object):
         st.stationPath = os.path.join(
             getBaseDirectory(), 'BServerData', 'StationData',
             str(st.stationID))
+        st.stationLocation = []
+        try:
+            st.stationLocation = kwargs['stationLocation']
         st._setupPaths()
         st.MACAddress = getnode()
         st.IPAddr = getIPAddr()
