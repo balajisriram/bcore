@@ -10,7 +10,7 @@ uuid
 verlib
 time
 socket
-
+kivy
 os
 sys
 numpy
