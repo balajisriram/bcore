@@ -1,0 +1,43 @@
+<BServerWidget>:
+    orientation: 'vertical'
+    spacing: 3
+    ActionBar:
+        id: control_bar
+        pos_hint: {'top': 1}
+        height: 60
+        ActionView:
+            use_separator: True
+            ActionPrevious:
+                title: 'Behavior Server'
+                font_size: 12
+                with_previous: False
+            ActionButton:
+                text: 'Btn0'
+                icon: 'atlas://data/images/defaulttheme/audio-volume-high'
+            ActionButton:
+                text: 'Btn1'
+            ActionButton:
+                text: 'Btn2'
+            ActionSeparator:
+            ActionButton:
+                id: time_button
+                text: root.ux_CurrTime
+            ActionSeparator:
+            ActionButton:
+                id: widget_close
+                text: 'CLOSE'
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 0.3,1
+            spacing: 3
+            Label:
+                size_hint: 1,None
+                height: 50
+                text: 'SUBJECTS'
+                font_size: 48
+        BoxLayout:
+            size_hint: 0.7,1
+            Button:
+                text: '4'
