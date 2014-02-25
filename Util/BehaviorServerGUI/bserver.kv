@@ -1,43 +1,156 @@
 <BServerWidget>:
-    orientation: 'vertical'
-    spacing: 3
-    ActionBar:
-        id: control_bar
-        pos_hint: {'top': 1}
-        height: 60
-        ActionView:
-            use_separator: True
-            ActionPrevious:
-                title: 'Behavior Server'
-                font_size: 12
-                with_previous: False
-            ActionButton:
-                text: 'Btn0'
-                icon: 'atlas://data/images/defaulttheme/audio-volume-high'
-            ActionButton:
-                text: 'Btn1'
-            ActionButton:
-                text: 'Btn2'
-            ActionSeparator:
-            ActionButton:
-                id: time_button
-                text: root.ux_CurrTime
-            ActionSeparator:
-            ActionButton:
-                id: widget_close
-                text: 'CLOSE'
-    BoxLayout:
-        orientation: 'horizontal'
-        BoxLayout:
+    AnchorLayout:
+        ScreenManager:
+            id: screen_manager
             orientation: 'vertical'
-            size_hint: 0.3,1
-            spacing: 3
-            Label:
-                size_hint: 1,None
-                height: 50
-                text: 'SUBJECTS'
-                font_size: 48
-        BoxLayout:
-            size_hint: 0.7,1
-            Button:
-                text: '4'
+            Screen:
+                id: base_screen
+                name: 'BaseScreen'
+                BoxLayout:
+                    spacing: 3
+                    orientation: 'vertical'
+                    ActionBar:
+                        id: control_bar
+                        pos_hint: {'top': 1}
+                        height: 60
+                        ActionView:
+                            use_separator: True
+                            ActionPrevious:
+                                title: 'Behavior Server'
+                                font_size: 12
+                                with_previous: False
+                                app_icon: './resources/ServerIcon.png'
+                            #ActionSeparator:
+                            ActionButton:
+                                id: time_button
+                                text: root.ux_CurrTime
+                            #ActionSeparator:
+                            ActionButton:
+                                id: widget_close
+                                icon: './resources/Close.png'
+                    BoxLayout:
+                        id: data_listing
+                        spacing: 5
+                        orientation: 'horizontal'
+                        BoxLayout:
+                            orientation: 'vertical'
+                            size_hint: 0.3,1
+                            ActionBar:
+                                id: subject_action_bar
+                                pos_hint: {'top': 1}
+                                height: 32
+                                ActionView:
+                                    use_separator: True
+                                    ActionPrevious:
+                                        title: 'Subject Control'
+                                        font_size: 12
+                                        with_previous: False
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: subject_filter
+                                        icon: './resources/Filter.png'
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: add_subject
+                                        icon: './resources/Add.png'
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: subject_help
+                                        icon: './resources/Info.png'
+                                        on_release: help_menu.changeText(text='Subject')
+                            ScrollView:
+                                size_hint: 1,1
+                                do_scroll_x: False
+                                GridLayout:
+                                    id:subject_listing
+                                    cols: 1
+                                    size_hint_y: None
+                                    orientation: 'vertical'
+                                    spacing: 3
+                        GridLayout:
+                            size_hint: 0.7,1
+                            cols: 1
+                            ActionBar:
+                                id: station_action_bar
+                                pos_hint: {'top': 1}
+                                height: 32
+                                ActionView:
+                                    use_separator: True
+                                    ActionPrevious:
+                                        title: 'Station Control'
+                                        font_size: 12
+                                        with_previous: False
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: subject_filter
+                                        icon: './resources/Filter.png'
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: add_subject
+                                        icon: './resources/Add.png'
+                                    #ActionSeparator:
+                                    ActionButton:
+                                        id: subject_help
+                                        icon: './resources/Info.png'
+                            GridLayout:
+                                cols: 3
+                                id: station_listing
+                    BoxLayout:
+                        size_hint: 1,0.1
+                        orientation: 'horizontal'
+                        ActionButton:
+                            icon: './resources/Info.png'
+                            on_release: help_menu.changeText(text=' Help Menu. Look here for information about the BServer')
+                        HelpText:
+                            id: help_menu
+                            text: 'Help Menu'
+            Screen:
+                id: subject_statistics
+                name: 'SubjectStatistics'
+                BoxLayout:
+                    spacing: 3
+                    orientation: 'vertical'
+                    ActionBar:
+                        id: control_bar
+                        pos_hint: {'top': 1}
+                        height: 60
+                        ActionView:
+                            use_separator: True
+                            ActionPrevious:
+                                title: 'Subject Statistics'
+                                font_size: 12
+                                with_previous: True
+                                app_icon: './resources/Subject.png'
+                                on_press: screen_manager.current='BaseScreen'
+                            #ActionSeparator:
+                            ActionButton:
+                                id: time_button
+                                text: root.ux_CurrTime
+            Screen
+                id: subject_statistics
+                name: 'StationStatistics'
+                BoxLayout:
+                    spacing: 3
+                    orientation: 'vertical'
+                    ActionBar:
+                        id: control_bar
+                        pos_hint: {'top': 1}
+                        height: 60
+                        ActionView:
+                            use_separator: True
+                            ActionPrevious:
+                                title: 'Station Statistics'
+                                font_size: 12
+                                with_previous: True
+                                app_icon: './resources/Station.png'
+                                on_press: screen_manager.current='BaseScreen'
+                            #ActionSeparator:
+                            ActionButton:
+                                id: time_button
+                                text: root.ux_CurrTime
+            Screen
+                name: 'SubjectFilter'
+            Screen:
+                name: 'StationFilter'
+<HelpText>:
+    Label:
