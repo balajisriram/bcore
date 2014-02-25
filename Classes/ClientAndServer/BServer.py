@@ -46,6 +46,9 @@ class BServer(object):
             server.StationConnections = {}
             server.saveServer()
 
+    def run(**kwargs):
+        pass
+
     def load(server):
         """
             Alias for server.loadServer

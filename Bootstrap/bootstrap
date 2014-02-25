@@ -19,9 +19,9 @@ def bootstrap(mode='init', procType='client', **kwargs):
             st = StandardVisionBehaviorStation(**kwargs)
             st.run()
         elif procType == 'server':
-            pass
+            server = BServer(**kwargs)
         elif procType == 'localServer':
-            pass
+            server = BServerLocal(**kwargs)
     elif mode == 'run':
         if procType == 'client':
             pass
@@ -29,9 +29,11 @@ def bootstrap(mode='init', procType='client', **kwargs):
             st = StandardVisionBehaviorStation(**kwargs)
             st.run()
         elif procType == 'server':
-            pass
+            server = BServer()
+            server.run(serverGUI=kwargs['serverGUI'])
         elif procType == 'localServer':
-            pass
+            server = BServerLocal()
+            server.run(serverGUI=kwargs['serverGUI'])
     else:
         raise NotImplementedError('Unknown bootstrap mode:: \
             You sent %s. Allowed {''init'',''run''}')
@@ -50,6 +52,7 @@ if __name__ == '__main__':
         'parallelPort': 'standardVisionBehaviorDefault',
         'serverID': 0,
         'serverName': 'Server0'
+        'serverGUI': False
         }
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time
@@ -76,8 +79,18 @@ if __name__ == '__main__':
             arg == 'serverName'):
             bootstrapKWArgs[arg] = next(args)
             print arg, '::', bootstrapKWArgs[arg]
-        elif (arg == 'soundOn'):  # all the bools
-            bootstrapKWArgs[arg] = next(args)
+        elif (arg == 'soundOn') or (  # all the bools
+            arg == 'severGUI'):
+            options = {False: ('False','false','f','no','n'),
+                True: ('True', 'true', 't', 'yes', 'y')}
+            temp = next(args)
+            if temp in options[False]:
+                bootstrapKWArgs[arg] = False
+                chosen = False
+            elif temp in options[True]:
+                bootstrapKWArgs[arg] = True
+            else:
+                raise ValueError('Unknown value for a boolean option')
             print arg, '::', bootstrapKWArgs[arg]
 
     bootstrap(mode, procType, **bootstrapKWArgs)
