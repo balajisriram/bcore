@@ -6,6 +6,7 @@ import copy
 
 from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr, getTimeStamp
+from BCore.Util.BehaviorServerGUI.BehaviorServerGUI import BServerApp
 
 
 class BServer(object):
@@ -46,8 +47,11 @@ class BServer(object):
             server.StationConnections = {}
             server.saveServer()
 
-    def run(**kwargs):
-        pass
+    def run(server, **kwargs):
+        if kwargs['serverGUI']:
+            bserverWidget = BServerApp(serverData=server)
+        else:
+            raise NotImplementedError()
 
     def load(server):
         """
