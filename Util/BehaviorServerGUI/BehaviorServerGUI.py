@@ -7,13 +7,16 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label  # lint:ok
 from kivy.uix.actionbar import ActionBar  # lint:ok
 from kivy.uix.popup import Popup  # lint:ok
-from kivy.uix.screenmanager import ScreenManager, Screen, WipeTransition
+from kivy.uix.screenmanager import ScreenManager, Screen  # lint:ok
 
-from kivy.properties import ListProperty
-from kivy.properties import StringProperty
+from kivy.properties import ListProperty, StringProperty, ObjectProperty
+# from kivy.properties import StringProperty
 from kivy.clock import Clock
 
 from kivy.config import Config
+
+#from BCore.Classes.ClientAndServer.BServer import BServer
+#from BCore.Classes.ClientAndServer.BServerLocal import BServerLocal
 
 import time
 
@@ -24,12 +27,34 @@ class HelpText(Label):
 
 
 class StationButton(Button):
+    pass
+
+
+class BServerAppScreenManager(ScreenManager):
+    cache = ObjectProperty()
+
+
+class SubjectStatisticsScreen(Screen):
+    def updateScreen(self, subjLbl, pressedObj):
+        # get the data
+        print self.ids
+        textToShow = pressedObj.text
+        subjLbl.text = textToShow
+
+    def cleanAndReturn():
+        pass
+
+
+class StationStatisticsScreen(Screen):
+    pass
 
     ux_LIGHTGREENCOLOR = [0.56, 0.93, 0.56, 0.75]
     ux_LIGHTREDCOLOR = [0.93, 0.56, 0.56, 0.75]
 
+
 class BServerWidget(BoxLayout):
     ux_CurrTime = StringProperty(time.strftime('%H::%M::%S'))
+    serverData = ObjectProperty()
 
     def updateTime(self, dt):
         self.ux_CurrTime = time.strftime('%H::%M::%S')
@@ -60,52 +85,43 @@ class BServerWidget(BoxLayout):
         subjectList = self.ids['subject_listing']
         subjectList.bind(minimum_height=subjectList.setter('height'))
 
-    def changeToSubjectScreen(self, junk):
+    def changeToSubjectScreen(self, pressedButton):
         screenMgr = self.ids['screen_manager']
         screenMgr.current = 'SubjectStatistics'
+        subjScreen = self.ids['subject_statistics']
+        subjLbl = self.ids['subject_label']
+        print self.serverData
+        subjScreen.updateScreen(subjLbl, pressedButton)
 
-    def changeToStationScreen(self, junk):
+    def changeToStationScreen(self, pressedButton):
         screenMgr = self.ids['screen_manager']
         screenMgr.current = 'StationStatistics'
+        screenMgr.cache = pressedButton
 
 
 class BServerApp(App):
     DefaultSubjects = ListProperty(
-        ['Sub1', 'Sub2', 'Sub3', 'Sub4', 'Sub5', 'Sub6',
-        'Sub7', 'Sub8', 'Sub9', 'Sub10', 'Sub11', 'Sub12',
-        'Sub13', 'Sub14', 'Sub15', 'Sub16', 'Sub17', 'Sub18',
-        'Sub19', 'Sub20', 'Sub21', 'Sub22', 'Sub23', 'Sub24',
-        'Sub25', 'Sub26', 'Sub27', 'Sub28', 'Sub29', 'Sub30',
-        'Sub31', 'Sub32', 'Sub33', 'Sub34', 'Sub35', 'Sub36'])
+        ['Sub1', 'Sub2', 'Sub3', 'Sub4', 'Sub5', 'Sub6'])
     DefaultStations = ListProperty(
         ['Station1', 'Station2', 'Station3', 'Station4',
         'Station5', 'Station6'])
+    serverData = ObjectProperty()
+    cache = ObjectProperty()
 
-    def createSubjectListing(self, Subjects, Box):
-        for Subject in Subjects:
-            Box.add_widget(Button(text=Subject,
-                size_hint=(1, None),
-                height=100))
-        return Box
-
-    def createStationListing(self, Stations, Box):
-        for Station in Stations:
-            Box.add_widget(Button(text=Station,
-                font_size=14
-                ))
-        return Box
-
-    def build(self):
+    def build(self, *args):
         bserver_widget = BServerWidget()
         Clock.schedule_interval(bserver_widget.updateTime, 1)
         bserver_widget.updateSubjects(self.DefaultSubjects)
         # allow scroll
         bserver_widget.enableScroll()
         bserver_widget.updateStations(self.DefaultStations)
+        bserver_widget.serverData = self.options['serverData']
         return bserver_widget
 
 
 if __name__ == "__main__":
-    BServerApp().run()
-    Config('graphics', 'fullscreen', 0)
+    Config.set('graphics', 'fullscreen', 'fake-fullscreen')
+    Config.write()
+    bserverWidget = BServerApp(serverData=1).run()
+    Config.set('graphics', 'fullscreen', 0)
     Config.write()

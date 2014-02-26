@@ -1,6 +1,6 @@
 <BServerWidget>:
     AnchorLayout:
-        ScreenManager:
+        BServerAppScreenManager:
             id: screen_manager
             orientation: 'vertical'
             Screen:
@@ -28,6 +28,7 @@
                             ActionButton:
                                 id: widget_close
                                 icon: './resources/Close.png'
+                                on_press: app.stop()
                     BoxLayout:
                         id: data_listing
                         spacing: 5
@@ -104,7 +105,7 @@
                         HelpText:
                             id: help_menu
                             text: 'Help Menu'
-            Screen:
+            SubjectStatisticsScreen:
                 id: subject_statistics
                 name: 'SubjectStatistics'
                 BoxLayout:
@@ -121,13 +122,16 @@
                                 font_size: 12
                                 with_previous: True
                                 app_icon: './resources/Subject.png'
-                                on_press: screen_manager.current='BaseScreen'
-                            #ActionSeparator:
+                                on_press: screen_manager.current='BaseScreen' # self.cleanAndReturn()
+                            ActionSeparator:
                             ActionButton:
                                 id: time_button
                                 text: root.ux_CurrTime
-            Screen
-                id: subject_statistics
+                    Label:
+                        id:subject_label
+                        text: 'Hello'
+            StationStatisticsScreen:
+                id: station_statistics
                 name: 'StationStatistics'
                 BoxLayout:
                     spacing: 3
@@ -140,11 +144,10 @@
                             use_separator: True
                             ActionPrevious:
                                 title: 'Station Statistics'
-                                font_size: 12
                                 with_previous: True
                                 app_icon: './resources/Station.png'
                                 on_press: screen_manager.current='BaseScreen'
-                            #ActionSeparator:
+                            ActionSeparator:
                             ActionButton:
                                 id: time_button
                                 text: root.ux_CurrTime
