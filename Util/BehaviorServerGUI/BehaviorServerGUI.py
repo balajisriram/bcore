@@ -7,16 +7,13 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label  # lint:ok
 from kivy.uix.actionbar import ActionBar  # lint:ok
 from kivy.uix.popup import Popup  # lint:ok
+from kivy.uix.checkbox import CheckBox  # lint:ok
 from kivy.uix.screenmanager import ScreenManager, Screen  # lint:ok
 
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
-# from kivy.properties import StringProperty
 from kivy.clock import Clock
 
 from kivy.config import Config
-
-#from BCore.Classes.ClientAndServer.BServer import BServer
-#from BCore.Classes.ClientAndServer.BServerLocal import BServerLocal
 
 import time
 
@@ -27,7 +24,8 @@ class HelpText(Label):
 
 
 class StationButton(Button):
-    pass
+    ux_LIGHTGREENCOLOR = [0.56, 0.93, 0.56, 0.75]
+    ux_LIGHTREDCOLOR = [0.93, 0.56, 0.56, 0.75]
 
 
 class BServerAppScreenManager(ScreenManager):
@@ -47,9 +45,10 @@ class SubjectStatisticsScreen(Screen):
 
 class StationStatisticsScreen(Screen):
     pass
-
-    ux_LIGHTGREENCOLOR = [0.56, 0.93, 0.56, 0.75]
-    ux_LIGHTREDCOLOR = [0.93, 0.56, 0.56, 0.75]
+    
+    
+class AddSubjectScreen(Screen):
+    pass
 
 
 class BServerWidget(BoxLayout):
@@ -90,7 +89,6 @@ class BServerWidget(BoxLayout):
         screenMgr.current = 'SubjectStatistics'
         subjScreen = self.ids['subject_statistics']
         subjLbl = self.ids['subject_label']
-        print self.serverData
         subjScreen.updateScreen(subjLbl, pressedButton)
 
     def changeToStationScreen(self, pressedButton):
@@ -100,11 +98,8 @@ class BServerWidget(BoxLayout):
 
 
 class BServerApp(App):
-    DefaultSubjects = ListProperty(
-        ['Sub1', 'Sub2', 'Sub3', 'Sub4', 'Sub5', 'Sub6'])
-    DefaultStations = ListProperty(
-        ['Station1', 'Station2', 'Station3', 'Station4',
-        'Station5', 'Station6'])
+    DefaultSubjects = ListProperty()
+    DefaultStations = ListProperty()
     serverData = ObjectProperty()
     cache = ObjectProperty()
 
