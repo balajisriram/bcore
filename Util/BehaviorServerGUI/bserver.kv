@@ -20,11 +20,9 @@
                                 font_size: 12
                                 with_previous: False
                                 app_icon: './resources/ServerIcon.png'
-                            #ActionSeparator:
                             ActionButton:
                                 id: time_button
                                 text: root.ux_CurrTime
-                            #ActionSeparator:
                             ActionButton:
                                 id: widget_close
                                 icon: './resources/Close.png'
@@ -46,16 +44,13 @@
                                         title: 'Subject Control'
                                         font_size: 12
                                         with_previous: False
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: subject_filter
                                         icon: './resources/Filter.png'
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: add_subject
                                         icon: './resources/Add.png'
                                         on_press: screen_manager.current='AddSubject'
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: subject_help
                                         icon: './resources/Info.png'
@@ -82,15 +77,12 @@
                                         title: 'Station Control'
                                         font_size: 12
                                         with_previous: False
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: subject_filter
                                         icon: './resources/Filter.png'
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: add_subject
                                         icon: './resources/Add.png'
-                                    #ActionSeparator:
                                     ActionButton:
                                         id: subject_help
                                         icon: './resources/Info.png'
@@ -123,7 +115,7 @@
                                 font_size: 12
                                 with_previous: True
                                 app_icon: './resources/Subject.png'
-                                on_press: screen_manager.current='BaseScreen' # self.cleanAndReturn()
+                                on_press: screen_manager.current='BaseScreen'
                             ActionSeparator:
                             ActionButton:
                                 id: time_button
@@ -178,28 +170,25 @@
                         id: add_subject_details
                         spacing: 10
                         size_hint: 1,1
-                        BoxLayout:
+                        FloatLayout:
                             orientation: 'vertical'
-                            size_hint: 0.3,1
-                            Label:
-                                text: 'Choose Species'
-                                font_size: 32
-                                size_hint_y: None
-                                height: 48
+                            size_hint: 0.2,None
+                            height: 350
                             Spinner:
                                 id: choose_species
-                                text:'Mouse'
+                                text:'Choose Species:'
                                 values:['Mouse','Rat','Virtual','Human']
                                 size_hint: None,None
-                                size: 100,44
-                                center_x: 0.5
-                                on_release: print self.text
-                            BoxLayout:
+                                size: 150,44
+                                pos_hint: {'center_x': .5, 'center_y': .5}
+                                on_text: add_subject.updateSpeciesSpecificChoice(self.text, species_specific_layout)
                         BoxLayout:
-                            size_hint: 0.7,1
+                            id: species_specific_layout
+                            spacing: 3
+                            size_hint: 0.8, None
+                            height: 400
             Screen:
                 name: 'StationFilter'
 
 <HelpText>:
     Label:
-    

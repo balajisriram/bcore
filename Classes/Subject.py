@@ -1,3 +1,6 @@
+import time
+
+
 class Subject(object):
     """
         SUBJECT contains all relevant details about the subject.
@@ -14,6 +17,7 @@ class Subject(object):
         """
         self.subjectID = kwargs['subjectID']
         self.protocol = []
+        self.creationDate = time.time()
 
     def __eq__(self, other):
         # if this method is called, then clearly
@@ -21,6 +25,15 @@ class Subject(object):
 
     def addProtocol(self, newProtocol):
         self.protocol.append(newProtocol)
+
+    def allowedGenders(self):
+        return None
+
+    def allowedStrains(self):
+        return None
+
+    def allowedGeneBkgd(self):
+        return None
 
 
 class Mouse(Subject):
@@ -48,6 +61,20 @@ class Mouse(Subject):
         else:
             return False
 
+    def allowedGenders(self):
+        return ['Male', 'Female']
+
+    def allowedStrains(self):
+        return ['C57BL/6J', '129S1/SvlmJ', 'BALB/c']
+
+    def allowedGeneBkgd(self):
+        return ['WT', 'Pvalb-cre', 'Pvalb-COP4-EYFP', 'Somst-cre']
+
+
+class DefaultMouse(Mouse):
+    def __init__(self):
+        pass
+
 
 class Rat(Subject):
     """
@@ -74,6 +101,20 @@ class Rat(Subject):
         else:
             return False
 
+    def allowedGenders(self):
+        return ['Male', 'Female']
+
+    def allowedStrains(self):
+        return ['Wistar', 'Sprague-Dawley', 'Long-Evans']
+
+    def allowedGeneBkgd(self):
+        return ['WT']
+
+
+class DefaultRat(Rat):
+    def __init__(self):
+        pass
+
 
 class Virtual(Subject):
     """
@@ -89,6 +130,20 @@ class Virtual(Subject):
             return True
         else:
             return False
+
+    def allowedGenders(self):
+        return None
+
+    def allowedStrains(self):
+        return None
+
+    def allowedGeneBkgd(self):
+        return None
+
+
+class DefaultVirtual(Virtual):
+    def __init__(self):
+        pass
 
 
 class Human(Subject):
@@ -117,6 +172,21 @@ class Human(Subject):
             return True
         else:
             return False
+
+    def allowedGenders(self):
+        return ['Male', 'Female', 'Other', 'NA']
+
+    def allowedStrains(self):
+        return None
+
+    def allowedGeneBkgd(self):
+        return None
+
+
+class DefaultHuman(Human):
+    def __init__(self):
+        pass
+
 
 if __name__ == '__main__':
     print('Will create an example MOUSE for comparison')
