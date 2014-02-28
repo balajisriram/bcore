@@ -49,7 +49,7 @@ class BServer(object):
 
     def run(server, **kwargs):
         if kwargs['serverGUI']:
-            bserverWidget = BServerApp(serverData=server)
+            BServerApp(serverData=server)
         else:
             raise NotImplementedError()
 
@@ -147,6 +147,7 @@ class BServer(object):
             raise ValueError('Station IDs and Station Names have to be unique')
         server.stations.append(newStation)
         # now enable station specific data
+        server.save()
 
     def addSubject(server, newSubject, newAssignment):
         if newSubject in server.subjects:
@@ -155,6 +156,7 @@ class BServer(object):
             raise ValueError('Cannot add new subject to non existent stations')
         server.subjects.append(newSubject)
         server.assignment[newSubject.subjectID] = newAssignment
+        server.save()
 
     def changeAssignment(server, subject, newAssignment):
         if subject not in server.subjects:
@@ -163,6 +165,7 @@ class BServer(object):
         if not(any(newAssignment in server.getStationIDs())):
             raise ValueError('Cannot assign subject to non existent stations')
         server.assignment[subject.subjectID] = newAssignment
+        server.save()
 
     def getStationIDs(server):
         stationIDs = []
