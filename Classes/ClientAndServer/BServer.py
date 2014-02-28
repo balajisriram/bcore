@@ -26,7 +26,7 @@ class BServer(object):
             revisionControl     : dictionary with access to details about
                                 the repository
     """
-
+    version = Ver('0.0.1')  # Feb 5, 2014
     def __init__(server, **kwargs):
         if len(kwargs) in (0, 1):
             server = server.loadServer()
@@ -34,7 +34,6 @@ class BServer(object):
                 if server.version < Ver(kwargs['requireVersion']):
                     raise ValueError('you are trying to load an old version.')
         else:
-            server.version = Ver('0.0.1')  # Feb 5, 2014
             server.serverID = kwargs['serverID']
             server.serverName = kwargs['serverName']
             server.serverDataPath = os.path.join(

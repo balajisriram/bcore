@@ -1,4 +1,5 @@
 import time
+from verlib import NormalizedVersion as Ver
 
 
 class Subject(object):
@@ -7,7 +8,7 @@ class Subject(object):
                 subjectID               : string identifier
                 protocol                : protocol object
     """
-
+    ver = Ver('0.0.1')
     def __init__(self, **kwargs):
         """
                 Call as follows::
@@ -24,7 +25,13 @@ class Subject(object):
         return False
 
     def addProtocol(self, newProtocol):
-        self.protocol.append(newProtocol)
+        if not self.protocol:
+            self.protocol = newProtocol
+        else:
+            raise ValueError('cannot add newProtocol. protocol is not empty. Maybe you meant replaceProtocol()?')
+            
+    def replaceProtocol(self, newProtocol):
+        self.protocol = newProtocol            
 
     def allowedGenders(self):
         return None
@@ -34,6 +41,12 @@ class Subject(object):
 
     def allowedGeneBkgd(self):
         return None
+        
+    def run(self):
+        if not self.protocol:
+            raise ValueError('Protocol Unavailable: cannot run subject without a protocol')
+            
+        
 
 
 class Mouse(Subject):
