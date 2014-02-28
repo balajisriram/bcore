@@ -75,6 +75,9 @@ class DefaultMouse(Mouse):
     def __init__(self):
         pass
 
+    def createSubject(self, **kwargs):
+        return Mouse(**kwargs)
+
 
 class Rat(Subject):
     """
@@ -115,6 +118,9 @@ class DefaultRat(Rat):
     def __init__(self):
         pass
 
+    def createSubject(self, **kwargs):
+        return Rat(**kwargs)
+
 
 class Virtual(Subject):
     """
@@ -144,6 +150,9 @@ class Virtual(Subject):
 class DefaultVirtual(Virtual):
     def __init__(self):
         pass
+
+    def createSubject(self, **kwargs):
+        return Virtual(**kwargs)
 
 
 class Human(Subject):
@@ -186,6 +195,9 @@ class Human(Subject):
 class DefaultHuman(Human):
     def __init__(self):
         pass
+
+    def createSubject(self, **kwargs):
+        return Human(**kwargs)
 
 
 if __name__ == '__main__':
