@@ -16,10 +16,17 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.switch import Switch
 
-from kivy.properties import ListProperty, StringProperty, ObjectProperty
+from kivy.properties import (ListProperty,
+                            StringProperty,
+                            ObjectProperty,
+                            DictProperty)
 from kivy.clock import Clock
 from kivy.config import Config
 from datetimepicker import DatePicker, TimePicker
+from kivy.graphics.vertex_instructions import (Rectangle,
+                                               Ellipse,
+                                               Line)
+from kivy.graphics.context_instructions import Color
 
 from BCore.Classes.Subject import Subject, Mouse, Rat, Virtual, Human
 from BCore.Classes.Subject import DefaultMouse, DefaultRat, DefaultVirtual
@@ -28,8 +35,48 @@ from BCore.Classes.Subject import DefaultHuman
 
 
 class HelpText(Label):
-    def changeText(self, text):
-        self.text = text
+    pass
+
+
+class StatusLabel(Label):
+    Status = StringProperty('ALLOK')
+    ux_ALLOK = [0.56, 0.93, 0.56, 0.5]
+    ux_ERROR = [0.93, 0.56, 0.56, 0.5]
+    ux_CONCERN = [0.99, 0.56, 0., 0.5]
+
+    StatusColorDict = DictProperty({
+        'ALLOK': ux_ALLOK,
+        'ERROR': ux_ERROR,
+        'CONCERN': ux_CONCERN
+        })
+
+    def on_Status(self, instrFrom, value):
+        with self.canvas:
+            try:
+                Color(self.StatusColorDict[value], mode='rgba')
+            except KeyError:
+                Color(self.StatusColorDict['ERROR'], mode='rgba')
+                self.text = self.text + '\nUnknown status!'
+
+
+class BaseActionBar(ActionBar):
+    pass
+
+
+class SubjectControlActionBar(ActionBar):
+    pass
+
+
+class StationControlActionBar(ActionBar):
+    pass
+
+
+class SubjectStatsActionBar(ActionBar):
+    pass
+
+
+class StationStatsActionBar(ActionBar):
+    pass
 
 
 class StationButton(Button):
@@ -42,6 +89,10 @@ class BServerAppScreenManager(ScreenManager):
 
     def deCache(self):
         self.cache = []
+
+
+class BaseScreen(Screen):
+    pass
 
 
 class SubjectStatisticsScreen(Screen):
@@ -59,7 +110,6 @@ class StationStatisticsScreen(Screen):
 
 
 class SubjectIDInput(TextInput):
-
     def validateSubIDInput(self, call):
         for c in self.text:
             if c in (' ', '-'):
@@ -69,7 +119,7 @@ class SubjectIDInput(TextInput):
 class AddSubjectScreen(Screen):
 
     def addSubjectToServer(self, value):
-        print 'here'
+        print type(self)
 
     def presentSpeciesSpecificWidgets(self, layout, present, details, example):
         # now add a vertical box layout and add the choices
@@ -228,66 +278,86 @@ class AddSubjectScreen(Screen):
 
 
 class BServerWidget(BoxLayout):
-    ux_CurrTime = StringProperty(time.strftime('%H::%M::%S'))
+
+    def updateSubjects(self, subjects):
+        subjectList = self.ids['base_screen'].ids['subject_listing']
+        for subject in subjects:
+            subjLbl = StatusLabel(text='Subject_' + subject,
+                height=30,
+                size_hint_y=None)
+            subjectList.add_widget(subjLbl)
+
+    def updateStations(self, stations):
+        stationList = self.ids['base_screen'].ids['station_listing']
+        for station in stations:
+            stLbl = StatusLabel(text='Station:\n' + station,
+                )
+            stationList.add_widget(stLbl)
+        print self.ids
+
+    def enableScroll(self):
+        subjectList = self.ids['base_screen'].ids['subject_listing']
+        subjectList.bind(minimum_height=subjectList.setter('height'))
+
+    def changeToSubjectStatisticsScreen(self):
+        screenMgr = self.ids['screen_manager']
+        screenMgr.current = 'SubjectStatistics'
+        subjScreen = self.ids['subject_statistics']
+
+    def changeToStationStatisticsScreen(self):
+        screenMgr = self.ids['screen_manager']
+        screenMgr.current = 'StationStatistics'
+
+    def changeToAddSubjectScreen(self):
+        screenMgr = self.ids['screen_manager']
+        screenMgr.current = 'AddSubject'
+
+    def changeToBaseScreen(self):
+        screenMgr = self.ids['screen_manager']
+        screenMgr.current = 'BaseScreen'
+
+    def changeScreen(self, screen):
+        if screen == 'SubjectStatistics':
+            self.changeToSubjectStatisticsScreen()
+        elif screen == 'StationStatistics':
+            self.changeToStationStatisticsScreen()
+        elif screen == 'AddSubject':
+            self.changeToAddSubjectScreen()
+        elif screen == 'BaseScreen':
+            self.changeToBaseScreen()
+
+
+class BServerApp(App):
+    # these are basic app-level data structures
+    Subjects = ListProperty()
+    Stations = ListProperty()
+    Assignments = ListProperty()
     serverData = ObjectProperty()
+    DefaultSubjects = ListProperty(['sub1', 'sub2'])
+    DefaultStations = ListProperty(['stn1', 'stn2', 'stn3',
+        'stn4', 'stn5', 'stn6'])
+    cache = ListProperty()
+    ux_CurrTime = StringProperty(time.strftime('%H::%M::%S'))
 
     def updateTime(self, dt):
         self.ux_CurrTime = time.strftime('%H::%M::%S')
 
-    def updateSubjects(self, subjects):
-        subjectList = self.ids['subject_listing']
-        for subject in subjects:
-            subjBtn = Button(text=subject,
-                    size_hint=(1, None),
-                    height=30,
-                    id='Subject_' + subject
-                    )
-            subjBtn.bind(on_press=self.changeToSubjectScreen)
-            subjectList.add_widget(subjBtn)
-
-    def updateStations(self, stations):
-        stationList = self.ids['station_listing']
-        for station in stations:
-            stBtn = StationButton(text=station,
-                height=30,
-                background_color=(0.56, 0.93, 0.56, 0.75),
-                id=station,
-                )
-            stationList.add_widget(stBtn)
-            stBtn.bind(on_press=self.changeToStationScreen)
-
-    def enableScroll(self):
-        subjectList = self.ids['subject_listing']
-        subjectList.bind(minimum_height=subjectList.setter('height'))
-
-    def changeToSubjectScreen(self, pressedButton):
-        screenMgr = self.ids['screen_manager']
-        screenMgr.current = 'SubjectStatistics'
-        subjScreen = self.ids['subject_statistics']
-        subjLbl = self.ids['subject_label']
-        subjScreen.updateScreen(subjLbl, pressedButton)
-
-    def changeToStationScreen(self, pressedButton):
-        screenMgr = self.ids['screen_manager']
-        screenMgr.current = 'StationStatistics'
-        screenMgr.cache = pressedButton
-
-
-class BServerApp(App):
-    DefaultSubjects = ListProperty()
-    DefaultStations = ListProperty()
-    serverData = ObjectProperty()
-    cache = ObjectProperty()
-
     def build(self, *args):
-        bserver_widget = BServerWidget()
-        Clock.schedule_interval(bserver_widget.updateTime, 1)
+        # get the server data imported
+        self.serverData = self.options['serverData']
+        # create widget
+        self.widget = bserver_widget = BServerWidget()
+        Clock.schedule_interval(self.updateTime, 1)
+        # bind the
+        # populate
         bserver_widget.updateSubjects(self.DefaultSubjects)
         # allow scroll
         bserver_widget.enableScroll()
         bserver_widget.updateStations(self.DefaultStations)
-        bserver_widget.serverData = self.options['serverData']
         return bserver_widget
+
+    def changeScreen(self, screen):
+        self.widget.changeScreen(screen)
 
 
 if __name__ == "__main__":
