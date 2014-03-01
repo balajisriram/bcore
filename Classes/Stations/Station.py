@@ -7,6 +7,7 @@ from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr
 from BCore.Classes.Hardware.Ports import StandardParallelPort
 
+
 class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
@@ -17,18 +18,25 @@ class Station(object):
         MACAddress      : unique mac address for the processor/ethernet
                           card. string identifier
     """
+    version = Ver('0.0.1')
+    stationID = 0
+    stationName = ''
+    stationPath = ''
+    stationLocation = []
+    MACAddress = ''
+    IPAddr = ''
+    port = 0
+
     def __init__(st, **kwargs):
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
-        st.version = Ver('0.0.1')
         st.stationID = kwargs['stationID']
         st.stationName = kwargs['stationName']
         st.stationPath = os.path.join(
             getBaseDirectory(), 'BServerData', 'StationData',
             str(st.stationID))
-        st.stationLocation = []
-        try:
-            st.stationLocation = kwargs['stationLocation']
+        st.stationLocation = kwargs['stationLocation']
+
         st._setupPaths()
         st.MACAddress = getnode()
         st.IPAddr = getIPAddr()
@@ -47,3 +55,15 @@ class Station(object):
     def _setupPaths(st):
         if not os.path.isdir(st.stationPath):
             os.makedirs(st.stationPath)
+
+    def load(self):
+        pass
+
+    def save(self):
+        pass
+
+    def loadStation(self):
+        pass
+
+    def saveStation(self):
+        pass

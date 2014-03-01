@@ -114,6 +114,9 @@ class TCPConnection(object):
         because it cannot be started directly. This works because the only
         difference between server and client is the way connections are started
     """
+    TCP_IP = ''
+    TCP_PORT = 0
+    DEFAULT_BUFFER_SIZE = 0
 
     def __init__(conn, **kwargs):
 

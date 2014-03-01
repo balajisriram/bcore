@@ -54,11 +54,13 @@ class StandardVisionBehaviorStation(Station):
         parallelPort['leftPort'] = 13
         parallelPort['portPins'] = (12, 10, 13)
     """
+    display = ''
+    soundOn = False
+    parallelPort = ''
+    BServerConnection = []
 
     def __init__(st, **kwargs):
-        super(StandardVisionBehaviorStation, st).__init__(
-            stationID=kwargs['stationID'],
-            stationName=kwargs['stationName'])
+        super(StandardVisionBehaviorStation, st).__init__(**kwargs)
         st.display = kwargs['display']
         st.soundOn = kwargs['soundOn']
         st.parallelPort = kwargs['parallelPort']
