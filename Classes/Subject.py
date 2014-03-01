@@ -9,6 +9,7 @@ class Subject(object):
                 protocol                : protocol object
     """
     ver = Ver('0.0.1')
+
     def __init__(self, **kwargs):
         """
                 Call as follows::
@@ -28,10 +29,11 @@ class Subject(object):
         if not self.protocol:
             self.protocol = newProtocol
         else:
-            raise ValueError('cannot add newProtocol. protocol is not empty. Maybe you meant replaceProtocol()?')
-            
+            raise ValueError('cannot add newProtocol. protocol is not empty. \
+            Maybe you meant replaceProtocol()?')
+
     def replaceProtocol(self, newProtocol):
-        self.protocol = newProtocol            
+        self.protocol = newProtocol
 
     def allowedGenders(self):
         return None
@@ -41,12 +43,11 @@ class Subject(object):
 
     def allowedGeneBkgd(self):
         return None
-        
+
     def run(self):
         if not self.protocol:
-            raise ValueError('Protocol Unavailable: cannot run subject without a protocol')
-            
-        
+            raise ValueError('Protocol Unavailable: cannot run subject without \
+            a protocol')
 
 
 class Mouse(Subject):
@@ -61,7 +62,7 @@ class Mouse(Subject):
     """
 
     def __init__(self, **kwargs):
-        super(Mouse, self).__init__(subjectID=kwargs['subjectID'])
+        super(Mouse, self).__init__(**kwargs)
         self.gender = kwargs['gender']
         self.birthDate = kwargs['birthDate']
         self.strain = kwargs['strain']
@@ -142,7 +143,7 @@ class Virtual(Subject):
     """
 
     def __init__(self, **kwargs):
-        super(Virtual, self).__init__(subjectID=kwargs['subjectID'])
+        super(Virtual, self).__init__(**kwargs)
 
     def __eq__(self, other):
         if isinstance(other, Virtual) and (self.subjectID == other.subjectID):
@@ -181,7 +182,7 @@ class Human(Subject):
     """
 
     def __init__(self, **kwargs):
-        super(Human, self).__init__(subjectID=kwargs['subjectID'])
+        super(Human, self).__init__(**kwargs)
         self.gender = kwargs['gender']
         self.birthDate = kwargs['birthDate']
         self.firstName = kwargs['firstName']

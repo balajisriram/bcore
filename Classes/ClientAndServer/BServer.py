@@ -3,6 +3,7 @@ import time
 import cPickle as pickle
 import shutil
 import copy
+import pprint
 
 from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr, getTimeStamp
@@ -27,8 +28,19 @@ class BServer(object):
                                 the repository
     """
     version = Ver('0.0.1')  # Feb 5, 2014
+    serverID = ''
+    serverDataPath = ''
+    serverIP = ''
+    creationTime = 0
+    stations = []
+    subjects = []
+    assignments = {}
+    StationConnections = {}
+
     def __init__(server, **kwargs):
         if len(kwargs) in (0, 1):
+            print('BServer.__init()::', len(kwargs),
+                ' %d args input. Loading standard Server')
             server = server.loadServer()
             if 'requireVersion' in kwargs:
                 if server.version < Ver(kwargs['requireVersion']):
@@ -37,7 +49,7 @@ class BServer(object):
             server.serverID = kwargs['serverID']
             server.serverName = kwargs['serverName']
             server.serverDataPath = os.path.join(
-                getBaseDirectory, 'BCoreData', 'ServerData')
+                getBaseDirectory(), 'BCoreData', 'ServerData')
             server.serverIP = getIPAddr()
             server.creationTime = time.time()
             server.stations = []
@@ -47,8 +59,10 @@ class BServer(object):
             server.saveServer()
 
     def run(server, **kwargs):
+        print(('Running server...\n'))
         if kwargs['serverGUI']:
             BServerApp(serverData=server)
+            pass
         else:
             raise NotImplementedError()
 
@@ -64,7 +78,10 @@ class BServer(object):
         dbLoc = os.path.join(
             getBaseDirectory(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
-            return pickle.load(dbLoc)
+            f = open(dbLoc, 'rb')
+            server = pickle.load(f)
+            f.close()
+            print 'BServer loaded'
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
@@ -80,6 +97,11 @@ class BServer(object):
             getBaseDirectory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
             getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
+
+        if not os.path.isdir(server.serverDataPath):
+            # assume that these are never made alone...
+            server._setupPaths()
+
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
             old = BServer()  # standardLoad to old
@@ -96,8 +118,9 @@ class BServer(object):
         print(('Cleaning and pickling object'))
         cleanedBServer = copy.deepcopy(server)
         cleanedBServer.StationConnections = {}
-
-        pickle.dump(cleanedBServer, os.path.join(srcDir, 'db.BServer'))
+        f = open(os.path.join(srcDir, 'db.BServer'), 'wb')
+        pickle.dump(cleanedBServer, f)
+        f.close()
 
     def loadBackup(server):
         """
@@ -122,23 +145,23 @@ class BServer(object):
 
     def _setupPaths(server):
         # create 'BServerData'
-        os.path.mkdir(os.path.join(getBaseDirectory, 'BCoreData'))
+        os.mkdir(os.path.join(getBaseDirectory(), 'BCoreData'))
         # create 'ServerData','Stations','PermanentTrialRecordStore' in
         # BServerData
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'ServerData'))
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'StationData'))
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'TrialData'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'StationData'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'TrialData'))
         # create 'replacedDBs' in 'ServerData'
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'ServerData', 'backupDBs'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs'))
         # create 'Full' and 'Compiled' in 'TrialData'
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'TrialData', 'Full'))
-        os.path.mkdir(os.path.join(
-            getBaseDirectory, 'BCoreData', 'TrialData', 'Compiled'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'TrialData', 'Full'))
+        os.mkdir(os.path.join(
+            getBaseDirectory(), 'BCoreData', 'TrialData', 'Compiled'))
 
     def addStation(server, newStation):
         if (newStation.stationID in server.getStationIDs() or
