@@ -1,4 +1,6 @@
 import time
+import functools
+import pprint
 
 #lint:disable
 from kivy.app import App
@@ -22,7 +24,7 @@ from kivy.properties import (ListProperty,
                             DictProperty)
 from kivy.clock import Clock
 from kivy.config import Config
-from datetimepicker import DatePicker, TimePicker
+from kivy.garden.datetimepicker import DatePicker, TimePicker
 from kivy.graphics.vertex_instructions import (Rectangle,
                                                Ellipse,
                                                Line)
@@ -31,6 +33,7 @@ from kivy.graphics.context_instructions import Color
 from BCore.Classes.Subject import Subject, Mouse, Rat, Virtual, Human
 from BCore.Classes.Subject import DefaultMouse, DefaultRat, DefaultVirtual
 from BCore.Classes.Subject import DefaultHuman
+from BCore.Classes.ClientAndServer.BServerLocal import DefaultBServerLocal
 #lint:enable
 
 
@@ -85,10 +88,7 @@ class StationButton(Button):
 
 
 class BServerAppScreenManager(ScreenManager):
-    cache = ObjectProperty()
-
-    def deCache(self):
-        self.cache = []
+    pass
 
 
 class BaseScreen(Screen):
@@ -118,10 +118,19 @@ class SubjectIDInput(TextInput):
 
 class AddSubjectScreen(Screen):
 
-    def addSubjectToServer(self, value):
-        print type(self)
+    def extractDataAndAddSubject(self, kw_function, example, app,
+        pressedButton):
+        kw_value = {}
+        for key, value in kw_function.iteritems():
+            if hasattr(value, '__call__'):
+                kw_value[key] = value()
+            else:
+                kw_value[key] = value
+        app.serverData.addSubject()
 
-    def presentSpeciesSpecificWidgets(self, layout, present, details, example):
+    def presentSpeciesSpecificWidgets(self, layout, present, details,
+        example, app):
+        kw_function = {}
         # now add a vertical box layout and add the choices
         OtherFields = BoxLayout(spacing=3, orientation='vertical')
         # subjectID
@@ -134,6 +143,7 @@ class AddSubjectScreen(Screen):
             subIDInput.bind(on_text_validate=subIDInput.validateSubIDInput)
             subjectIDLayout.add_widget(subIDInput)
             OtherFields.add_widget(subjectIDLayout)
+            kw_function['subjectID'] = subIDInput.text
 
         # firstName
         if present['firstName']:
@@ -144,6 +154,7 @@ class AddSubjectScreen(Screen):
                 multiline=False)
             FirstNameLayout.add_widget(firstNameInput)
             OtherFields.add_widget(FirstNameLayout)
+            kw_function['firstName'] = firstNameInput.text
 
         # lastName
         if present['lastName']:
@@ -154,6 +165,7 @@ class AddSubjectScreen(Screen):
                 multiline=False)
             LastNameLayout.add_widget(lastNameInput)
             OtherFields.add_widget(LastNameLayout)
+            kw_function['lastName'] = lastNameInput.text
 
         # gender
         if present['gender']:
@@ -165,6 +177,7 @@ class AddSubjectScreen(Screen):
                 size=(150, 40))
             genderLayout.add_widget(genderInput)
             OtherFields.add_widget(genderLayout)
+            kw_function['gender'] = genderInput.text
 
         # dob
         if present['dob']:
@@ -174,6 +187,7 @@ class AddSubjectScreen(Screen):
             dobInput = DatePicker()
             dobLayout.add_widget(dobInput)
             OtherFields.add_widget(dobLayout)
+            kw_function['birthDate'] = dobInput.get_datetime
 
         # strains
         if present['strains']:
@@ -185,6 +199,7 @@ class AddSubjectScreen(Screen):
                 size=(150, 40))
             strainLayout.add_widget(strainInput)
             OtherFields.add_widget(strainLayout)
+            kw_function['strain'] = strainInput.text
 
         # geneBkgd
         if present['geneBkgd']:
@@ -196,6 +211,8 @@ class AddSubjectScreen(Screen):
                 size=(150, 40))
             geneBkgdLayout.add_widget(geneBkgdInput)
             OtherFields.add_widget(geneBkgdLayout)
+            kw_function['geneBkgd'] = geneBkgdInput.text
+
         # anonymize
         if present['anonymize']:
             anonLayout = BoxLayout(orientation='horizontal', height=40,
@@ -204,6 +221,8 @@ class AddSubjectScreen(Screen):
             anonInput = Switch(active=False)
             anonLayout.add_widget(anonInput)
             OtherFields.add_widget(anonLayout)
+            kw_function['anonymize'] = anonInput.active
+
         print '[INFO]\t added species specific widgets'
         largeBlankSpace = BoxLayout(orientation='horizontal', height=80,
                 size_hint_y=None)
@@ -212,13 +231,15 @@ class AddSubjectScreen(Screen):
         addSubjectLayout = BoxLayout(orientation='horizontal', height=80,
                 size_hint_y=None)
         addSubjectButton = Button(text='Add Subject')
-        addSubjectButton.bind(on_press=self.addSubjectToServer)
+        extractDataAndAddSubject = functools.partial(
+            self.extractDataAndAddSubject, kw_function, example, app)
+        addSubjectButton.bind(on_press=extractDataAndAddSubject)
         addSubjectLayout.add_widget(addSubjectButton)
         OtherFields.add_widget(addSubjectLayout)
         print '[INFO]\t added add subject button'
         layout.add_widget(OtherFields)
 
-    def updateSpeciesSpecificChoice(self, species, layout):
+    def updateSpeciesSpecificChoice(self, species, layout, app):
         # if there are any old widgets to the layout, clear it
         layout.clear_widgets()
         present = {
@@ -244,7 +265,7 @@ class AddSubjectScreen(Screen):
             present['geneBkgd'] = True
 
             self.presentSpeciesSpecificWidgets(
-                layout, present, details, example)
+                layout, present, details, example, app)
         elif species == 'Rat':
             example = DefaultRat()
             details['allowedGenders'] = example.allowedGenders()
@@ -257,13 +278,13 @@ class AddSubjectScreen(Screen):
             present['geneBkgd'] = True
 
             self.presentSpeciesSpecificWidgets(
-                layout, present, details, example)
+                layout, present, details, example, app)
         elif species == 'Virtual':
             example = DefaultVirtual()
             present['subjectID'] = True
 
             self.presentSpeciesSpecificWidgets(
-                layout, present, details, example)
+                layout, present, details, example, app)
         elif species == 'Human':
             example = DefaultHuman()
             details['allowedGenders'] = example.allowedGenders()
@@ -274,7 +295,7 @@ class AddSubjectScreen(Screen):
             present['anonymize'] = True
 
             self.presentSpeciesSpecificWidgets(
-                layout, present, details, example)
+                layout, present, details, example, app)
 
 
 class BServerWidget(BoxLayout):
@@ -302,7 +323,6 @@ class BServerWidget(BoxLayout):
     def changeToSubjectStatisticsScreen(self):
         screenMgr = self.ids['screen_manager']
         screenMgr.current = 'SubjectStatistics'
-        subjScreen = self.ids['subject_statistics']
 
     def changeToStationStatisticsScreen(self):
         screenMgr = self.ids['screen_manager']
@@ -363,6 +383,6 @@ class BServerApp(App):
 if __name__ == "__main__":
     Config.set('graphics', 'fullscreen', 'fake-fullscreen')
     Config.write()
-    bserverWidget = BServerApp(serverData=1).run()
+    app = BServerApp(serverData=DefaultBServerLocal()).run()
     Config.set('graphics', 'fullscreen', 0)
     Config.write()

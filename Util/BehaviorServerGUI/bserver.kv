@@ -81,6 +81,7 @@
         StationStatsActionBar:
 
 <AddSubjectScreen>:
+    id: add_subject
     BoxLayout:
         spacing: 3
         orientation: 'vertical'
@@ -94,7 +95,7 @@
                     title: 'Add Subject'
                     with_previous: True
                     app_icon: './resources/Station.png'
-                    on_press: screen_manager.current='BaseScreen'
+                    on_press: app.changeScreen('BaseScreen')
                 ActionSeparator:
                 ActionButton:
                     id: time_button
@@ -115,7 +116,7 @@
                     size_hint: None,None
                     size: 150,44
                     pos_hint: {'center_x': .5, 'center_y': .5}
-                    on_text: add_subject.updateSpeciesSpecificChoice(self.text, species_specific_layout)
+                    on_text: add_subject.updateSpeciesSpecificChoice(self.text, species_specific_layout, app)
             BoxLayout:
                 id: species_specific_layout
                 spacing: 3
@@ -185,6 +186,10 @@
             with_previous: True
             app_icon: './resources/Subject.png'
             on_press: app.changeScreen('BaseScreen')
+        ActionSeparator:
+        ActionButton:
+            icon: './resources/AddSubject.png'
+            on_press: app.changeScreen('AddSubject')
         ActionSeparator:
         ActionButton:
             id: time_button
