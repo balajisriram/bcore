@@ -20,5 +20,16 @@ class BServerLocal(BServer):
         # this is the only substantial change in BServerLocal
         server.serverIP = 'localhost'
 
+
+class DefaultBServerLocal(BServerLocal):
+
+    def __init__(self):
+        kw_values = {
+            'serverID': 0,
+            'serverName': 'DefaultLocalServer'
+            }
+        super(DefaultBServerLocal, self).__init__(**kw_values)
+
+
 if __name__ == "__main__":
     print("here")
