@@ -52,6 +52,9 @@ class SimpleProtocol(Protocol):
 
     def numSteps(self):
         return len(self.trainingSteps)
+        
+    def addStep(self, step):
+        self.trainingSteps.append(step)
 
 
 class SequentialProtocol(SimpleProtocol):
