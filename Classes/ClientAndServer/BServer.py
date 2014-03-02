@@ -171,13 +171,10 @@ class BServer(object):
         # now enable station specific data
         server.save()
 
-    def addSubject(server, newSubject, newAssignment):
+    def addSubject(server, newSubject):
         if newSubject in server.subjects:
             raise ValueError('Cannot add replica of subjects to BServer')
-        if not(any(newAssignment in server.getStationIDs())):
-            raise ValueError('Cannot add new subject to non existent stations')
         server.subjects.append(newSubject)
-        server.assignment[newSubject.subjectID] = newAssignment
         server.save()
 
     def changeAssignment(server, subject, newAssignment):
