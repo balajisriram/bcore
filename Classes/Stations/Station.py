@@ -33,7 +33,7 @@ class Station(object):
         st.stationID = kwargs['stationID']
         st.stationName = kwargs['stationName']
         st.stationPath = os.path.join(
-            getBaseDirectory(), 'BServerData', 'StationData',
+            getBaseDirectory(), 'BStationData', 'StationData',
             str(st.stationID))
         st.stationLocation = kwargs['stationLocation']
 
