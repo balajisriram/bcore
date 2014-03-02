@@ -225,3 +225,20 @@ if __name__ == '__main__':
     print(('MOUSE is a Mouse? ' + str(isinstance(a, Mouse))))
     print(('MOUSE is a Rat? ' + str(isinstance(a, Rat))))
     print(('MOUSE is a Subject? ' + str(isinstance(a, Subject))))
+    
+    b = Mouse(
+        subjectID='998',
+        gender='M',
+        birthDate='02/10/2014',
+        strain='c57bl/6j',
+        geneBkgd='PV-cre')
+        
+    c = Mouse(
+        subjectID='997',
+        gender='M',
+        birthDate='02/10/2014',
+        strain='c57bl/6j',
+        geneBkgd='PV-cre')
+    mouselist = [a,b]
+    if c in mouselist:
+        print 'avail'
