@@ -58,6 +58,8 @@ class StandardVisionBehaviorStation(Station):
     soundOn = False
     parallelPort = ''
     BServerConnection = []
+    
+    
 
     def __init__(st, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(**kwargs)
@@ -173,9 +175,12 @@ class StandardVisionBehaviorStation(Station):
     def getDisplaySize(st):
         pass
 
-    def doTrials(st, bServer, numTrials):
-        pass
-
+    def doTrials(st, **kwargs):
+        if __debug__:
+            pass
+        
+        # find the subject
+        
 
 if __name__ == '__main__':
     # Create a new StandardVisionBehaviorStation and test it
