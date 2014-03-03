@@ -8,6 +8,9 @@ class Protocol(object):
 
     def __init__(self, **kwargs):
         self.name = kwargs['name']
+        
+    def ProtocolOKForSessionMgr(self, **kwargs):
+        return False
 
 
 class MetaProtocol(Protocol):
