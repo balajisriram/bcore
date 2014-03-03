@@ -70,15 +70,58 @@
         spacing: 3
         orientation: 'vertical'
         SubjectStatsActionBar:
-        Label:
-            id:subject_label
-            text: 'Hello'
+        BoxLayout:
+            id: subj_stat_data_listing
+            spacing: 5
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: 0.3,1
+                ScrollView:
+                    size_hint: 1,1
+                    do_scroll_x: False
+                    GridLayout:
+                        id:subject_button_listing
+                        cols: 1
+                        size_hint_y: None
+                        orientation: 'vertical'
+                        spacing: 3
+            GridLayout:
+                size_hint: 0.7,1
+                cols: 1
+                GridLayout:
+                    cols: 3
+                    spacing: 5
+                    id: subject_stats_box
 
 <StationStatisticsScreen>:
     BoxLayout:
         spacing: 3
         orientation: 'vertical'
         StationStatsActionBar:
+        BoxLayout:
+            id: stn_stat_data_listing
+            spacing: 5
+            orientation: 'horizontal'
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint: 0.3,1
+                ScrollView:
+                    size_hint: 1,1
+                    do_scroll_x: False
+                    GridLayout:
+                        id:station_button_listing
+                        cols: 1
+                        size_hint_y: None
+                        orientation: 'vertical'
+                        spacing: 3
+            GridLayout:
+                size_hint: 0.7,1
+                cols: 1
+                GridLayout:
+                    cols: 3
+                    spacing: 5
+                    id: station_stats_box
 
 <AddSubjectScreen>:
     id: add_subject
