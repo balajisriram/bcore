@@ -7,6 +7,7 @@ from BCore.Classes.Stations.Station import Station
 from BCore.Classes.Hardware.Ports import TCPServerConnection
 from BCore.Classes.Hardware.Ports import BehaviorClientConnection
 from BCore import getBaseDirectory
+from BCore.Classes.TrialManagers.TrialManager import SessionRecord, TrialRecord
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -58,8 +59,7 @@ class StandardVisionBehaviorStation(Station):
     soundOn = False
     parallelPort = ''
     BServerConnection = []
-    
-    
+    session = []
 
     def __init__(st, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(**kwargs)
@@ -175,12 +175,43 @@ class StandardVisionBehaviorStation(Station):
     def getDisplaySize(st):
         pass
 
+    def getSession(st):
+        """
+            Connect to BServer and request session details to be loaded
+        """
+        pass
+
+    def getCompiledRecords(st):
+        """
+            Connect to BServer and request compiledRecords
+        """
+        pass
+
+    def decache(st):
+        """
+            Remove session specific details. ideal for pickling
+        """
+        pass
+
     def doTrials(st, **kwargs):
         if __debug__:
             pass
-        
+
         # find the subject
-        
+        st.getSession()
+        st.getCompiledRecords()
+
+        Quit = False
+
+        # session starts here
+        sR = SessionRecord()  # make new session record
+
+        while not Quit and not st.session.stop():
+            # it loops in here every trial
+            tR = TrialRecord()
+            st.session.subject.run(station=st, sessionRecord=sR,
+                trialRecord=tR, quit=Quit)
+
 
 if __name__ == '__main__':
     # Create a new StandardVisionBehaviorStation and test it
