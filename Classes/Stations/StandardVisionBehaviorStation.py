@@ -199,7 +199,7 @@ class StandardVisionBehaviorStation(Station):
 
         # find the subject
         st.getSession()
-        st.getCompiledRecords()
+        cR = st.getCompiledRecords()
 
         Quit = False
 
@@ -209,8 +209,15 @@ class StandardVisionBehaviorStation(Station):
         while not Quit and not st.session.stop():
             # it loops in here every trial
             tR = TrialRecord()
-            st.session.subject.run(station=st, sessionRecord=sR,
-                trialRecord=tR, quit=Quit)
+            # just assign relevant details here
+            tR.trialNumber = cR.trialNumber[-1] + 1
+            tR.sessionNumber = st.session.sessionNumber
+            # doTrial
+            st.session.subject.doTrial(station=st, trialRecord=tR, 
+                compiledRecord=cR, quit=Quit)
+            # update sessionRecord and compiledRecord
+            sR.append(tR)
+            cR.append(tR)
 
 
 if __name__ == '__main__':
