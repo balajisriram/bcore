@@ -10,45 +10,61 @@ class Subject(object):
     """
     ver = Ver('0.0.1')
 
-    def __init__(self, **kwargs):
+    def __init__(sub, **kwargs):
         """
                 Call as follows::
                 subject(subjectID='demo')
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        self.subjectID = kwargs['subjectID']
-        self.protocol = []
-        self.creationDate = time.time()
+        sub.subjectID = kwargs['subjectID']
+        sub.protocol = []
+        sub.creationDate = time.time()
 
-    def __eq__(self, other):
+    def __eq__(sub, other):
         # if this method is called, then clearly
         return False
 
-    def addProtocol(self, newProtocol):
-        if not self.protocol:
-            self.protocol = newProtocol
+    def addProtocol(sub, newProtocol):
+        if not sub.protocol:
+            sub.protocol = newProtocol
         else:
             raise ValueError('cannot add newProtocol. protocol is not empty. \
             Maybe you meant replaceProtocol()?')
 
-    def replaceProtocol(self, newProtocol):
-        self.protocol = newProtocol
+    def replaceProtocol(sub, newProtocol):
+        sub.protocol = newProtocol
 
-    def allowedGenders(self):
+    def allowedGenders(sub):
         return None
 
-    def allowedStrains(self):
+    def allowedStrains(sub):
         return None
 
-    def allowedGeneBkgd(self):
+    def allowedGeneBkgd(sub):
         return None
 
-    def run(self):
-        if not self.protocol:
+    def doTrial(sub, **kwargs):
+        if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
             a protocol')
-
+        tR = kwargs['trialRecord']
+        Quit = kwargs['quit']
+        
+        # new consideration in  protocol and training step 
+        Graduate = False
+        kwargs['graduate'] = Graduate
+        
+        # figure out the protocol, and the trainingStep details
+        tR.protocol = sub.protocol.name
+        tR.currentStep = sub.protocol.currentStep
+        tR.numSteps = sub.protocol.numSteps()
+        currentStep = sub.protocol.step()
+        
+        currentStep.doTrial(**kwargs)
+        
+        if kwargs['graduate']:
+            sub.protocol.graduate()
 
 class Mouse(Subject):
     """
@@ -61,35 +77,35 @@ class Mouse(Subject):
         manipulation              : three-ple list
     """
 
-    def __init__(self, **kwargs):
-        super(Mouse, self).__init__(**kwargs)
-        self.gender = kwargs['gender']
-        self.birthDate = kwargs['birthDate']
-        self.strain = kwargs['strain']
-        self.geneBkgd = kwargs['geneBkgd']
-        self.manipulation = []
+    def __init__(sub, **kwargs):
+        super(Mouse, sub).__init__(**kwargs)
+        sub.gender = kwargs['gender']
+        sub.birthDate = kwargs['birthDate']
+        sub.strain = kwargs['strain']
+        sub.geneBkgd = kwargs['geneBkgd']
+        sub.manipulation = []
 
-    def __eq__(self, other):
-        if isinstance(other, Mouse) and (self.subjectID == other.subjectID):
+    def __eq__(sub, other):
+        if isinstance(other, Mouse) and (sub.subjectID == other.subjectID):
             return True
         else:
             return False
 
-    def allowedGenders(self):
+    def allowedGenders(sub):
         return ['Male', 'Female']
 
-    def allowedStrains(self):
+    def allowedStrains(sub):
         return ['C57BL/6J', '129S1/SvlmJ', 'BALB/c']
 
-    def allowedGeneBkgd(self):
+    def allowedGeneBkgd(sub):
         return ['WT', 'Pvalb-cre', 'Pvalb-COP4-EYFP', 'Somst-cre']
 
 
 class DefaultMouse(Mouse):
-    def __init__(self):
+    def __init__(sub):
         pass
 
-    def createSubject(self, **kwargs):
+    def createSubject(sub, **kwargs):
         return Mouse(**kwargs)
 
 
@@ -104,35 +120,35 @@ class Rat(Subject):
         manipulation              : three-ple list
     """
 
-    def __init__(self, **kwargs):
-        super(Rat, self).__init__(subjectID=kwargs['subjectID'])
-        self.gender = kwargs['gender']
-        self.birthDate = kwargs['birthDate']
-        self.strain = kwargs['strain']
-        self.geneBkgd = kwargs['geneBkgd']
-        self.manipulation = []
+    def __init__(sub, **kwargs):
+        super(Rat, sub).__init__(subjectID=kwargs['subjectID'])
+        sub.gender = kwargs['gender']
+        sub.birthDate = kwargs['birthDate']
+        sub.strain = kwargs['strain']
+        sub.geneBkgd = kwargs['geneBkgd']
+        sub.manipulation = []
 
-    def __eq__(self, other):
-        if isinstance(other, Rat) and (self.subjectID == other.subjectID):
+    def __eq__(sub, other):
+        if isinstance(other, Rat) and (sub.subjectID == other.subjectID):
             return True
         else:
             return False
 
-    def allowedGenders(self):
+    def allowedGenders(sub):
         return ['Male', 'Female']
 
-    def allowedStrains(self):
+    def allowedStrains(sub):
         return ['Wistar', 'Sprague-Dawley', 'Long-Evans']
 
-    def allowedGeneBkgd(self):
+    def allowedGeneBkgd(sub):
         return ['WT']
 
 
 class DefaultRat(Rat):
-    def __init__(self):
+    def __init__(sub):
         pass
 
-    def createSubject(self, **kwargs):
+    def createSubject(sub, **kwargs):
         return Rat(**kwargs)
 
 
@@ -142,30 +158,30 @@ class Virtual(Subject):
         subjectID                 : string ID sent to SUBJECT
     """
 
-    def __init__(self, **kwargs):
-        super(Virtual, self).__init__(**kwargs)
+    def __init__(sub, **kwargs):
+        super(Virtual, sub).__init__(**kwargs)
 
-    def __eq__(self, other):
-        if isinstance(other, Virtual) and (self.subjectID == other.subjectID):
+    def __eq__(sub, other):
+        if isinstance(other, Virtual) and (sub.subjectID == other.subjectID):
             return True
         else:
             return False
 
-    def allowedGenders(self):
+    def allowedGenders(sub):
         return None
 
-    def allowedStrains(self):
+    def allowedStrains(sub):
         return None
 
-    def allowedGeneBkgd(self):
+    def allowedGeneBkgd(sub):
         return None
 
 
 class DefaultVirtual(Virtual):
-    def __init__(self):
+    def __init__(sub):
         pass
 
-    def createSubject(self, **kwargs):
+    def createSubject(sub, **kwargs):
         return Virtual(**kwargs)
 
 
@@ -181,36 +197,36 @@ class Human(Subject):
         anonymize                 : True/False
     """
 
-    def __init__(self, **kwargs):
-        super(Human, self).__init__(**kwargs)
-        self.gender = kwargs['gender']
-        self.birthDate = kwargs['birthDate']
-        self.firstName = kwargs['firstName']
-        self.lastName = kwargs['lastName']
-        self.initials = self.firstName[0] + '.' + self.lastName[0] + '.'
-        self.anonymize = False
+    def __init__(sub, **kwargs):
+        super(Human, sub).__init__(**kwargs)
+        sub.gender = kwargs['gender']
+        sub.birthDate = kwargs['birthDate']
+        sub.firstName = kwargs['firstName']
+        sub.lastName = kwargs['lastName']
+        sub.initials = sub.firstName[0] + '.' + sub.lastName[0] + '.'
+        sub.anonymize = False
 
-    def __eq__(self, other):
-        if isinstance(other, Human) and (self.subjectID == other.subjectID):
+    def __eq__(sub, other):
+        if isinstance(other, Human) and (sub.subjectID == other.subjectID):
             return True
         else:
             return False
 
-    def allowedGenders(self):
+    def allowedGenders(sub):
         return ['Male', 'Female', 'Other', 'NA']
 
-    def allowedStrains(self):
+    def allowedStrains(sub):
         return None
 
-    def allowedGeneBkgd(self):
+    def allowedGeneBkgd(sub):
         return None
 
 
 class DefaultHuman(Human):
-    def __init__(self):
+    def __init__(sub):
         pass
 
-    def createSubject(self, **kwargs):
+    def createSubject(sub, **kwargs):
         return Human(**kwargs)
 
 
