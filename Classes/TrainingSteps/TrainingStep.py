@@ -17,5 +17,4 @@ class TrainingStep(object):
         self.Criterion = kwargs['criterion']
 
     def doTrial(self, **kwargs):
-        if __debug__:
-            assert kwargs['session'].tsOKForSessMgr, ''
+        
