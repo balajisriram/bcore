@@ -67,6 +67,6 @@ class Station(object):
 
     def saveStation(self):
         pass
-        
+
     def doTrials(self, **kwargs):
-        raise NotImplementedError, 'Run doTrials() on '
+        raise NotImplementedError('Run doTrials() on a subclass')
