@@ -10,11 +10,30 @@ class TrainingStep(object):
     Scheduler = []
     Criterion = []
 
-    def __init__(self, **kwargs):
-        self.name = kwargs['name']
-        self.TrialManager = kwargs['trialManager']
-        self.Scheduler = kwargs['scheduler']
-        self.Criterion = kwargs['criterion']
+    def __init__(ts, **kwargs):
+        ts.name = kwargs['name']
+        ts.TrialManager = kwargs['trialManager']
+        ts.Scheduler = kwargs['scheduler']
+        ts.Criterion = kwargs['criterion']
 
-    def doTrial(self, **kwargs):
-        
+    def scheduleOK(ts):
+        return ts.Scheduler.scheduleOK()
+
+    def doTrial(ts, **kwargs):
+        # called by subject.doTrial()
+        if __debug__:
+            assert kwargs['session'].tsOKForSessMgr, ''
+
+        tR = kwargs['trialRecords']
+
+        tR.trialManagerName = ts.TrialManager.name
+        tR.schedulerName = ts.Scheduler.name
+        tR.criterionName = ts.Criterion.name
+
+        if ts.scheduleOK(**kwargs):
+            tR = ts.TrialManager.doTrial(**kwargs)
+
+        if ts.Criterion.graduate(**kwargs):
+            kwargs['Graduate'] = True
+
+        return tR
