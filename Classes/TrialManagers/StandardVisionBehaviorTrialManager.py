@@ -1,6 +1,23 @@
 from BCore.Classes.TrialManagers.TrialManager import TrialManager
-from BCore.Classes.TrialManagers.TrialManager import TrialRecord
-from BCore.Classes.TrialManagers.TrialManager import TrialRecordList
+
+
+class StimSpec(object):
+    stimulus = 0
+    transitions = [[], 0]
+    stimType = 'loop'
+    startFrame = 1
+    framesUntilTransition = float('inf')
+    autoTrigger = []
+    scaleFactor = 0
+    isFinalPhase = False
+    hz = 0
+    phaseType = ''
+    phaseName = ''
+    isStim = False
+    lockoutDuration = 0
+
+    def __init__(self):
+        pass
 
 
 class StandardVisionBehaviorTrialManager(TrialManager):
@@ -8,9 +25,11 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         STANDARDVISIONBEHAVIORTRIALMANAGER defines a standard vision
         behavior trial manager.
     """
+    name = ''
+    textDisplay = 'full'
     soundManager = []
     reinforcementManager = []
-    requestPort = 'center'
+    requestPort = 'center'  # 'center' or 'all'
     frameDropCorner = 'off'
     textureCaches = {}
     phases = []
@@ -21,9 +40,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tm.reinforcementManager = kwargs['reinforcementmanager']
         if 'requestPort'in kwargs:
             tm.requestPort = kwargs['requestPort']
-
-    def stationOKForTrialManager(tm, st):
-        return False
 
     def doTrial(tm, ts, p, sub, tR, cR):
         # tm - trialManager
@@ -36,17 +52,5 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tm._setupPhases()
 
     def _setupPhases(tm):
-        pass
-
-
-class VisionBehaviorTrialRecord(TrialRecord):
-    """
-    """
-    response = 0
-    step = ''
-    responseTime = 0
-    phaseRecords = []
-
-
-class VisionBehaviorTrialRecordList(TrialRecordList):
-    pass
+        raise NotImplementedError('Cannot run on an abstract class - call on\
+        a concrete example')
