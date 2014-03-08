@@ -216,47 +216,49 @@ class TCPClientConnection(TCPConnection):
 class BehaviorServerConnection(TCPServerConnection):
     """
         BEHAVIORSERVERCONNECTION makes the BServer act as a server. Special
-        constants are defined for communication with the client along with 
-        acknowledgement codes that allow the server to continue its function.
-        
-        It is important to keep the constants defined here in sync with the 
-        constants defined in BEHAVIORCLIENTCONNECTION. 
+        constants are defined for communication with the client along with
+        acknowledgement codes that allow the server to continue its function
+
+        It is important to keep the constants defined here in sync with the
+        constants defined in BEHAVIORCLIENTCONNECTION.
     """
+
     # client side commands to server
-    COMMAND_REQUESTED = 0 # in station loop, ask for things to do 
-    SUBJECT_REQUESTED = 0 # in station.run() request subject details
-    TRIALRECORDS_REQUESTED = 0 # in station.run() request trialRecords
-    KILL_REQUEST = 0 # something is terribly wrong and i am going to kill
-    
-    ACCEPT_TRIALRECORDS = 0 # cleanly killing station needs to send trialRecs
-    
+    COMMAND_REQUESTED = 0  # in station loop, ask for things to do
+    SUBJECT_REQUESTED = 0  # in station.run() request subject details
+    TRIALRECORDS_REQUESTED = 0  # in station.run() request trialRecords
+    KILL_REQUEST = 0  # something is terribly wrong and i am going to kill
+
+    ACCEPT_TRIALRECORDS = 0  # cleanly killing station needs to send trialRecs
+
     # server side commands to client
-    ACK_NONE = 65535 # if receive  ACK_NONE keep on looping
-    ACK_SUBJECT = 65535 # acknowledgement for receipt for subject
-    ACK_KILL = 65535 # acknowledge going into kill mode
+    ACK_NONE = 65535  # if receive  ACK_NONE keep on looping
+    ACK_SUBJECT = 65535  # acknowledgement for receipt for subject
+    ACK_KILL = 65535  # acknowledge going into kill mode
+
 
 class BehaviorClientConnection(TCPClientConnection):
     """
         BEHAVIORCLIENTCONNECTION makes the station act as a client. Special
-        constants are defined for communication with the server along with 
+        constants are defined for communication with the server along with
         acknowledgement codes that allow the server to continue its function.
-        
-        It is important to keep the constants defined here in sync with the 
-        constants defined in BEHAVIORSERVERCONNECTION. 
+
+        It is important to keep the constants defined here in sync with the
+        constants defined in BEHAVIORSERVERCONNECTION.
     """
-    
+
     # client side commands to server
-    REQUEST_COMMAND = 0 # in station loop, ask for things to do 
-    REQUEST_SUBJECT = 0 # in station.run() request subject details
-    REQUEST_TRIALRECORDS = 0 # in station.run() request trialRecords
-    REQUEST_KILL = 0 # something is terribly wrong and i am going to kill
-    
-    ACCEPT_TRIALRECORDS = 0 # cleanly killing station needs to send trialRecs
-    
+    REQUEST_COMMAND = 0  # in station loop, ask for things to do
+    REQUEST_SUBJECT = 0  # in station.run() request subject details
+    REQUEST_TRIALRECORDS = 0  # in station.run() request trialRecords
+    REQUEST_KILL = 0  # something is terribly wrong and i am going to kill
+
+    ACCEPT_TRIALRECORDS = 0  # cleanly killing station needs to send trialRecs
+
     # server side commands to client
-    ACK_NONE = 65535 # if receive  ACK_NONE keep on looping
-    ACK_SUBJECT = 65535 # acknowledgement for receipt for subject
-    ACK_KILL = 65535 # acknowledge going into kill mode
-    
+    ACK_NONE = 65535  # if receive  ACK_NONE keep on looping
+    ACK_SUBJECT = 65535  # acknowledgement for receipt for subject
+    ACK_KILL = 65535  # acknowledge going into kill mode
+
     def __init__(conn, **kwargs):
         super(BehaviorClientConnection, conn).__init__(**kwargs)
