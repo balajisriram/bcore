@@ -7,7 +7,8 @@ from BCore.Classes.Stations.Station import Station
 from BCore.Classes.Hardware.Ports import TCPServerConnection
 from BCore.Classes.Hardware.Ports import BehaviorClientConnection
 from BCore import getBaseDirectory
-from BCore.Classes.TrialManagers.TrialManager import SessionRecord, TrialRecord
+from BCore.Classes.TrialManagers.TrialManager import \
+    VisionBehaviorSessionRecord, VisionBehaviorTrialRecord
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -194,6 +195,8 @@ class StandardVisionBehaviorStation(Station):
         pass
 
     def doTrials(st, **kwargs):
+        # first step in the running of trials. called directly by station
+        # or through the BServer
         if __debug__:
             pass
 
@@ -204,17 +207,19 @@ class StandardVisionBehaviorStation(Station):
         Quit = False
 
         # session starts here
-        sR = SessionRecord()  # make new session record
+        sR = VisionBehaviorSessionRecord()  # make new session record
 
         while not Quit and not st.session.stop():
             # it loops in here every trial
-            tR = TrialRecord()
+            tR = VisionBehaviorTrialRecord()
             # just assign relevant details here
             tR.trialNumber = cR.trialNumber[-1] + 1
             tR.sessionNumber = st.session.sessionNumber
-            # doTrial
-            st.session.subject.doTrial(station=st, trialRecord=tR, 
+            # doTrial - only tR will be returned as its type will be changed
+            tR = st.session.subject.doTrial(station=st, trialRecord=tR,
                 compiledRecord=cR, quit=Quit)
+
+            tR.stopTime = time.localtime()
             # update sessionRecord and compiledRecord
             sR.append(tR)
             cR.append(tR)
