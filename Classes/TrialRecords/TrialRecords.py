@@ -52,6 +52,9 @@ class VisionBehaviorTrialRecord(TrialRecord):
     responseTime = 0
     phaseRecords = []
 
+    # set in stimManager
+    stimRecords = []
+
 
 class VisionBehaviorSessionRecord(SessionRecord):
     def __init__(self):
