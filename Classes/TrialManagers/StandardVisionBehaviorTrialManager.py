@@ -48,9 +48,6 @@ class PhaseSpecs(object):
     isStim = False
     indexPulses = False
 
-    def __init__(self):
-        pass
-
 
 class StandardVisionBehaviorTrialManager(TrialManager):
     """
@@ -88,3 +85,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
     def _setupPhases(tm):
         raise NotImplementedError('Cannot run on an abstract class - call on\
         a concrete example')
+
+    def compileRecords(tm):
+        pass
