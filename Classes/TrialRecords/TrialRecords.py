@@ -24,20 +24,33 @@ class VisionBehaviorTrialRecord(TrialRecord):
     """
     import time
     import datetime
-    trialNumber = 0
 
+    # set in init
     date = datetime.date.today()
     startTime = time.localtime()
-    stopTime = None
+
+    # set in station
+    trialNumber = 0
     sessionNumber = None
+    stopTime = None
+    resolution = None
+
+    # set in subject
+    protocolName = ''
+    currentStep = ''
+    numSteps = ''
+    criterionMet = False
+
+    # set in trainingStep
+    trialManagerName = ''
+    schedulerName = ''
+    criterionName = ''
+
+    #set in trialManager
     response = 0
     step = ''
     responseTime = 0
     phaseRecords = []
-
-    protocolName = ''
-    currentStep = ''
-    numSteps = ''
 
 
 class VisionBehaviorSessionRecord(SessionRecord):
