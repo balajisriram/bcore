@@ -3,7 +3,6 @@ import time
 import cPickle as pickle
 import shutil
 import copy
-import pprint
 
 from verlib import NormalizedVersion as Ver
 from BCore import getBaseDirectory, getIPAddr, getTimeStamp
@@ -81,10 +80,11 @@ class BServer(object):
             f = open(dbLoc, 'rb')
             server = pickle.load(f)
             f.close()
-            print 'BServer loaded'
+            print('BServer loaded')
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
+        return server
 
     def save(server):
         """
