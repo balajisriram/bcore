@@ -56,7 +56,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
     """
     name = ''
     textDisplay = 'full'
-    stimManager = []
     soundManager = []
     reinforcementManager = []
     requestPort = 'center'  # 'center' or 'all'
@@ -88,3 +87,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
 
     def compileRecords(tm):
         pass
+
+
+class Gratings
