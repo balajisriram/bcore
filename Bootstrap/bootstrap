@@ -51,7 +51,7 @@ if __name__ == '__main__':
         'soundOn': False,
         'parallelPort': 'standardVisionBehaviorDefault',
         'serverID': 0,
-        'serverName': 'Server0'
+        'serverName': 'Server0',
         'serverGUI': False
         }
     # parse input arguments and send to bootstrap
