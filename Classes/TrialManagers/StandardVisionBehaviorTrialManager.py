@@ -91,7 +91,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
 
 class Gratings(StandardVisionBehaviorTrialManager):
 
-
     def __init__(grating, **kwargs):
-        super(Gratings, self).__init__(**kwargs)
+        super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
 
