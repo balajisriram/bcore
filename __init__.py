@@ -5,7 +5,7 @@ import time
 import fcntl
 import struct
 
-import git
+# import git
 
 
 def getBaseDirectory():
@@ -37,11 +37,15 @@ def getIPAddr(*args):
         ifname = args[0]
 
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    return socket.inet_ntoa(fcntl.ioctl(
-        s.fileno(),
-        0x8915,  # SIOCGIFADDR
-        struct.pack('256s', ifname[:15])
-        )[20:24])
+    try:
+        ip = socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,  # SIOCGIFADDR
+            struct.pack('256s', ifname[:15])
+            )[20:24])
+    except IOError:
+        ip = ''
+    return ip
 
 
 def getTimeStamp(*arg):
@@ -66,19 +70,19 @@ def getTimeStamp(*arg):
         return time.strftime('D%m%d%YT%H%M%SM', localtime) + milliseconds
 
 
-def gitpull(**kwargs):
-    """
-        Use function only if you know what you are doing. Pulling changes while
-        the function is running will randomly cause the earth to flip magnetic
-        poles
-
-        But seriously, in cases where there has not been any git checkouts of
-        a different branch. For simple git pulls, if the pyc timestamp is
-        different, python will do the right thing
-    """
-    if kwargs:
-        gitdir = kwargs['gitdir']
-    else:
-        gitdir = os.path.join(getBaseDirectory(), 'BCore')
-    g = git.cmd.Git(gitdir)
-    g.pull()
+# def gitpull(**kwargs):
+#     """
+#         Use function only if you know what you are doing. Pulling changes while
+#         the function is running will randomly cause the earth to flip magnetic
+#         poles
+# 
+#         But seriously, in cases where there has not been any git checkouts of
+#         a different branch. For simple git pulls, if the pyc timestamp is
+#         different, python will do the right thing
+#     """
+#     if kwargs:
+#         gitdir = kwargs['gitdir']
+#     else:
+#         gitdir = os.path.join(getBaseDirectory(), 'BCore')
+#     g = git.cmd.Git(gitdir)
+#     g.pull()
