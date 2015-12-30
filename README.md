@@ -3,6 +3,8 @@ b-core
 
 Core Behavior setup for training rodents
 
+add BCore to modules and add modules to PYTHONPATH
+
 requires :
 pyopengl
 pygame
@@ -15,4 +17,9 @@ os
 sys
 numpy
 pyparallel (http://pyserial.sourceforge.net/pyparallel.html)
-pysql
+kivy garden
+    -kivy garden.roulette
+    -kivy.garden.datetimepicker
+    -kivy.garden.tickline
+    -kivy.garden.roulettescroll
+    -kivy.garden.graph

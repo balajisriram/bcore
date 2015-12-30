@@ -30,9 +30,9 @@ from kivy.graphics.vertex_instructions import (Rectangle,
                                                Line)
 from kivy.graphics.context_instructions import Color
 
-from BCore.Classes.Subject import Subject, Mouse, Rat, Virtual, Human
-from BCore.Classes.Subject import DefaultMouse, DefaultRat, DefaultVirtual
-from BCore.Classes.Subject import DefaultHuman
+from BCore.Classes.Subjects.Subject import Subject, Mouse, Rat, Virtual, Human
+from BCore.Classes.Subjects.Subject import DefaultMouse, DefaultRat
+from BCore.Classes.Subjects.Subject import DefaultVirtual, DefaultHuman
 #lint:enable
 
 
@@ -75,10 +75,10 @@ class SubjectIDInput(TextInput):
         for c in self.text:
             if c in (' ', '-'):
                 self.text = 'Only alphanumerics and underscores allowed'
-    
+
     def getText(self):
         return self.text
-        
+
 class ChoiceSpinner(Spinner):
     def getText(self):
         return self.text
@@ -122,7 +122,7 @@ class BaseScreen(Screen):
     def enableScroll(self):
         subjectList = self.ids['subject_listing']
         subjectList.bind(minimum_height=subjectList.setter('height'))
-        
+
     def updateSubjects(self, subjects):
         subjectList = self.ids['subject_listing']
         for subject in subjects:
@@ -152,7 +152,7 @@ class SubjectStatisticsScreen(Screen):
                 height=30,
                 size_hint_y=None)
             subjectList.add_widget(subjLbl)
-            
+
     def enableScroll(self):
         subjectList = self.ids['subject_button_listing']
         subjectList.bind(minimum_height=subjectList.setter('height'))
@@ -162,7 +162,7 @@ class StationStatisticsScreen(Screen):
     def updateScreen(self, data):
         self.updateStations(data.getStationNames())
         self.enableScroll()
-        
+
     def enableScroll(self):
         subjectList = self.ids['station_button_listing']
         subjectList.bind(minimum_height=subjectList.setter('height'))
