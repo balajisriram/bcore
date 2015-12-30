@@ -15,3 +15,4 @@ os
 sys
 numpy
 pyparallel (http://pyserial.sourceforge.net/pyparallel.html)
+pysql
