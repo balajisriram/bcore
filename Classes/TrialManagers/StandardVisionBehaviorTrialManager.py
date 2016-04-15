@@ -6,14 +6,14 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         STANDARDVISIONBEHAVIORTRIALMANAGER defines a standard vision
         behavior trial manager.
     """
-    name = ''
-    textDisplay = 'full'
     soundManager = []
     reinforcementManager = []
     requestPort = 'center'  # 'center' or 'all'
     frameDropCorner = 'off'
-    textureCaches = {}
-    stimSpec = []
+    textureCaches = []
+    phases = []
+
+    allowRepeats = True
 
     def __init__(tm, **kwargs):
         super(StandardVisionBehaviorTrialManager, tm).__init__(**kwargs)
@@ -21,14 +21,15 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tm.reinforcementManager = kwargs['reinforcementmanager']
         if 'requestPort'in kwargs:
             tm.requestPort = kwargs['requestPort']
+        if 'frameDropCorner' in kwargs:
+            tm.frameDropCorner = kwargs['frameDropCorner']
 
-    def doTrial(tm, ts, p, sub, tR, cR):
+    def doTrial(tm, **kwargs):
         # tm - trialManager
-        # ts - trainingStep
+        # st - station
         # p - protocol
         # sub - subject
         # tR - trialRecord (current)
-        # sR - sessionRecord
         # cR - compiledRecord
         tm._setupPhases()
         tm._validatePhases()

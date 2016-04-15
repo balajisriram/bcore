@@ -54,6 +54,7 @@ class Subject(object):
         # new consideration in  protocol and training step
         Graduate = False
         kwargs['graduate'] = Graduate
+        kwargs['subject'] = sub
 
         # figure out the protocol, and the trainingStep details
         tR.protocolName = sub.protocol.name

@@ -1,8 +1,9 @@
 class PhaseSpecs(object):
     """
         PHASESPEC acts as a kind of state machine. You start at the first phase
+        which specifies rules for moving through phases and keep going.
         stimType:
-            allowed: 'static', - explicitly call for flip
+            allowed:'static', - explicitly call for flip
                     'cache', - relevant texs are stored in stimManager cache
                     'loop', - given stims are looped
                     {'timedFrames', numFrames}, - present 'numFrames' frames
@@ -36,11 +37,30 @@ class PhaseSpecs(object):
     """
     stimType = 'loop'
     stimulus = {}
+    startFrame = 0
     transitions = {}
     framesUntilTransition = float('inf')
     autoTrigger = {}
+    scaleFactor = [1, 1]
     isFinalPhase = False
+    hz = 60
     phaseType = ''
     phaseName = ''
     isStim = False
     indexPulses = False
+
+    def __init__(spec,**kwargs):
+        spec.stimulus               = kwargs['stimulus']
+        spec.stimType               = kwargs['stimType']
+        spec.startFrame             = kwargs['startFrame']
+        spec.transitions            = kwargs['transitions']
+        spec.framesUntilTransition  = kwargs['framesUntilTransition']
+        spec.autoTrigger            = kwargs['autoTrigger']
+        spec.scaleFactor            = kwargs['scaleFactor']
+        spec.isFinalPhase           = kwargs['isFinalPhase']
+        spec.hz                     = kwargs['hz']
+        spec.phaseType              = kwargs['phaseType']
+        spec.phaseName              = kwargs['phaseName']
+        spec.isStim                 = kwargs['isStim']
+        spec.indexPulses            = kwargs['indexPulses']
+
