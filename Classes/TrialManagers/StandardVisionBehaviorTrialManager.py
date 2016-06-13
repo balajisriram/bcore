@@ -34,10 +34,15 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         # cR - compiledRecord
         tm._setupPhases()
         tm._validatePhases()
+        tm._stationOKForTrialManager(kwargs['station'])
+        tR = kwargs['trialRecords']
+
+        # important data common to all trials
+        tR.date = now();
+        tR
 
     def _setupPhases(tm):
-        raise NotImplementedError('Cannot run on an abstract class - call on\
-        a concrete example')
+        raise NotImplementedError('Cannot run on an abstract class - call on a concrete example')
 
     def compileRecords(tm):
         pass
@@ -81,6 +86,13 @@ class Gratings(StandardVisionBehaviorTrialManager):
             grating.Contrasts = kwargs['Contrasts']
         if 'Durations' in kwargs:
             grating.Durations = kwargs['Durations']
+
+    def CalcStim(gratings, **kwargs):
+        (ResInd, H, W, Hz) = gratings.ChooseResolution(kwargs)
+
+
+    def ChooseResolution(gratings, **kwargs):
+        
 
 
 class Gratings_GaussianEdge(Gratings):

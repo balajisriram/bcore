@@ -215,6 +215,9 @@ class StandardVisionBehaviorStation(Station):
             # just assign relevant details here
             tR.trialNumber = cR.trialNumber[-1] + 1
             tR.sessionNumber = st.session.sessionNumber
+            tR.stationID = st.stationID
+            tR.stationName = st.stationName
+            tR.numPortsInStation = st.numPorts()
             # doTrial - only tR will be returned as its type will be changed
             tR = st.session.subject.doTrial(station=st, trialRecord=tR,
                 compiledRecord=cR, quit=Quit)
