@@ -1,6 +1,8 @@
 from BCore.Classes.TrialManagers.TrialManager import TrialManager
 from math import pi as PI
 import numpy
+import time
+
 
 class StandardVisionBehaviorTrialManager(TrialManager):
     """
@@ -9,7 +11,7 @@ class StandardVisionBehaviorTrialManager(TrialManager):
     """
     SoundManager = []
     ReinforcementManager = []
-    RequestPort = 'center'  # 'center' or 'all'
+    RequestPort = 'center'  # 'center' or 'all' or 'none'
     FrameDropCorner = 'off'
     TextureCaches = []
     Phases = []
@@ -36,13 +38,18 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tm._validatePhases()
         tm._stationOKForTrialManager(kwargs['station'])
         tR = kwargs['trialRecords']
-
         # important data common to all trials
-        tR.date = now();
-        tR
+        tR.reinforcementManagerClass = tm.ReinforcementManager.__class__.__name__
+        st = kwargs['station']
+        tR.subjectsInStation = st.subjectsInStation()
+
+    def decache(tm):
+        tm.TextureCaches = []
+        return tm
 
     def _setupPhases(tm):
-        raise NotImplementedError('Cannot run on an abstract class - call on a concrete example')
+        raise NotImplementedError('Cannot run on an abstract class - call on \
+        a concrete example')
 
     def compileRecords(tm):
         pass
@@ -64,12 +71,11 @@ class Gratings(StandardVisionBehaviorTrialManager):
     """
 
     PixPerCycs = 128
-    Orientations = PI/4
+    Orientations = PI / 4
     DriftFrequencies = 0
-    Phases = numpy.linspace(start=-PI,stop=PI,num=8,endpoint=True)
+    Phases = numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)
     Contrasts = 1
     Durations = float('Inf')
-
 
     def __init__(grating, **kwargs):
         super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
@@ -90,9 +96,8 @@ class Gratings(StandardVisionBehaviorTrialManager):
     def CalcStim(gratings, **kwargs):
         (ResInd, H, W, Hz) = gratings.ChooseResolution(kwargs)
 
-
     def ChooseResolution(gratings, **kwargs):
-        
+        pass
 
 
 class Gratings_GaussianEdge(Gratings):
@@ -113,6 +118,7 @@ class Gratings_GaussianEdge(Gratings):
 
         if 'Radii'in kwargs:
             grating.Radii = kwargs['Radii']
+
 
 class Gratings_HardEdge(Gratings):
     """

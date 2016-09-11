@@ -8,7 +8,7 @@ class Protocol(object):
 
     def __init__(self, **kwargs):
         self.name = kwargs['name']
-        
+
     def ProtocolOKForSessionMgr(self, **kwargs):
         return False
 
@@ -55,7 +55,7 @@ class SimpleProtocol(Protocol):
 
     def numSteps(self):
         return len(self.trainingSteps)
-        
+
     def addStep(self, step):
         self.trainingSteps.append(step)
 

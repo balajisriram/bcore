@@ -48,19 +48,21 @@ class PhaseSpecs(object):
     phaseName = ''
     isStim = False
     indexPulses = False
+    soundPlayed = {}
 
-    def __init__(spec,**kwargs):
-        spec.stimulus               = kwargs['stimulus']
-        spec.stimType               = kwargs['stimType']
-        spec.startFrame             = kwargs['startFrame']
-        spec.transitions            = kwargs['transitions']
-        spec.framesUntilTransition  = kwargs['framesUntilTransition']
-        spec.autoTrigger            = kwargs['autoTrigger']
-        spec.scaleFactor            = kwargs['scaleFactor']
-        spec.isFinalPhase           = kwargs['isFinalPhase']
-        spec.hz                     = kwargs['hz']
-        spec.phaseType              = kwargs['phaseType']
-        spec.phaseName              = kwargs['phaseName']
-        spec.isStim                 = kwargs['isStim']
-        spec.indexPulses            = kwargs['indexPulses']
+    def __init__(spec, **kwargs):
+        spec.stimulus = kwargs['stimulus']
+        spec.stimType = kwargs['stimType']
+        spec.startFrame = kwargs['startFrame']
+        spec.transitions = kwargs['transitions']
+        spec.framesUntilTransition = kwargs['framesUntilTransition']
+        spec.autoTrigger = kwargs['autoTrigger']
+        spec.scaleFactor = kwargs['scaleFactor']
+        spec.isFinalPhase = kwargs['isFinalPhase']
+        spec.hz = kwargs['hz']
+        spec.phaseType = kwargs['phaseType']
+        spec.phaseName = kwargs['phaseName']
+        spec.isStim = kwargs['isStim']
+        spec.indexPulses = kwargs['indexPulses']
+        spec.soundPlayed = kwargs['soundPlayed']
 

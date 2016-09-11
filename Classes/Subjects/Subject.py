@@ -59,6 +59,7 @@ class Subject(object):
         # figure out the protocol, and the trainingStep details
         tR.protocolName = sub.protocol.name
         tR.currentStep = sub.protocol.currentStep
+        tR.currentStepName = sub.protocol.step().name
         tR.numSteps = sub.protocol.numSteps()
 
         currentStep = sub.protocol.step()

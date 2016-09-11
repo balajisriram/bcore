@@ -30,6 +30,10 @@ class TrainingStep(object):
         tR.schedulerName = ts.Scheduler.name
         tR.criterionName = ts.Criterion.name
 
+        tR.trialManagerClass = ts.TrialManager.__class__.__name__
+        tR.schedulerClass = ts.Scheduler.__class__.__name__
+        tR.criterionClass = ts.Criterion.__class__.__name__
+
         kwargs['trialManager'] = ts.TrialManager
 
         if ts.scheduleOK(**kwargs):
