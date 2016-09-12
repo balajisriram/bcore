@@ -1,5 +1,5 @@
 import socket
-import cPickle
+import pickle
 import time
 
 from BCore.Util.parallel.parallelppdev import Parallel

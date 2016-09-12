@@ -32,7 +32,7 @@ def getIPAddr(*args):
         Code from : http://code.activestate.com/recipes/439094/
     """
     if not args:
-        ifname = 'eth0'
+        ifname = 'lo0'
     else:
         ifname = args[0]
 
@@ -40,8 +40,8 @@ def getIPAddr(*args):
     try:
         ip = socket.inet_ntoa(fcntl.ioctl(
             s.fileno(),
-            0x8915,  # SIOCGIFADDR
-            struct.pack('256s', ifname[:15])
+            0x8927,  # SIOCGIFADDR
+            struct.pack('256s', bytes(ifname[:15], 'utf-8'))
             )[20:24])
     except IOError:
         ip = ''

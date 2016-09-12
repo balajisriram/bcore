@@ -185,7 +185,7 @@ class AddSubjectScreen(Screen):
                 kw_value[key] = value()
             else:
                 kw_value[key] = value
-            print key, kw_value[key]
+            print (key, kw_value[key])
         app.serverData.addSubject(example.createSubject(**kw_value))
 
     def presentSpeciesSpecificWidgets(self, layout, present, details,
@@ -283,11 +283,11 @@ class AddSubjectScreen(Screen):
             OtherFields.add_widget(anonLayout)
             kw_function['anonymize'] = anonInput.active
 
-        print '[INFO]\t added species specific widgets'
+        print ('[INFO]\t added species specific widgets')
         largeBlankSpace = BoxLayout(orientation='horizontal', height=80,
                 size_hint_y=None)
         OtherFields.add_widget(largeBlankSpace)
-        print '[INFO]\t added blank space'
+        print ('[INFO]\t added blank space')
         addSubjectLayout = BoxLayout(orientation='horizontal', height=80,
                 size_hint_y=None)
         addSubjectButton = Button(text='Add Subject')
@@ -296,7 +296,7 @@ class AddSubjectScreen(Screen):
         addSubjectButton.bind(on_press=extractDataAndAddSubject)
         addSubjectLayout.add_widget(addSubjectButton)
         OtherFields.add_widget(addSubjectLayout)
-        print '[INFO]\t added add subject button'
+        print ('[INFO]\t added add subject button')
         layout.add_widget(OtherFields)
 
     def updateSpeciesSpecificChoice(self, species, layout, app):
@@ -363,24 +363,24 @@ class AddSubjectScreen(Screen):
 class BServerWidget(BoxLayout):
 
     def changeToSubjectStatisticsScreen(self, data):
-        print 'changing to subject statistics'
+        print ('changing to subject statistics')
         screenMgr = self.ids['screen_manager']
         self.ids['subject_statistics'].updateScreen(data)
         screenMgr.current = 'SubjectStatistics'
 
     def changeToStationStatisticsScreen(self, data):
-        print 'changing to station statistics'
+        print ('changing to station statistics')
         screenMgr = self.ids['screen_manager']
         self.ids['station_statistics'].updateScreen(data)
         screenMgr.current = 'StationStatistics'
 
     def changeToAddSubjectScreen(self, data):
-        print 'changing to add subject'
+        print ('changing to add subject')
         screenMgr = self.ids['screen_manager']
         screenMgr.current = 'AddSubject'
 
     def changeToBaseScreen(self, data):
-        print 'changing to base screen'
+        print ('changing to base screen')
         screenMgr = self.ids['screen_manager']
         self.ids['base_screen'].updateScreen(data)
         screenMgr.current = 'BaseScreen'

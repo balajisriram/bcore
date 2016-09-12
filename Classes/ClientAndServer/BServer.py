@@ -1,6 +1,6 @@
 import os
 import time
-import cPickle as pickle
+import pickle
 import shutil
 import copy
 

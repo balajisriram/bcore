@@ -34,22 +34,19 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         # sub - subject
         # tR - trialRecord (current)
         # cR - compiledRecord
-        tm._setupPhases()
+        tm._setupPhases() # should call calcStim
         tm._validatePhases()
         tm._stationOKForTrialManager(kwargs['station'])
         tR = kwargs['trialRecords']
         # important data common to all trials
-        tR.reinforcementManagerClass = tm.ReinforcementManager.__class__.__name__
-        st = kwargs['station']
-        tR.subjectsInStation = st.subjectsInStation()
 
+        
     def decache(tm):
         tm.TextureCaches = []
         return tm
 
     def _setupPhases(tm):
-        raise NotImplementedError('Cannot run on an abstract class - call on \
-        a concrete example')
+        raise NotImplementedError('Cannot run on an abstract class - call on a concrete example')
 
     def compileRecords(tm):
         pass
@@ -98,6 +95,15 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
     def ChooseResolution(gratings, **kwargs):
         pass
+
+    def _setupPhases(gratings, **kwargs):
+        """
+        Gratings:_setupPhases is a simple trialManager. It is for autopilot
+        It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
+        Contrasts, Durations and shows them one at a time. There is only one
+        phase. There is no "correct" and no responses are required/recorded
+        """
+
 
 
 class Gratings_GaussianEdge(Gratings):

@@ -34,6 +34,7 @@ class VisionBehaviorTrialRecord(TrialRecord):
     sessionNumber = None
     stopTime = None
     resolution = None
+    subjectsInStation = None
 
     # set in subject
     protocolName = ''
@@ -51,6 +52,7 @@ class VisionBehaviorTrialRecord(TrialRecord):
     step = ''
     responseTime = 0
     phaseRecords = []
+
 
     # set in stimManager
     stimRecords = []

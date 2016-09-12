@@ -219,6 +219,7 @@ class StandardVisionBehaviorStation(Station):
             tR.stationName = st.stationName
             tR.numPortsInStation = st.numPorts()
             tR.startTime = time.localtime()
+            tR.subjectsInStation = st.subjectsInStation()
             # doTrial - only tR will be returned as its type will be changed
             tR = st.session.subject.doTrial(station=st, trialRecord=tR,
                 compiledRecord=cR, quit=Quit)
