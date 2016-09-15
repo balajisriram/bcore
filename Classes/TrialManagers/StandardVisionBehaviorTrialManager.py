@@ -1,7 +1,10 @@
 from BCore.Classes.TrialManagers.TrialManager import TrialManager
+from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpecs
 from math import pi as PI
 import numpy
 import time
+
+doNothing = []
 
 
 class StandardVisionBehaviorTrialManager(TrialManager):
@@ -34,19 +37,20 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         # sub - subject
         # tR - trialRecord (current)
         # cR - compiledRecord
-        tm._setupPhases() # should call calcStim
+        # tR = kwargs['trialRecords']  # need to send this to _setupPhases
+        tm._setupPhases(kwargs)  # should call calcStim
         tm._validatePhases()
         tm._stationOKForTrialManager(kwargs['station'])
-        tR = kwargs['trialRecords']
+
         # important data common to all trials
 
-        
     def decache(tm):
         tm.TextureCaches = []
         return tm
 
     def _setupPhases(tm):
-        raise NotImplementedError('Cannot run on an abstract class - call on a concrete example')
+        raise NotImplementedError('Cannot run on an abstract class - call on a',
+            ' concrete example')
 
     def compileRecords(tm):
         pass
@@ -91,7 +95,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
             grating.Durations = kwargs['Durations']
 
     def CalcStim(gratings, **kwargs):
-        (ResInd, H, W, Hz) = gratings.ChooseResolution(kwargs)
+        (H, W, Hz) = gratings.ChooseResolution(kwargs)
 
     def ChooseResolution(gratings, **kwargs):
         pass
@@ -103,7 +107,23 @@ class Gratings(StandardVisionBehaviorTrialManager):
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
         """
+        (stimulus, stimType, resolution, hz, bitDepth, scaleFactor,
+            framesTotal) = gratings.calcStim(kwargs)
+        # Just display stim
 
+        gratings.Phases[0] = PhaseSpecs(
+            stimulus=stimulus,
+            stimType=stimType,
+            startFrame=0,
+            transitions={doNothing: 1},
+            framesUntilTransition=framesTotal,
+            autoTrigger=False,
+            scaleFactor=scaleFactor,
+            phaseType='stimulus',
+            phaseName='stim',
+            isStim=True,
+            indexPulses=False,
+            soundPlayed=('trialStartSound', 50))
 
 
 class Gratings_GaussianEdge(Gratings):

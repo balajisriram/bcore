@@ -230,9 +230,28 @@ class StandardVisionBehaviorStation(Station):
             cR.append(tR)
 
 
+class SimpleVisionBehaviorStation(object):
+
+    def __init__(self):
+        print('Creating SimpleVisionBehaviorStation')
+
+    def testGL(st):
+        pygame.init()
+        size = width, height = 600, 400
+        screen = pygame.display.set_mode(size)
+        splashTex = pygame.image.load(os.path.join(
+            getBaseDirectory(), 'BCore', 'Util', 'Resources', 'splash.png'))
+        screen.blit(splashTex, [0, 0])
+        pygame.display.flip()
+        time.sleep(1)
+
 if __name__ == '__main__':
+    import sys
+    print((sys.version))
     # Create a new StandardVisionBehaviorStation and test it
-    st = StandardVisionBehaviorStation(stationID=0, display=None, soundOn=False,
-                                        parallelPort=None)
+    #st = StandardVisionBehaviorStation(stationID=0,
+    #    display=None, soundOn=False, parallelPort=None)
+    st = SimpleVisionBehaviorStation()
     print(('Testing the station\'s graphics'))
     st.testGL()
+    time.sleep(2)
