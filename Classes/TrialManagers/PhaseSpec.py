@@ -65,4 +65,3 @@ class PhaseSpecs(object):
         spec.isStim = kwargs['isStim']
         spec.indexPulses = kwargs['indexPulses']
         spec.soundPlayed = kwargs['soundPlayed']
-
