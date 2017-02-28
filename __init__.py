@@ -72,10 +72,10 @@ def getTimeStamp(*arg):
 
 # def gitpull(**kwargs):
 #     """
-#         Use function only if you know what you are doing. Pulling changes while
-#         the function is running will randomly cause the earth to flip magnetic
-#         poles
-# 
+#         Use function only if you know what you are doing. Pulling changes
+#         while the function is running will randomly cause the earth to flip
+#         magnetic poles
+#
 #         But seriously, in cases where there has not been any git checkouts of
 #         a different branch. For simple git pulls, if the pyc timestamp is
 #         different, python will do the right thing

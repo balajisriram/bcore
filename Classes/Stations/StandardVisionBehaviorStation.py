@@ -102,6 +102,10 @@ class StandardVisionBehaviorStation(Station):
         st.splash()
         st.connectToBServer()
 
+    def initializeDisplay(st):
+        pygame.display.init()
+        pygame.display.list_modes(depth=0, flags=pygame.FULLSCREEN)
+
     def connectToBServer(st):
         """
             This is a somewhat complicated handshake. Initially, the

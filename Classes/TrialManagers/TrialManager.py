@@ -14,7 +14,7 @@ class TrialManager(object):
             tm.name = kwargs['name']
         if 'textDisplay' in kwargs:
             tm.textDisplay = kwargs['textDisplay']
-        assert tm.textDisplay in ['full','light','off'],\
+        assert tm.textDisplay in ['full', 'light', 'off'],\
             "textDisplay not one of ['full','light','off']"
 
     def doTrial(tm, **kwargs):

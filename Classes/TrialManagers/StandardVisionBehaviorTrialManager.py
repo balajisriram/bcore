@@ -1,8 +1,8 @@
 from BCore.Classes.TrialManagers.TrialManager import TrialManager
 from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpecs
 from math import pi as PI
+from verlib import NormalizedVersion as Ver
 import numpy
-import time
 
 doNothing = []
 
@@ -18,6 +18,8 @@ class StandardVisionBehaviorTrialManager(TrialManager):
     FrameDropCorner = 'off'
     TextureCaches = []
     Phases = []
+
+    ver = Ver('0.0.1')
 
     allowRepeats = True
 
@@ -43,6 +45,10 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tm._stationOKForTrialManager(kwargs['station'])
 
         # important data common to all trials
+        tR = kwargs['trialRecords']
+        tR.reinforcementManagerName = tm.ReinforcementManager.name
+        tR.reinforcementManagerClass = \
+            tm.ReinforcementManager.__class__.__name__
 
     def decache(tm):
         tm.TextureCaches = []
@@ -77,6 +83,8 @@ class Gratings(StandardVisionBehaviorTrialManager):
     Phases = numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)
     Contrasts = 1
     Durations = float('Inf')
+
+    ver = Ver('0.0.1')
 
     def __init__(grating, **kwargs):
         super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
@@ -139,6 +147,8 @@ class Gratings_GaussianEdge(Gratings):
     RadiusType = "GaussianEdge"
     Scale = 'ScaleToHeight'
 
+    ver = Ver('0.0.1')
+
     def __init__(grating, **kwargs):
         super(Gratings, grating).__init__(**kwargs)
 
@@ -157,6 +167,7 @@ class Gratings_HardEdge(Gratings):
 
     Radii = []
     RadiusType = "HardEdge"
+    ver = Ver('0.0.1')
 
     def __init__(grating, **kwargs):
         super(Gratings, grating).__init__(**kwargs)

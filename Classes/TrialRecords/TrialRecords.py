@@ -53,7 +53,6 @@ class VisionBehaviorTrialRecord(TrialRecord):
     responseTime = 0
     phaseRecords = []
 
-
     # set in stimManager
     stimRecords = []
 
