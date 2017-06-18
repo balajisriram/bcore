@@ -1,10 +1,13 @@
-b-core
-======
+# BCore
 
-Core Behavior setup for training rodents
+## Introduction
+BCore is a Behavior training library built originally for training rodents but is compatible with training any subject. It was built in MATLab originally but is not compatible with python.
 
-add BCore to modules and add modules to PYTHONPATH
+## Starting with BCore
+ * add BCore to modules and add modules to PYTHONPATH
 
+## Package requirements
+For specific requirements please look at package.requirements
 requires :
 pyopengl
 pygame
