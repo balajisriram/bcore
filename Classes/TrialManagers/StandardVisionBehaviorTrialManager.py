@@ -103,10 +103,17 @@ class Gratings(StandardVisionBehaviorTrialManager):
             grating.Durations = kwargs['Durations']
 
     def CalcStim(gratings, **kwargs):
-        (H, W, Hz) = gratings.ChooseResolution(kwargs)
+        tR = kwargs['trialRecord'] # for saving trial specific info
 
+        (H, W, Hz) = gratings.ChooseResolution(kwargs)
+        tR.Resolution = (H,W,Hz)
+        
+        
     def ChooseResolution(gratings, **kwargs):
-        pass
+        H = 1080
+        W = 1920
+        Hz = 60
+        return (H,W,Hz)
 
     def _setupPhases(gratings, **kwargs):
         """
@@ -178,7 +185,10 @@ class AFCGratings(Gratings):
         (H, W, Hz) = gratings.ChooseResolution(kwargs)
 
     def ChooseResolution(gratings, **kwargs):
-        pass
+        H = 1080
+        W = 1920
+        Hz = 60
+        return (H,W,Hz)
 
     def _setupPhases(gratings, **kwargs):
         """
