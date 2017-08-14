@@ -1,8 +1,5 @@
 from .TrialManager import TrialManager
-from .PhaseSpec import PhaseSpecs
-from math import pi as PI
 from verlib import NormalizedVersion as Ver
-import numpy
 
 doNothing = []
 

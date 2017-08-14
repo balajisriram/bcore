@@ -1,4 +1,6 @@
 from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
+from .PhaseSpec import PhaseSpecs
+from verlib import NormalizedVersion as Ver
 
 
 class Gratings(StandardVisionBehaviorTrialManager):
@@ -64,7 +66,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
         (stimulus, stimType, resolution, hz, bitDepth, scaleFactor,
             framesTotal) = gratings.calcStim(kwargs)
         # Just display stim
-
+        doNothing = []
         gratings.Phases[0] = PhaseSpecs(
             stimulus=stimulus,
             stimType=stimType,
@@ -82,7 +84,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
             stimulus=0.5,
             stimType=('timedFrames',10),
             startFrame=0,
-            transitions={doNothing:1},
+            transitions={doNothing:2},
             framesUntilTransition=10,
             autoTrigger=False,
             scaleFactor=scaleFactor,
@@ -91,6 +93,9 @@ class Gratings(StandardVisionBehaviorTrialManager):
             isStim=False,
             indexPulses =False,
             soundPlayed=('trialEndSound', 50))
+
+    def _simulate(gratings, **kwargs):
+        pass
 
 
 class AFCGratings(Gratings):

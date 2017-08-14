@@ -1,14 +1,12 @@
 import time
 import os
+import psychopy
 
-import pygame
-
-from BCore.Classes.Stations.Station import Station
-from BCore.Classes.Hardware.Ports import TCPServerConnection
-from BCore.Classes.Hardware.Ports import BehaviorClientConnection
-from BCore import getBaseDirectory
-from BCore.Classes.TrialManagers.TrialManager import \
-    VisionBehaviorSessionRecord, VisionBehaviorTrialRecord
+from .Station import Station
+from ..Hardware.Ports import TCPServerConnection
+from ..Hardware.Ports import BehaviorClientConnection
+from ... import getBaseDirectory
+from ..TrialRecords.TrialRecords import VisionBehaviorSessionRecord, VisionBehaviorTrialRecord
 
 PPORT_LO = 0
 PPORT_HI = 1
