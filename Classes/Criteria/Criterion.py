@@ -47,21 +47,6 @@ class PerformanceCriterion(Criterion):
         return Graduate
 
 
-class PerformanceCriterion(Criterion):
-
-    def __init__(self, **kwargs):
-        super(PerformanceCriterion, self).__init__(**kwargs)
-        self.pctCorrect = kwargs['pctCorrect']
-        self.numTrials = kwargs['numTrials']
-
-    def graduate(self, **kwargs):
-        # find the latest number of
-        if self.numTrialsMode == 'consecutive':
-            pass
-        Graduate = False
-        return Graduate
-
-
 class RateCriterion(Criterion):
 
     def __init__(self, **kwargs):
