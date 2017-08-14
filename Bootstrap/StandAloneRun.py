@@ -13,12 +13,19 @@ if __name__ == '__main__':
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time
     args = iter(sys.argv)
-    for arg in args:
-        if arg == 'SubjectID':
-            SARKWArgs['SubjectID'] = next(args)
-        elif arg == 'BServerPath':
-            SARKWArgs['BServerPath'] = next(args)
-        elif arg == 'Protocol':
-            SARKWArgs['Protocol'] = next(args)
+    added = False
 
-        print ((arg, '::', SARKWArgs[arg]))
+    for arg in args:
+        if (arg == 'SubjectID') or (arg == '--subject') or (arg == '-s'):
+            SARKWArgs['SubjectID'] = next(args)
+            added = True
+        elif (arg == 'BServerPath') or (arg == '--server-path'):
+            SARKWArgs['BServerPath'] = next(args)
+            added = True
+        elif (arg == 'Protocol') or (arg == '--protocol') or (arg == '-p'):
+            SARKWArgs['Protocol'] = next(args)
+            added = True
+
+        if added:
+            print (SARKWArgs)
+            added = False
