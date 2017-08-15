@@ -5,8 +5,6 @@ import time
 import fcntl
 import struct
 
-# import git
-
 
 def getBaseDirectory():
     base = os.path.split(os.path.abspath(__file__))
@@ -68,21 +66,3 @@ def getTimeStamp(*arg):
     else:
         milliseconds = '%03d' % int((t - int(t)) * 1000)
         return time.strftime('D%m%d%YT%H%M%SM', localtime) + milliseconds
-
-
-# def gitpull(**kwargs):
-#     """
-#         Use function only if you know what you are doing. Pulling changes
-#         while the function is running will randomly cause the earth to flip
-#         magnetic poles
-#
-#         But seriously, in cases where there has not been any git checkouts of
-#         a different branch. For simple git pulls, if the pyc timestamp is
-#         different, python will do the right thing
-#     """
-#     if kwargs:
-#         gitdir = kwargs['gitdir']
-#     else:
-#         gitdir = os.path.join(getBaseDirectory(), 'BCore')
-#     g = git.cmd.Git(gitdir)
-#     g.pull()
