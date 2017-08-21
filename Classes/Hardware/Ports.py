@@ -2,7 +2,7 @@ import socket
 import pickle
 import time
 
-from BCore.Util.parallel.parallelppdev import Parallel
+from ..Util.parallel.parallelppdev import Parallel
 
 
 class StandardParallelPort(Parallel):
@@ -51,7 +51,7 @@ class StandardParallelPort(Parallel):
     def __init__(pPort, **kwargs):
         super(StandardParallelPort, pPort).__init__(port=kwargs['pPortAddr'])
 
-    def writePins(pPort, pins, val):
+    def write_pins(pPort, pins, val):
         """
             STANDARDPARALLELPORT.WRITEPINS(PPORT,PINS,VAL)
             call writePin sequentially
@@ -59,7 +59,7 @@ class StandardParallelPort(Parallel):
         for pin in pins:
             pPort.writePin(pin, val)
 
-    def readPins(pPort, pins):
+    def read_pins(pPort, pins):
         """
             STANDARDPARALLELPORT.READPINS(PPORT,PINS)
             call readPin sequentially
@@ -69,7 +69,7 @@ class StandardParallelPort(Parallel):
             retVal.append(pPort.readPin(pin))
         return retVal
 
-    def writePin(pPort, pin, state):
+    def write_pin(pPort, pin, state):
         """
             STANDARDPARALLELPORT.WRITEPIN(PIN,VAL)
             Get the data for each pin and only change the data for the pins
@@ -81,11 +81,11 @@ class StandardParallelPort(Parallel):
         else:
             pPort.setData(pPort.PPRDATA() & (255 ^ 2 ** (pin - 2)))
 
-    def readData(pPort):
+    def read_data(pPort):
         """Return the value currently set on the data pins (2-9)"""
         return (pPort.PPRDATA())
 
-    def readPin(pPort, pin):
+    def read_pin(pPort, pin):
         """
             STANDARDPARALLELPORT.READPIN(PIN)
             only certain pins are readable
@@ -141,7 +141,7 @@ class TCPConnection(object):
         conn.connection.close()
         print(('done.'))
 
-    def recvData(conn):
+    def recv_data(conn):
         """
             Enforces a max conn.DEFAULT_BUFFER_SIZE message from the client.
             Assumes that the data sent is cPickled at the client end.
@@ -152,7 +152,7 @@ class TCPConnection(object):
                 break
         return cPickle.loads(BITSTR)
 
-    def sendData(conn, DATA):
+    def send_data(conn, DATA):
         """
             Pickles and sends the data through the socket connection.
         """
