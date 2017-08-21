@@ -1,6 +1,8 @@
 import time
 import os
-import psychopy
+import glfw
+import PyOpenGl.gl as gl
+import PyOpenGl.glu as glu
 
 from .Station import Station
 from ..Hardware.Ports import TCPServerConnection
@@ -85,15 +87,13 @@ class StandardVisionBehaviorStation(Station):
             pPort['leftPort'] = 13
             pPort['portPins'] = (12, 10, 13)
             pPort['indexPin'] = 8
-            pPort['frampPin'] = 9
+            pPort['framePin'] = 9
             pPort['LED0'] = 5
             pPort['LED1'] = 7
             st.parallelPort = pPort
-            return super(
-                StandardVisionBehaviorStation, st).initializeParallelPort()
+            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
         else:
-            return super(
-                StandardVisionBehaviorStation, st).initializeParallelPort()
+            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
 
     def run(st):
         # currently just show a splash
@@ -188,7 +188,7 @@ class StandardVisionBehaviorStation(Station):
         """
             Connect to BServer and request compiledRecords
         """
-        pass
+        return None
 
     def decache(st):
         """
