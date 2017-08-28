@@ -4,7 +4,6 @@ import time
 
 from ..Util.parallel.parallelppdev import Parallel
 
-
 class StandardParallelPort(Parallel):
     """
         STANDARD0PARALLELPORT is a wrapper around parallel.Parallel and is

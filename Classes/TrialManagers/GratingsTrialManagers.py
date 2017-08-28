@@ -1,6 +1,8 @@
 from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
 from .PhaseSpec import PhaseSpecs
-from verlib import NormalizedVersion as Ver
+
+__version__ = '0.0.1'
+__author__ = 'Balaji Sriram'
 
 
 class Gratings(StandardVisionBehaviorTrialManager):
@@ -25,31 +27,23 @@ class Gratings(StandardVisionBehaviorTrialManager):
     Contrasts = 1
     Durations = float('Inf')
 
-    ver = Ver('0.0.1')
-
-    def __init__(grating, **kwargs):
+    def __init__(grating, PixPerCycs=128, Orientations=PI/4, DriftFrequencies=0, Phases=0, Contrasts=1, Durations=1, **kwargs):
         super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
 
-        if 'PixPerCycs'in kwargs:
-            grating.PixPerCycs = kwargs['PixPerCycs']
-        if 'Orientations' in kwargs:
-            grating.Orientations = kwargs['Orientations']
-        if 'DriftFrequencies'in kwargs:
-            grating.DriftFrequencies = kwargs['DriftFrequencies']
-        if 'Phases' in kwargs:
-            grating.Phases = kwargs['Phases']
-        if 'Contrasts'in kwargs:
-            grating.Contrasts = kwargs['Contrasts']
-        if 'Durations' in kwargs:
-            grating.Durations = kwargs['Durations']
+        grating.PixPerCycs=PixPerCycs
+        grating.Orientations=Orientations
+        grating.DriftFrequencies=DriftFrequencies
+        grating.Phases=Phases
+        grating.Contrasts=Contrasts
+        grating.Durations=Durations
 
     def CalcStim(gratings, **kwargs):
         tR = kwargs['trialRecord'] # for saving trial specific info
 
         (H, W, Hz) = gratings.ChooseResolution(kwargs)
         tR.Resolution = (H,W,Hz)
-        
-        
+
+
     def ChooseResolution(gratings, **kwargs):
         H = 1080
         W = 1920

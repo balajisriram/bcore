@@ -7,8 +7,8 @@ import PyOpenGl.glu as glu
 from .Station import Station
 from ..Hardware.Ports import TCPServerConnection
 from ..Hardware.Ports import BehaviorClientConnection
+from ..Hardware.Displays import StandardDisplay
 from ... import getBaseDirectory
-from ..TrialRecords.TrialRecords import VisionBehaviorSessionRecord, VisionBehaviorTrialRecord
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -62,9 +62,9 @@ class StandardVisionBehaviorStation(Station):
     BServerConnection = []
     session = []
 
-    def __init__(st, **kwargs):
+    def __init__(st, display=StandardDisplay, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(**kwargs)
-        st.display = kwargs['display']
+        st.display = display
         st.soundOn = kwargs['soundOn']
         st.parallelPort = kwargs['parallelPort']
         pPort = st.initializeParallelPort()
