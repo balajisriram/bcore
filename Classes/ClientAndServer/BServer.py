@@ -65,13 +65,15 @@ class BServer(object):
         else:
             raise NotImplementedError()
 
-    def load(server):
+    @staticmethod
+    def load():
         """
             Alias for server.loadServer
         """
         return server.load_server()
 
-    def load_server(server):
+    @staticmethod
+    def load_server():
         # use standard location for path,
         # make sure to never modify server here:
         dbLoc = os.path.join(
