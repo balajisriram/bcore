@@ -1,7 +1,9 @@
-from BCore.Classes.ClientAndServer.BServer import BServer
+import zmq, time, os
+
+from verlib import NormalizedVersion as Ver
 
 
-class BServerLocal(BServer):
+class BServerLocal(object):
     """
         BSERVERLOCAL  is a BServer which defaults to using *localhost*,
         which subjects are allowed in which station and data storage locations.
@@ -14,21 +16,42 @@ class BServerLocal(BServer):
             revisionControl     : dictionary with access to details about
                                 the repository
     """
+    version = Ver('0.0.1')  # Nov 7, 2017
+    serverID = ''
+    serverDataPath = ''
+    serverIP = ''
+    creationTime = 0
+    stations = []
+    subjects = []
+    assignments = {}
+    StationConnections = {}
 
-    def __init__(server, **kwargs):
-        super(BServerLocal, server).__init__(**kwargs)
-        # this is the only substantial change in BServerLocal
-        server.serverIP = 'localhost'
+    def __init__(server):
+        server.serverID = 0
+        server.serverDataPath = os.path.join(BCore.get_base_directory(),'BCoreData','ServerData')
+        server.serverIP = 'http://localhost'
+        server.creationTime = time.time()
 
 
-class DefaultBServerLocal(BServerLocal):
+def _setup_paths(force_delete=False):
+    if force_delete:
+        import shutils
+        shutils.rmtree(os.path.join(BCore.get_base_directory,'BCoreData'))
 
-    def __init__(self):
-        kw_values = {
-            'serverID': 0,
-            'serverName': 'DefaultLocalServer'
-            }
-        super(DefaultBServerLocal, self).__init__(**kw_values)
+    if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData')):
+        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData'))
+
+    if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData','ServerData')):
+        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData'))
+
+    if not os.path.exist(os.path.join(BCore.get_base_directory,'BcoreData','ServerData','Backups')):
+        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData','Backups'))
+
+
+def initialize_server(force_delete=False):
+    # setup the paths
+    _setup_paths(force_delete)
+    # setup the sql server
 
 
 if __name__ == "__main__":

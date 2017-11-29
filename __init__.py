@@ -6,16 +6,16 @@ import fcntl
 import struct
 
 
-def getBaseDirectory():
+def get_base_directory():
     base = os.path.split(os.path.abspath(__file__))
     base = os.path.split(base[0])
     return base[0]
 
 
-def addPaths():
+def add_paths():
     # make a list of all the directories in the os.walk of the base
     # directory and then remove the .git or .svn components
-    baseDirTree = [
+    base_dir_tree = [
                   dirs[0] for dirs in
                   os.walk(os.path.join(getBaseDirectory(), 'BCore'))
                   if ('.git' or '.svn') not in dirs[0]
@@ -25,7 +25,7 @@ def addPaths():
     print('INFO:: added module fodlers to path')
 
 
-def getIPAddr(*args):
+def get_ip_addr(*args):
     """
         Code from : http://code.activestate.com/recipes/439094/
     """
@@ -46,7 +46,7 @@ def getIPAddr(*args):
     return ip
 
 
-def getTimeStamp(*arg):
+def get_time_stamp(*arg):
     if len(arg) > 1:
         raise ValueError('only a single timestamp in a single run')
     elif len(arg) == 0:

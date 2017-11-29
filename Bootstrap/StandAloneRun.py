@@ -1,6 +1,8 @@
 #! /usr/bin/python
 import sys
+import zmq
 
+SERVER_PORT = 12345
 
 if __name__ == '__main__':
     # set defaults for all the things that need to be sent to the bootstrap
@@ -29,3 +31,11 @@ if __name__ == '__main__':
         if added:
             print (SARKWArgs)
             added = False
+
+    # look for local server and collect information about the Subject being run
+
+    # find protocol and and training step num of subject being run.
+
+    # run doTrials on subject
+
+    # clean up at end of trials

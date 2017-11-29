@@ -69,9 +69,9 @@ class BServer(object):
         """
             Alias for server.loadServer
         """
-        return server.loadServer()
+        return server.load_server()
 
-    def loadServer(server):
+    def load_server(server):
         # use standard location for path,
         # make sure to never modify server here:
         dbLoc = os.path.join(
@@ -90,9 +90,9 @@ class BServer(object):
         """
             Alias for server.saveServer
         """
-        server.saveServer()
+        server.save_server()
 
-    def saveServer(server):
+    def save_server(server):
         srcDir = os.path.join(
             getBaseDirectory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
@@ -122,16 +122,16 @@ class BServer(object):
         pickle.dump(cleanedBServer, f)
         f.close()
 
-    def loadBackup(server):
+    def load_backup(server):
         """
             Use this only if you specifically require the deletion of current
             db.BServer and replacement with an older backup. Only the latest
             back up is used.
         """
         desDir = os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData')
+            get_base_directory(), 'BCoreData', 'ServerData')
         srcDir = os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
         # delete the original database
         os.remove(os.path.join(desDir, 'db.BServer'))
         # find the latest file in the backupDBs
@@ -143,7 +143,7 @@ class BServer(object):
         # delete the newest backup
         os.remove(os.path.join(srcDir, newestBkup))
 
-    def _setupPaths(server):
+    def _setup_paths(server):
         # create 'BServerData'
         os.mkdir(os.path.join(getBaseDirectory(), 'BCoreData'))
         # create 'ServerData','Stations','PermanentTrialRecordStore' in
@@ -163,7 +163,7 @@ class BServer(object):
         os.mkdir(os.path.join(
             getBaseDirectory(), 'BCoreData', 'TrialData', 'Compiled'))
 
-    def addStation(server, newStation):
+    def add_station(server, newStation):
         if (newStation.stationID in server.getStationIDs() or
             newStation.stationName in server.getStationNames()):
             raise ValueError('Station IDs and Station Names have to be unique')
@@ -171,13 +171,13 @@ class BServer(object):
         # now enable station specific data
         server.save()
 
-    def addSubject(server, newSubject):
+    def add_subject(server, newSubject):
         if newSubject in server.subjects:
             raise ValueError('Cannot add replica of subjects to BServer')
         server.subjects.append(newSubject)
         server.save()
 
-    def changeAssignment(server, subject, newAssignment):
+    def change_assignment(server, subject, newAssignment):
         if subject not in server.subjects:
             raise ValueError('Cannot change assignment on a subject \
             that is not on Bserver')
@@ -186,19 +186,19 @@ class BServer(object):
         server.assignment[subject.subjectID] = newAssignment
         server.save()
 
-    def getStationIDs(server):
+    def get_station_ids(server):
         stationIDs = []
         for station in server.stations:
             stationIDs.append(station.stationID)
         return stationIDs
 
-    def getStationNames(server):
+    def get_station_names(server):
         stationNames = []
         for station in server.stations:
             stationNames.append(station.stationName)
         return stationNames
 
-    def getSubjectIDs(server):
+    def get_subject_ids(server):
         subjectIDs = []
         for subject in server.subjects:
             subjectIDs.append(subject.subjectID)

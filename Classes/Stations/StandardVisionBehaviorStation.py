@@ -1,8 +1,6 @@
 import time
 import os
-import glfw
-import PyOpenGl.gl as gl
-import PyOpenGl.glu as glu
+import psychopy
 
 from .Station import Station
 from ..Hardware.Ports import TCPServerConnection
@@ -62,10 +60,10 @@ class StandardVisionBehaviorStation(Station):
     BServerConnection = []
     session = []
 
-    def __init__(st, display=StandardDisplay, **kwargs):
+    def __init__(st, display=StandardDisplay, soundOn=False, **kwargs):
         super(StandardVisionBehaviorStation, st).__init__(**kwargs)
         st.display = display
-        st.soundOn = kwargs['soundOn']
+        st.soundOn = soundOn
         st.parallelPort = kwargs['parallelPort']
         pPort = st.initializeParallelPort()
         if pPort:
