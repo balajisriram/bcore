@@ -4,8 +4,7 @@ from uuid import getnode
 from verlib import NormalizedVersion as Ver
 
 
-from BCore import getBaseDirectory, getIPAddr
-from BCore.Classes.Hardware.Ports import StandardParallelPort
+from ... import get_base_directory, get_ip_addr
 
 
 class Station(object):
@@ -19,42 +18,35 @@ class Station(object):
                           card. string identifier
     """
     version = Ver('0.0.1')
-    stationID = 0
-    stationName = ''
-    stationPath = ''
-    stationLocation = []
-    MACAddress = ''
-    IPAddr = ''
+    station_id = 0
+    station_name = ''
+    station_path = ''
+    station_location = []
+    mac_address = ''
+    ip_address = ''
     port = 0
 
-    def __init__(st, **kwargs):
+    def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
-        st.stationID = kwargs['stationID']
-        st.stationName = kwargs['stationName']
-        st.stationPath = os.path.join(
-            getBaseDirectory(), 'BStationData', 'StationData',
-            str(st.stationID))
-        st.stationLocation = kwargs['stationLocation']
+        self.station_id = station_id
+        self.station_name = station_name
+        self.station_path = os.path.join(
+            get_base_directory(), 'BStationData', 'StationData',
+            str(self.station_id))
+        self.station_location = station_location
 
-        st._setupPaths()
-        st.MACAddress = getnode()
-        st.IPAddr = getIPAddr()
-        st.port = 5005  # standard for all stations.
+        self._setup_paths()
+        self.mac_address = getnode()
+        self.ip_address = get_ip_addr()
+        self.port = 5005  # standard for all stations.
 
-    def getSubject(st):
+    def get_subject(self):
         raise NotImplementedError()
 
-    def initializeParallelPort(st):
-        try:
-            pPort = StandardParallelPort(pPortAddr=st.parallelPort['pPortAddr'])
-            return (pPort)
-        except:
-            return (None)
-
-    def _setupPaths(st):
-        if not os.path.isdir(st.stationPath):
-            os.makedirs(st.stationPath)
+    def _setup_paths(self):
+        if not os.path.isdir(self.station_path):
+            os.makedirs(self.station_path)
 
     def load(self):
         pass
@@ -62,11 +54,11 @@ class Station(object):
     def save(self):
         pass
 
-    def loadStation(self):
+    def load_station(self):
         pass
 
-    def saveStation(self):
+    def save_station(self):
         pass
 
-    def doTrials(self, **kwargs):
+    def do_trials(self, **kwargs):
         raise NotImplementedError('Run doTrials() on a subclass')

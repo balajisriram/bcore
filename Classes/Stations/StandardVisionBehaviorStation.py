@@ -3,10 +3,9 @@ import os
 import psychopy
 
 from .Station import Station
-from ..Hardware.Ports import TCPServerConnection
-from ..Hardware.Ports import BehaviorClientConnection
 from ..Hardware.Displays import StandardDisplay
-from ... import getBaseDirectory
+from ..Hardware.Ports import StandardParallelPort, TCPServerConnection, BehaviorClientConnection
+from ... import get_base_directory
 
 PPORT_LO = 0
 PPORT_HI = 1
@@ -44,65 +43,72 @@ class StandardVisionBehaviorStation(Station):
         want your system to work :)
 
         Use these defaults unless you know what you are doing
-        parallelPort = {}
-        parallelPort['rightValve'] = 2
-        parallelPort['centerValve'] = 3
-        parallelPort['leftValve'] = 4
-        parallelPort['valvePins'] = (2, 3, 4)
-        parallelPort['centerPort'] = 10
-        parallelPort['rightPort'] = 12
-        parallelPort['leftPort'] = 13
-        parallelPort['portPins'] = (12, 10, 13)
+        parallel_port = {}
+        parallel_port['right_valve'] = 2
+        parallel_port['center_valve'] = 3
+        parallel_port['left_valve'] = 4
+        parallel_port['valve_pins'] = (2, 3, 4)
+        parallel_port['center_port'] = 10
+        parallel_port['right_port'] = 12
+        parallel_port['left_port'] = 13
+        parallel_port['port_pins'] = (12, 10, 13)
+        parallel_port['index_pin'] = 8
+        parallel_port['frame_pin'] = 9
+        parallel_port['led_0'] = 5
+        parallel_port['led_1'] = 7
     """
-    display = ''
-    soundOn = False
-    parallelPort = ''
-    BServerConnection = []
-    session = []
+    display = None
+    sound_on = False
+    parallel_port_conn = None
+    parallel_port = None
+    server_connection = None
+    session = None
 
-    def __init__(st, display=StandardDisplay, soundOn=False, **kwargs):
-        super(StandardVisionBehaviorStation, st).__init__(**kwargs)
-        st.display = display
-        st.soundOn = soundOn
-        st.parallelPort = kwargs['parallelPort']
-        pPort = st.initializeParallelPort()
+    def __init__(self, display=StandardDisplay, sound_on=False, station_id= 0, station_name='Station0',
+                 station_location=(0,0,0), pport_addr='D010', parallel_port='standardVisionBehaviorDefault'):
+        super(StandardVisionBehaviorStation, self).__init__(station_id=station_id, station_name=station_name,
+                                                          station_location=station_location)
+        self.display = display
+        self.sound_on = sound_on
+        self.parallel_port_conn = StandardParallelPort(pPortAddr=pport_addr)
+        self.parallel_port = parallel_port
+        pPort = self.initialize_parallel_port()
         if pPort:
-            st.parallelPort['pPort'] = pPort
-            st.closeAllValves()
+            self.parallel_port = pPort
+            self.close_all_valves()
         else:
-            st.parallelPort = None
-        st.BServerConnection = []
+            self.parallel_port = None
+            self.server_connection = []
 
-    def initializeParallelPort(st):
-        if st.parallelPort == 'standardVisionBehaviorDefault':
+    def initialize_parallel_port(self):
+        if self.parallel_port == 'standardVisionBehaviorDefault':
             pPort = {}
-            pPort['rightValve'] = 2
-            pPort['centerValve'] = 3
-            pPort['leftValve'] = 4
-            pPort['valvePins'] = (2, 3, 4)
-            pPort['centerPort'] = 10
-            pPort['rightPort'] = 12
-            pPort['leftPort'] = 13
-            pPort['portPins'] = (12, 10, 13)
-            pPort['indexPin'] = 8
-            pPort['framePin'] = 9
-            pPort['LED0'] = 5
-            pPort['LED1'] = 7
-            st.parallelPort = pPort
-            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
+            pPort['right_valve'] = 2
+            pPort['center_valve'] = 3
+            pPort['left_valve'] = 4
+            pPort['valve_pins'] = (2, 3, 4)
+            pPort['center_port'] = 10
+            pPort['right_port'] = 12
+            pPort['left_port'] = 13
+            pPort['port_pins'] = (12, 10, 13)
+            pPort['index_pin'] = 8
+            pPort['frame_pin'] = 9
+            pPort['led_0'] = 5
+            pPort['led_1'] = 7
+            return pPort
         else:
-            return super(StandardVisionBehaviorStation, st).initializeParallelPort()
+            return None # need to write code that checks if allowable
 
-    def run(st):
+    def run(self):
         # currently just show a splash
-        st.splash()
-        st.connectToBServer()
+        self.splash()
+        self.connect_to_server()
 
-    def initializeDisplay(st):
+    def initialize_display(self):
         pygame.display.init()
         pygame.display.list_modes(depth=0, flags=pygame.FULLSCREEN)
 
-    def connectToBServer(st):
+    def connect_to_server(self):
         """
             This is a somewhat complicated handshake. Initially, the
             station acts as a server exposing its IP::port to the server.
@@ -117,50 +123,50 @@ class StandardVisionBehaviorStation(Station):
             the server side, this should provide scalable, TCP communications
             with the server
         """
-        st.BServerConnection = TCPServerConnection(ipaddr=st.IPAddr,
-            port=st.port)
-        st.BServerConnection.start()
-        BServerConnDetails = st.BServerConnection.recvData()
+        self.server_connection = TCPServerConnection(ipaddr=self.IPAddr,
+            port=self.port)
+        self.BServerConnection.start()
+        BServerConnDetails = self.BServerConnection.recvData()
         # use BServerConnDetails to connect to the BServer as a client
         print('Closing connection as server...')
-        st.BServerConnection.stop()
-        st.BServerConnection = BehaviorClientConnection(
+        self.BServerConnection.stop()
+        self.BServerConnection = BehaviorClientConnection(
             ipaddr=BServerConnDetails['ipaddr'],
             port=BServerConnDetails['port'])
         print(('Starting connection as client...'))
-        st.BServerConnection.start()
+        self.BServerConnection.start()
 
-    def getSubject(st):
+    def get_subject(self):
         """
             For STANDARDVISIONBEHAVIORSTATION.GETSUBJECT(), get data from
             BServer
         """
         raise NotImplementedError()
 
-    def closeAllValves(st):
-        st.parallelPort['pPort'].writePins(
-            st.parallelPort['valvePins'], PPORT_LO)
+    def close_all_valves(self):
+        self.parallelPort['pPort'].writePins(
+            self.parallelPort['valvePins'], PPORT_LO)
 
-    def readPorts(st):
-        st.parallelPort['pPort'].readPins(
-            st.parallelPort['portPins'])
+    def read_ports(self):
+        self.parallelPort['pPort'].readPins(
+            self.parallelPort['portPins'])
 
-    def openValve(st, valve):
-        st.parallelPort['pPort'].writePins(
-            st.parallelPort[valve], PPORT_HI)
+    def open_valve(self, valve):
+        self.parallelPort['pPort'].writePins(
+            self.parallelPort[valve], PPORT_HI)
 
-    def closeValve(st, valve):
-        st.parallelPort['pPort'].writePins(
-            st.parallelPort[valve], PPORT_LO)
+    def close_valve(self, valve):
+        self.parallelPort['pPort'].writePins(
+            self.parallelPort[valve], PPORT_LO)
 
-    def flushValves(st, dur):
-        st.parallelPort['pPort'].writePins(
-            st.parallelPort['valvePins'], PPORT_HI)
+    def flush_valves(self, dur):
+        self.parallelPort['pPort'].writePins(
+            self.parallelPort['valvePins'], PPORT_HI)
         time.sleep(dur)
-        st.parallelPort['pPort'].writePins(
-            st.parallelPort['valvePins'], PPORT_LO)
+        self.parallelPort['pPort'].writePins(
+            self.parallelPort['valvePins'], PPORT_LO)
 
-    def splash(st):
+    def splash(self):
         pygame.init()
         size = width, height = 600, 400
 
@@ -173,55 +179,55 @@ class StandardVisionBehaviorStation(Station):
 
         time.sleep(1)
 
-    def getDisplaySize(st):
+    def get_display_size(self):
         pass
 
-    def getSession(st):
+    def get_session(self):
         """
             Connect to BServer and request session details to be loaded
         """
         pass
 
-    def getCompiledRecords(st):
+    def get_compiled_records(self):
         """
             Connect to BServer and request compiledRecords
         """
         return None
 
-    def decache(st):
+    def decache(self):
         """
             Remove session specific details. ideal for pickling
         """
         pass
 
-    def doTrials(st, **kwargs):
+    def do_trials(self, **kwargs):
         # first step in the running of trials. called directly by station
         # or through the BServer
         if __debug__:
             pass
 
         # find the subject
-        st.getSession()
-        cR = st.getCompiledRecords()
+        self.get_session()
+        cR = self.get_compiled_records()
 
         Quit = False
 
         # session starts here
         sR = VisionBehaviorSessionRecord()  # make new session record
 
-        while not Quit and not st.session.stop():
+        while not Quit and not self.session.stop():
             # it loops in here every trial
             tR = VisionBehaviorTrialRecord()
             # just assign relevant details here
             tR.trialNumber = cR.trialNumber[-1] + 1
-            tR.sessionNumber = st.session.sessionNumber
-            tR.stationID = st.stationID
-            tR.stationName = st.stationName
-            tR.numPortsInStation = st.numPorts()
+            tR.sessionNumber = self.session.sessionNumber
+            tR.stationID = self.stationID
+            tR.stationName = self.stationName
+            tR.numPortsInStation = self.numPorts()
             tR.startTime = time.localtime()
-            tR.subjectsInStation = st.subjectsInStation()
+            tR.subjectsInStation = self.subjectsInStation()
             # doTrial - only tR will be returned as its type will be changed
-            tR = st.session.subject.doTrial(station=st, trialRecord=tR,
+            tR = self.session.subject.do_trial(station=self, trialRecord=tR,
                 compiledRecord=cR, quit=Quit)
 
             tR.stopTime = time.localtime()
@@ -235,12 +241,12 @@ class SimpleVisionBehaviorStation(object):
     def __init__(self):
         print('Creating SimpleVisionBehaviorStation')
 
-    def testGL(st):
+    def test_gl(self):
         pygame.init()
         size = width, height = 600, 400
         screen = pygame.display.set_mode(size)
         splashTex = pygame.image.load(os.path.join(
-            getBaseDirectory(), 'BCore', 'Util', 'Resources', 'splash.png'))
+            get_base_directory(), 'BCore', 'Util', 'Resources', 'splash.png'))
         screen.blit(splashTex, [0, 0])
         pygame.display.flip()
         time.sleep(1)
@@ -253,5 +259,5 @@ if __name__ == '__main__':
     #    display=None, soundOn=False, parallelPort=None)
     st = SimpleVisionBehaviorStation()
     print(('Testing the station\'s graphics'))
-    st.testGL()
+    st.test_gl()
     time.sleep(2)

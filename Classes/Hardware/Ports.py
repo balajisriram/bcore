@@ -1,12 +1,12 @@
 import socket
-import pickle
 import time
 
-from ..Util.parallel.parallelppdev import Parallel
+from ...Util.parallel.parallelppdev import Parallel
+
 
 class StandardParallelPort(Parallel):
     """
-        STANDARD0PARALLELPORT is a wrapper around parallel.Parallel and is
+        STANDARDPARALLELPORT is a wrapper around parallel.Parallel and is
         specifically used to read and write multiple pins simultaneously.
         For use cases, see StandardParallelPort.writePins() and
         StandardParallelPort.readPins()
@@ -47,60 +47,60 @@ class StandardParallelPort(Parallel):
             Pin 13           :            Left Response Sensor
     """
 
-    def __init__(pPort, **kwargs):
-        super(StandardParallelPort, pPort).__init__(port=kwargs['pPortAddr'])
+    def __init__(self, **kwargs):
+        super(StandardParallelPort, self).__init__(port=kwargs['pPortAddr'])
 
-    def write_pins(pPort, pins, val):
+    def write_pins(self, pins, val):
         """
             STANDARDPARALLELPORT.WRITEPINS(PPORT,PINS,VAL)
             call writePin sequentially
         """
         for pin in pins:
-            pPort.writePin(pin, val)
+            self.write_pin(pin, val)
 
-    def read_pins(pPort, pins):
+    def read_pins(self, pins):
         """
             STANDARDPARALLELPORT.READPINS(PPORT,PINS)
             call readPin sequentially
         """
         retVal = []
         for pin in pins:
-            retVal.append(pPort.readPin(pin))
+            retVal.append(self.read_pin(pin))
         return retVal
 
-    def write_pin(pPort, pin, state):
+    def write_pin(self, pin, state):
         """
             STANDARDPARALLELPORT.WRITEPIN(PIN,VAL)
             Get the data for each pin and only change the data for the pins
             that need to be written
         """
         if state:
-            pPort.setData(pPort.PPRDATA() | (2 ** (pin - 2)))
+            self.setData(self.PPRDATA() | (2 ** (pin - 2)))
             # pin 2 is the 0th bit in the data sream
         else:
-            pPort.setData(pPort.PPRDATA() & (255 ^ 2 ** (pin - 2)))
+            self.setData(self.PPRDATA() & (255 ^ 2 ** (pin - 2)))
 
-    def read_data(pPort):
+    def read_data(self):
         """Return the value currently set on the data pins (2-9)"""
-        return (pPort.PPRDATA())
+        return (self.PPRDATA())
 
-    def read_pin(pPort, pin):
+    def read_pin(self, pin):
         """
             STANDARDPARALLELPORT.READPIN(PIN)
             only certain pins are readable
         """
         if pin == 10:
-            return pPort.getInAcknowledge()
+            return self.getInAcknowledge()
         elif pin == 11:
-            return pPort.getInBusy()
+            return self.getInBusy()
         elif pin == 12:
-            return pPort.getInPaperOut()
+            return self.getInPaperOut()
         elif pin == 13:
-            return pPort.getInSelected()
+            return self.getInSelected()
         elif pin == 15:
-            return pPort.getInError()
+            return self.getInError()
         elif pin >= 2 and pin <= 9:
-            return (pPort.PPRDATA() >> (pin - 2)) & 1
+            return (self.PPRDATA() >> (pin - 2)) & 1
         else:
             print (('Pin %i cannot be read (by PParallelLinux.readPin() yet)'
             % (pin)))
