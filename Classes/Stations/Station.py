@@ -41,6 +41,10 @@ class Station(object):
         self.ip_address = get_ip_addr()
         self.port = 5005  # standard for all stations.
 
+    def register(self):
+        #
+        pass
+
     def get_subject(self):
         raise NotImplementedError()
 

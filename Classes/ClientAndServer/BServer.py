@@ -3,10 +3,10 @@ import time
 import pickle
 import shutil
 import copy
+import zmq
 
 from verlib import NormalizedVersion as Ver
-from BCore import getBaseDirectory, getIPAddr, getTimeStamp
-from BCore.Util.BehaviorServerGUI.BehaviorServerGUI import BServerApp
+from ... import get_base_directory, get_ip_addr, get_time_stamp
 
 
 class BServer(object):
@@ -23,108 +23,102 @@ class BServer(object):
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
                                 and values being list of stationIDs
-            revisionControl     : dictionary with access to details about
-                                the repository
     """
     version = Ver('0.0.1')  # Feb 5, 2014
-    serverID = ''
-    serverDataPath = ''
-    serverIP = ''
-    creationTime = 0
+    server_id = ''
+    server_name = ''
+    server_data_path = ''
+    server_ip = ''
+    creation_time = 0
     stations = []
     subjects = []
     assignments = {}
-    StationConnections = {}
+    server_connection = []
+    station_connections = {}
 
-    def __init__(server, **kwargs):
+    def __init__(self, **kwargs):
         if len(kwargs) in (0, 1):
             print('BServer.__init()::', len(kwargs),
-                ' %d args input. Loading standard Server')
-            server = server.loadServer()
+                  ' %d args input. Loading standard Server')
+            self = BServer.load_server()
             if 'requireVersion' in kwargs:
-                if server.version < Ver(kwargs['requireVersion']):
+                if self.version < Ver(kwargs['requireVersion']):
                     raise ValueError('you are trying to load an old version.')
         else:
-            server.serverID = kwargs['serverID']
-            server.serverName = kwargs['serverName']
-            server.serverDataPath = os.path.join(
-                getBaseDirectory(), 'BCoreData', 'ServerData')
-            server.serverIP = getIPAddr()
-            server.creationTime = time.time()
-            server.stations = []
-            server.subjects = []
-            server.assignments = {}
-            server.StationConnections = {}
-            server.saveServer()
+            self.server_id = kwargs['server_id']
+            self.server_name = kwargs['server_name']
+            self.server_data_path = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
+            self.server_ip = get_ip_addr()
+            self.creation_time = time.time()
+            self.stations = []
+            self.subjects = []
+            self.assignments = {}
+            self.station_connections = {}
+            self.save_server()
 
     def run(server, **kwargs):
-        print(('Running server...\n'))
-        if kwargs['serverGUI']:
-            BServerApp(serverData=server)
-            pass
-        else:
-            raise NotImplementedError()
+        # should expose the ZMQ context. and allow connections
+        raise NotImplementedError()
 
     @staticmethod
     def load():
         """
             Alias for server.loadServer
         """
-        return server.load_server()
+        return BServer.load_server()
 
     @staticmethod
     def load_server():
         # use standard location for path,
         # make sure to never modify server here:
         dbLoc = os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData', 'db.BServer')
+            get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
-            f = open(dbLoc, 'rb')
-            server = pickle.load(f)
-            f.close()
+            with open(dbLoc, 'rb') as f:
+                server = pickle.load(f)
+
             print('BServer loaded')
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
         return server
 
-    def save(server):
+    def save(self):
         """
             Alias for server.saveServer
         """
-        server.save_server()
+        self.save_server()
 
-    def save_server(server):
+    def save_server(self):
         srcDir = os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData')
+            get_base_directory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
 
-        if not os.path.isdir(server.serverDataPath):
+        if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
-            server._setupPaths()
+            self._setup_paths()
 
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
             old = BServer()  # standardLoad to old
-            desName = 'db_' + getTimeStamp(old.creationTime) + '.BServer'
+            desName = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
             shutil.copyfile(
                 os.path.join(srcDir, 'db.BServer'),  # source
                 os.path.join(desDir, desName)  # destination
-                )
+            )
             print(('Moved to backup... deleting old copy'))
             os.remove(os.path.join(srcDir, 'db.BServer'))
 
         # there might be some attributes that need to be deleted
         # delete them here before continuing
         print(('Cleaning and pickling object'))
-        cleanedBServer = copy.deepcopy(server)
+        cleanedBServer = copy.deepcopy(self)
         cleanedBServer.StationConnections = {}
-        f = open(os.path.join(srcDir, 'db.BServer'), 'wb')
-        pickle.dump(cleanedBServer, f)
-        f.close()
+        with open(os.path.join(srcDir, 'db.BServer'), 'wb') as f:
+            pickle.dump(cleanedBServer, f)
 
-    def load_backup(server):
+    def load_backup(self):
         """
             Use this only if you specifically require the deletion of current
             db.BServer and replacement with an older backup. Only the latest
@@ -139,72 +133,73 @@ class BServer(object):
         # find the latest file in the backupDBs
         newestBkup = max(os.listdir(srcDir), key=os.path.getctime)
         shutil.copyfile(
-                os.path.join(srcDir, newestBkup),  # source
-                os.path.join(desDir, 'db.BServer')  # destination
-                )
+            os.path.join(srcDir, newestBkup),  # source
+            os.path.join(desDir, 'db.BServer')  # destination
+        )
         # delete the newest backup
         os.remove(os.path.join(srcDir, newestBkup))
 
     def _setup_paths(server):
         # create 'BServerData'
-        os.mkdir(os.path.join(getBaseDirectory(), 'BCoreData'))
+        os.mkdir(os.path.join(get_base_directory(), 'BCoreData'))
         # create 'ServerData','Stations','PermanentTrialRecordStore' in
         # BServerData
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData'))
+            get_base_directory(), 'BCoreData', 'ServerData'))
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'StationData'))
+            get_base_directory(), 'BCoreData', 'StationData'))
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'TrialData'))
+            get_base_directory(), 'BCoreData', 'TrialData'))
         # create 'replacedDBs' in 'ServerData'
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'ServerData', 'backupDBs'))
+            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs'))
         # create 'Full' and 'Compiled' in 'TrialData'
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'TrialData', 'Full'))
+            get_base_directory(), 'BCoreData', 'TrialData', 'Full'))
         os.mkdir(os.path.join(
-            getBaseDirectory(), 'BCoreData', 'TrialData', 'Compiled'))
+            get_base_directory(), 'BCoreData', 'TrialData', 'Compiled'))
 
-    def add_station(server, newStation):
-        if (newStation.stationID in server.getStationIDs() or
-            newStation.stationName in server.getStationNames()):
+    def add_station(self, new_station):
+        if (new_station.station_id in self.get_station_ids() or
+                new_station.station_name in self.get_station_names()):
             raise ValueError('Station IDs and Station Names have to be unique')
-        server.stations.append(newStation)
+        self.stations.append(new_station)
         # now enable station specific data
-        server.save()
+        self.save()
 
-    def add_subject(server, newSubject):
-        if newSubject in server.subjects:
+    def add_subject(self, new_subject):
+        if new_subject in self.subjects:
             raise ValueError('Cannot add replica of subjects to BServer')
-        server.subjects.append(newSubject)
-        server.save()
+        self.subjects.append(new_subject)
+        self.save()
 
-    def change_assignment(server, subject, newAssignment):
-        if subject not in server.subjects:
+    def change_assignment(self, subject, new_assignment):
+        if subject not in self.subjects:
             raise ValueError('Cannot change assignment on a subject \
             that is not on Bserver')
-        if not(any(newAssignment in server.getStationIDs())):
+        if not (any(new_assignment in self.get_station_ids())):
             raise ValueError('Cannot assign subject to non existent stations')
-        server.assignment[subject.subjectID] = newAssignment
-        server.save()
+        self.assignments[subject.subjectID] = new_assignment
+        self.save()
 
-    def get_station_ids(server):
-        stationIDs = []
-        for station in server.stations:
-            stationIDs.append(station.stationID)
-        return stationIDs
+    def get_station_ids(self):
+        station_ids = []
+        for station in self.stations:
+            station_ids.append(station.station_id)
+        return station_ids
 
-    def get_station_names(server):
-        stationNames = []
-        for station in server.stations:
-            stationNames.append(station.stationName)
-        return stationNames
+    def get_station_names(self):
+        station_names = []
+        for station in self.stations:
+            station_names.append(station.station_name)
+        return station_names
 
-    def get_subject_ids(server):
-        subjectIDs = []
-        for subject in server.subjects:
-            subjectIDs.append(subject.subjectID)
-        return subjectIDs
+    def get_subject_ids(self):
+        subject_ids = []
+        for subject in self.subjects:
+            subject_ids.append(subject.subject_id)
+        return subject_ids
+
 
 if __name__ == "__main__":
     print("here")

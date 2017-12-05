@@ -1,7 +1,7 @@
 class Criterion(object):
 
-    def __init__(self, **kwargs):
-        self.name = kwargs['name']
+    def __init__(self, name='Unknown'):
+        self.name = name
 
     def graduate(self, **kwargs):
         return False
@@ -9,63 +9,63 @@ class Criterion(object):
 
 class NumTrialsDoneCriterion(Criterion):
 
-    def __init__(self, **kwargs):
-        super(NumTrialsDoneCriterion, self).__init__(**kwargs)
-        self.numTrials = kwargs['numTrials']
-        self.numTrialsMode = 'global'
-        if 'numTrialsMode' in kwargs:
-            self.numTrialsMode = kwargs['numTrialsMode']
-            # can be 'global' or 'consecutive'
+    def __init__(self, num_trials=100, num_trials_mode='global', name='Unknown'):
+        super(NumTrialsDoneCriterion, self).__init__(name)
+        self.num_trials = num_trials
+        self.num_trials_mode = num_trials_mode
 
-    def graduate(self, **kwargs):
-        cR = kwargs['compiled']
+    def graduate(self, cR, **kwargs):
         # find the latest number of
-        if self.numTrialsMode == 'consecutive':
+        if self.num_trials_mode == 'consecutive':
             raise NotImplementedError()
         else:  # 'global'
-            nT = [i for i in cR.trialNumber]
+            nT = [i for i in cR.trial_number]
             raise NotImplementedError()
-        if nT > self.numTrials:
+        if nT > self.num_trials:
             Graduate = True
         else:
             Graduate = False
+
         return Graduate
 
 
 class PerformanceCriterion(Criterion):
 
-    def __init__(self, **kwargs):
-        super(PerformanceCriterion, self).__init__(**kwargs)
-        self.pctCorrect = kwargs['pctCorrect']
-        self.numTrials = kwargs['numTrials']
+    def __init__(self, pct_correct=0.8, num_trials=200, num_trials_mode='global', name='Unknown'):
+        super(PerformanceCriterion, self).__init__(name)
+        self.pct_correct = pct_correct
+        self.num_trials = num_trials
+        self.num_trials_mode = num_trials_mode
 
-    def graduate(self, **kwargs):
+    def graduate(self, cR, **kwargs):
         # find the latest number of
-        if self.numTrialsMode == 'consecutive':
+        if self.num_trials_mode == 'consecutive':
             pass
+            raise NotImplementedError()
+        else:
+            raise NotImplementedError()
+
         Graduate = False
         return Graduate
 
 
 class RateCriterion(Criterion):
 
-    def __init__(self, **kwargs):
-        super(PerformanceCriterion, self).__init__(**kwargs)
-        self.trialsPerMin = kwargs['trialsPerMin']
-        self.consecutiveMins = kwargs['consecutiveMins']
+    def __init__(self, trials_per_minute=10, consecutive_minutes=5, name='Unknown'):
+        super(PerformanceCriterion, self).__init__(name)
+        self.trials_per_minute = trials_per_minute
+        self.consecutive_minutes = consecutive_minutes
 
     def graduate(self, **kwargs):
-        # find the latest number of
-        if self.numTrialsMode == 'consecutive':
-            pass
         Graduate = False
+        raise NotImplementedError()
         return Graduate
 
 
 class RepeatIndefinitely(Criterion):
 
-    def __init__(self, **kwargs):
-        super(RepeatIndefinitely, self).__init__(**kwargs)
+    def __init__(self, name='Unknown'):
+        super(RepeatIndefinitely, self).__init__(name)
 
-    def graduate(self, **kwargs):
+    def graduate(self, cR, **kwargs):
         return False

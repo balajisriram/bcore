@@ -1,5 +1,5 @@
-import socket
 import time
+import pyzmq
 
 from ...Util.parallel.parallelppdev import Parallel
 
@@ -106,120 +106,17 @@ class StandardParallelPort(Parallel):
             % (pin)))
 
 
-class TCPConnection(object):
+class ServerMessage(object):
     """
-        TCPCONNECTION defines a class that determines the read/write protocol
-        for data streamed through its channels. It cannot be used directly
-        because it cannot be started directly. This works because the only
-        difference between server and client is the way connections are started
-    """
-    TCP_IP = ''
-    TCP_PORT = 0
-    DEFAULT_BUFFER_SIZE = 0
-
-    def __init__(conn, **kwargs):
-
-        if not kwargs:
-            conn.TCP_IP = '127.0.0.1'
-            conn.TCP_PORT = 5005
-        else:
-            conn.TCP_IP = kwargs['ipaddr']
-            conn.TCP_PORT = kwargs['port']
-        conn.DEFAULT_BUFFER_SIZE = 1024
-
-    def start(conn):
-        raise NotImplementedError('TCPConnection needs to be started as a \
-            server or as a client. Look at TCPServerConnection and \
-            TCPClientConnection')
-
-    def close(conn):
-        conn.connection.close()
-
-    def __del__(conn):
-        print(('Closing connection...'))
-        conn.connection.close()
-        print(('done.'))
-
-    def recv_data(conn):
-        """
-            Enforces a max conn.DEFAULT_BUFFER_SIZE message from the client.
-            Assumes that the data sent is cPickled at the client end.
-        """
-        while True:
-            BITSTR = conn.connection.recv(conn.DEFAULT_BUFFER_SIZE)
-            if not BITSTR:
-                break
-        return cPickle.loads(BITSTR)
-
-    def send_data(conn, DATA):
-        """
-            Pickles and sends the data through the socket connection.
-        """
-        conn.connection.sendall(cPickle.dumps(DATA))
-
-
-class TCPServerConnection(TCPConnection):
-    """
-        TCPSERVERCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a server, conn.TCP_IP and
-        conn.TCP_PORT are bound to the socket and listened to until connection
-        is established.
-
-        One extra attribute is defined:
-            conn.clientIP           :               IP address of client
-    """
-
-    def __init__(conn, **kwargs):
-        super(TCPServerConnection, conn).__init__(**kwargs)
-
-    def start(conn):
-        conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        conn.connection.bind((conn.TCP_IP, conn.TCP_PORT))
-        print(('Binding socket connection to given IP::port'))
-        conn.connection.listen(True)
-
-        print(('Accepting connections at %s::%04d' %
-            (conn.TCP_IP, conn.TCP_PORT)))
-
-        (conn.connection, conn.clientIP) = conn.connection.accept()
-
-        print(('Connected to destination at %s' % conn.serverIP))
-
-
-class TCPClientConnection(TCPConnection):
-    """
-        TCPCLIENTCONNECTION subclasses TCP connection. Only difference is in
-        the initiation of the connection. As a client, conn.TCP_IP and
-        conn.TCP_PORT is the location of the server. conn.start() performs
-        a socket.connect() until a connection is established
-    """
-
-    def __init__(conn, **kwargs):
-        super(TCPServerConnection, conn).__init__(**kwargs)
-
-    def start(conn):
-        conn.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(('Connecting to server at %s::%s...' % (
-            (conn.TCP_IP, conn.TCP_PORT))))
-        Connected = False
-        while not Connected:
-            try:
-                conn.connection.connect((conn.TCP_IP, conn.TCP_PORT))
-                Connected = True
-            except socket.error:
-                print(('Server busy...retrying ...'))
-                time.sleep(1)
-        print(('Connected.'))
-
-
-class BehaviorServerConnection(TCPServerConnection):
-    """
-        BEHAVIORSERVERCONNECTION makes the BServer act as a server. Special
-        constants are defined for communication with the client along with
-        acknowledgement codes that allow the server to continue its function
+        SERVERMESSAGE is a class that will contain information about messages
+        sent by the Server. Server can send multiple types of messages to the
+        clients
+        1. Initiate session (includes subject, protocol ...)
+        2. Kill Session (request information about session - records, num trials ...)
+        3.
 
         It is important to keep the constants defined here in sync with the
-        constants defined in BEHAVIORCLIENTCONNECTION.
+        constants defined in CLIENTMESSAGE.
     """
 
     # client side commands to server
@@ -236,14 +133,14 @@ class BehaviorServerConnection(TCPServerConnection):
     ACK_KILL = 65535  # acknowledge going into kill mode
 
 
-class BehaviorClientConnection(TCPClientConnection):
+class ClientMessage(object):
     """
-        BEHAVIORCLIENTCONNECTION makes the station act as a client. Special
+        CLIENTMESSAGE makes the station act as a client. Special
         constants are defined for communication with the server along with
         acknowledgement codes that allow the server to continue its function.
 
         It is important to keep the constants defined here in sync with the
-        constants defined in BEHAVIORSERVERCONNECTION.
+        constants defined in SERVERMESSAGE.
     """
 
     # client side commands to server

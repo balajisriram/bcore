@@ -1,7 +1,7 @@
-import zmq, time, os, pickle
+import zmq, time, os, pickle, shutil
 
 from verlib import NormalizedVersion as Ver
-
+from ... import get_base_directory
 
 class BServerLocal(object):
     """
@@ -15,20 +15,20 @@ class BServerLocal(object):
                                 and values being list of stationIDs
     """
     version = Ver('0.0.1')  # Nov 7, 2017
-    serverID = ''
-    serverDataPath = ''
-    serverIP = ''
-    creationTime = 0
+    server_id = ''
+    server_data_path = ''
+    server_ip = ''
+    creation_time = 0
     stations = []
     subjects = []
     assignments = {}
     StationConnections = {}
 
     def __init__(self):
-        self.serverID = 0
-        self.serverDataPath = os.path.join(BCore.get_base_directory(),'BCoreData','ServerData')
-        self.serverIP = 'http://localhost'
-        self.creationTime = time.time()
+        self.server_id = 0
+        self.server_data_path = os.path.join(BCore.get_base_directory(),'BCoreData','ServerData')
+        self.server_ip = 'http://localhost'
+        self.creation_time = time.time()
 
     @staticmethod
     def load():
@@ -42,7 +42,7 @@ class BServerLocal(object):
         # use standard location for path,
         # make sure to never modify server here:
         dbLoc = os.path.join(
-            BCore.get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
+            get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
             with open(dbLoc, 'rb') as f:
                 server = pickle.load(f)
@@ -61,18 +61,18 @@ class BServerLocal(object):
 
     def save_server(self):
         srcDir = os.path.join(
-            BCore.get_base_directory(), 'BCoreData', 'ServerData')
+            get_base_directory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
-            BCore.get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
 
-        if not os.path.isdir(self.serverDataPath):
+        if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
-            self._setupPaths()
+            self._setup_paths()
 
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
-            old = BServer()  # standardLoad to old
-            desName = 'db_' + BCore.get_time_stamp(old.creationTime) + '.BServer'
+            old = BServerLocal()  # standardLoad to old
+            desName = 'db_' + get_time_stamp(old.creationTime) + '.BServer'
             shutil.copyfile(
                 os.path.join(srcDir, 'db.BServer'),  # source
                 os.path.join(desDir, desName)  # destination
