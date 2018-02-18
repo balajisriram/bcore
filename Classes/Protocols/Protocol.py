@@ -39,25 +39,25 @@ class SimpleProtocol(Protocol):
                     criterionManager,sessionManager,trialManager,
                     reinforcementManager)
     """
-    trainingSteps = []
-    currentStep = 0
+    training_steps = []
+    current_step = 0
 
     def __init__(self, **kwargs):
         super(SimpleProtocol, self).__init__(**kwargs)
-        self.trainingSteps = kwargs['trainingSteps']
-        self.currentStep = 0
+        self.training_steps = kwargs['training_steps']
+        self.current_step = 0
 
-    def changeToStep(self, stepNum):
-        self.currentStep = stepNum
+    def change_to_step(self, stepNum):
+        self.current_step = stepNum
 
     def step(self):
-        return self.trainingSteps[self.currentStep]
+        return self.training_steps[self.current_step]
 
-    def numSteps(self):
-        return len(self.trainingSteps)
+    def num_steps(self):
+        return len(self.training_steps)
 
-    def addStep(self, step):
-        self.trainingSteps.append(step)
+    def add_step(self, step):
+        self.training_steps.append(step)
 
 
 class SequentialProtocol(SimpleProtocol):
@@ -69,16 +69,16 @@ class SequentialProtocol(SimpleProtocol):
         super(SequentialProtocol, self).__init__(**kwargs)
 
     def graduate(self, safe=False):
-        self.currentStep += 1
-        if safe and self.currentStep == self.numSteps():
-            self.currentStep -= 1
+        self.current_step += 1
+        if safe and self.current_step == self.num_steps():
+            self.current_step -= 1
 
     def fallback(self, safe=False):
-        self.currentStep -= 1
-        if safe and self.currentStep < 0:
-            self.currentStep -= 0
+        self.current_step -= 1
+        if safe and self.current_step < 0:
+            self.current_step -= 0
 
-    def changeToStep(self, stepNum):
+    def change_to_step(self, step_num):
         raise NotImplementedError('SequentialProtocol does not allow arbitrary\
         step changes. Use graduate() and fallback() only')
 
@@ -94,13 +94,13 @@ class RandomizedProtocol(SimpleProtocol):
         raise NotImplementedError('RandomizedProtocol does not allow arbitrary\
         step changes. Use graduate() only')
 
-    def graduate(self, ensureDifferent=False):
+    def graduate(self, ensure_different=False):
         import random
-        if not ensureDifferent:
-            self.currentStep = random.randint(0, self.numSteps() - 1)
+        if not ensure_different:
+            self.current_step = random.randint(0, self.num_steps() - 1)
         else:
-            currentStep = self.currentStep
-            newStep = currentStep
-            while currentStep == newStep:
-                newStep = random.randint(0, self.numSteps() - 1)
-            self.currentStep = newStep
+            current_step = self.current_step
+            new_step = current_step
+            while current_step == new_step:
+                new_step = random.randint(0, self.num_steps() - 1)
+            self.current_step = new_step

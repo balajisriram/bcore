@@ -6,44 +6,44 @@ class TrainingStep(object):
         And a Criterion to determine when to graduate.
     """
     name = ''
-    TrialManager = []
-    Scheduler = []
-    Criterion = []
+    trial_manager = []
+    scheduler = []
+    criterion = []
 
-    def __init__(ts, **kwargs):
-        ts.name = kwargs['name']
-        ts.TrialManager = kwargs['trialManager']
-        ts.Scheduler = kwargs['scheduler']
-        ts.Criterion = kwargs['criterion']
+    def __init__(ts, name, trial_manager, scheduler, criterion, **kwargs):
+        ts.name = name
+        ts.trial_manager = trial_manager
+        ts.scheduler = scheduler
+        ts.criterion = criterion
 
-    def scheduleOK(ts):
-        return ts.Scheduler.scheduleOK()
+    def schedule_ok(ts):
+        return ts.scheduler.schedule_ok()
 
-    def doTrial(ts, **kwargs):
+    def do_trial(ts, tR, **kwargs):
         # called by subject.doTrial()
         if __debug__:
             assert kwargs['session'].tsOKForSessMgr, ''
 
-        tR = kwargs['trialRecords']
+        tR.trial_manager_name = ts.trial_manager.name
+        tR.scheduler_name = ts.scheduler.name
+        tR.criterion_name = ts.criterion.name
 
-        tR.trialManagerName = ts.TrialManager.name
-        tR.schedulerName = ts.Scheduler.name
-        tR.criterionName = ts.Criterion.name
+        tR.trial_manager_class = ts.trial_manager.__class__.__name__
+        tR.scheduler_class = ts.scheduler.__class__.__name__
+        tR.criterion_class = ts.criterion.__class__.__name__
 
-        tR.trialManagerClass = ts.TrialManager.__class__.__name__
-        tR.schedulerClass = ts.Scheduler.__class__.__name__
-        tR.criterionClass = ts.Criterion.__class__.__name__
-
-        tR.trialManagerVersionNumber = ts.TrialManager.ver
-        tR.schedulerVersionNumber = ts.Scheduler.ver
-        tR.criterionVersionNumber = ts.Criterion.ver
+        tR.trial_manager_version_number = ts.trial_manager.ver
+        tR.scheduler_version_number = ts.scheduler.ver
+        tR.criterion_version_number = ts.criterion.ver
 
         kwargs['trialManager'] = ts.TrialManager
 
-        if ts.scheduleOK(**kwargs):
-            tR = ts.TrialManager.doTrial(**kwargs)
+        if ts.schedule_ok(**kwargs):
+            tR = ts.trial_manager.do_trial(tR, **kwargs)
 
-        if ts.Criterion.graduate(**kwargs):
-            kwargs['Graduate'] = True
+        if ts.criterion.graduate(tR, **kwargs):
+            tR.graduated_end_of_trial = True
+        else:
+            tR.graduated_end_of_trial = False
 
         return tR

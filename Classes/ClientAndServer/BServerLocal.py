@@ -110,25 +110,25 @@ class BServerLocal(object):
         os.remove(os.path.join(srcDir, newestBkup))
         # load the backup and return it ## TOBEDONE
 
-def _setup_paths(force_delete=False):
-    if force_delete:
-        import shutils
-        shutils.rmtree(os.path.join(BCore.get_base_directory,'BCoreData'))
+    def _setup_paths(force_delete=False):
+        if force_delete:
+            import shutils
+            shutils.rmtree(os.path.join(BCore.get_base_directory,'BCoreData'))
 
-    if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData')):
-        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData'))
+        if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData')):
+            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData'))
 
-    if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData','ServerData')):
-        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData'))
+        if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData','ServerData')):
+            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData'))
 
-    if not os.path.exist(os.path.join(BCore.get_base_directory,'BcoreData','ServerData','Backups')):
-        os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData','Backups'))
+        if not os.path.exist(os.path.join(BCore.get_base_directory,'BcoreData','ServerData','Backups')):
+            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData','Backups'))
 
 
-def initialize_server(force_delete=False):
-    # setup the paths
-    _setup_paths(force_delete)
-    # setup the sql server
+    def initialize_server(force_delete=False):
+        # setup the paths
+        _setup_paths(force_delete)
+        # setup the sql server
 
 
 if __name__ == "__main__":

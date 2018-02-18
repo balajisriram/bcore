@@ -27,7 +27,13 @@ class Gratings(StandardVisionBehaviorTrialManager):
     Contrasts = 1
     Durations = float('Inf')
 
-    def __init__(grating, PixPerCycs=128, Orientations=PI/4, DriftFrequencies=0, Phases=0, Contrasts=1, Durations=1, **kwargs):
+    def __init__(grating, PixPerCycs=128,
+                 Orientations=PI/4,
+                 DriftFrequencies=0,
+                 Phases=0,
+                 Contrasts=1,
+                 Durations=1,
+                 **kwargs):
         super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
 
         grating.PixPerCycs=PixPerCycs

@@ -102,10 +102,10 @@ class BServer(object):
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
             old = BServer()  # standardLoad to old
-            desName = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
+            des_name = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
             shutil.copyfile(
                 os.path.join(srcDir, 'db.BServer'),  # source
-                os.path.join(desDir, desName)  # destination
+                os.path.join(desDir, des_name)  # destination
             )
             print(('Moved to backup... deleting old copy'))
             os.remove(os.path.join(srcDir, 'db.BServer'))
@@ -114,7 +114,7 @@ class BServer(object):
         # delete them here before continuing
         print(('Cleaning and pickling object'))
         cleanedBServer = copy.deepcopy(self)
-        cleanedBServer.StationConnections = {}
+        cleanedBServer.station_connections = {}
         with open(os.path.join(srcDir, 'db.BServer'), 'wb') as f:
             pickle.dump(cleanedBServer, f)
 
@@ -179,7 +179,7 @@ class BServer(object):
             that is not on Bserver')
         if not (any(new_assignment in self.get_station_ids())):
             raise ValueError('Cannot assign subject to non existent stations')
-        self.assignments[subject.subjectID] = new_assignment
+        self.assignments[subject.subject_id] = new_assignment
         self.save()
 
     def get_station_ids(self):

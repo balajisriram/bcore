@@ -22,11 +22,11 @@ class NumTrialsDoneCriterion(Criterion):
             nT = [i for i in cR.trial_number]
             raise NotImplementedError()
         if nT > self.num_trials:
-            Graduate = True
+            graduate = True
         else:
-            Graduate = False
+            graduate = False
 
-        return Graduate
+        return graduate
 
 
 class PerformanceCriterion(Criterion):
@@ -45,8 +45,8 @@ class PerformanceCriterion(Criterion):
         else:
             raise NotImplementedError()
 
-        Graduate = False
-        return Graduate
+        graduate = False
+        return graduate
 
 
 class RateCriterion(Criterion):
@@ -59,7 +59,7 @@ class RateCriterion(Criterion):
     def graduate(self, **kwargs):
         Graduate = False
         raise NotImplementedError()
-        return Graduate
+        return graduate
 
 
 class RepeatIndefinitely(Criterion):

@@ -10,61 +10,60 @@ class Subject(object):
     """
     ver = Ver('0.0.1')
 
-    def __init__(sub, **kwargs):
+    def __init__(sub, subject_id, **kwargs):
         """
                 Call as follows::
                 subject(subjectID='demo')
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        sub.subjectID = kwargs['subjectID']
+        sub.subject_id = subject_id
         sub.protocol = []
-        sub.creationDate = time.time()
+        sub.creation_date = time.time()
 
     def __eq__(sub, other):
         # if this method is called, then clearly
         return False
 
-    def addProtocol(sub, newProtocol):
+    def add_protocol(sub, new_protocol):
         if not sub.protocol:
-            sub.protocol = newProtocol
+            sub.protocol = new_protocol
         else:
             raise ValueError('cannot add newProtocol. protocol is not empty. \
             Maybe you meant replaceProtocol()?')
 
-    def replaceProtocol(sub, newProtocol):
-        sub.protocol = newProtocol
+    def replace_protocol(sub, new_protocol):
+        sub.protocol = new_protocol
 
-    def allowedGenders(sub):
+    def allowed_genders(sub):
         return None
 
-    def allowedStrains(sub):
+    def allowed_strains(sub):
         return None
 
-    def allowedGeneBkgd(sub):
+    def allowed_gene_bkgd(sub):
         return None
 
-    def doTrial(sub, **kwargs):
+    def do_trial(sub, tR, **kwargs):
         # Called by station.doTrials()
         if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
             a protocol')
-        tR = kwargs['trialRecord']
 
         # new consideration in  protocol and training step
-        Graduate = False
-        kwargs['graduate'] = Graduate
+        graduate = False
+        kwargs['graduate'] = graduate
         kwargs['subject'] = sub
 
         # figure out the protocol, and the trainingStep details
-        tR.protocolName = sub.protocol.name
-        tR.protocolVersionNumber = sub.protocol.ver
-        tR.currentStep = sub.protocol.currentStep
-        tR.currentStepName = sub.protocol.step().name
+        tR.protocol_name = sub.protocol.name
+        tR.protocol_version_number = sub.protocol.ver
+        tR.current_step = sub.protocol.current_step
+        tR.current_step_name = sub.protocol.step().name
         tR.numSteps = sub.protocol.numSteps()
 
         currentStep = sub.protocol.step()
-        tR = currentStep.doTrial(**kwargs)
+        tR = currentStep.do_trial(tR,**kwargs)
 
         if kwargs['graduate']:
             tR.criterionMet = True
@@ -84,36 +83,34 @@ class Mouse(Subject):
         manipulation              : three-ple list
     """
 
-    def __init__(sub, **kwargs):
-        super(Mouse, sub).__init__(**kwargs)
-        sub.gender = kwargs['gender']
-        sub.birthDate = kwargs['birthDate']
-        sub.strain = kwargs['strain']
-        sub.geneBkgd = kwargs['geneBkgd']
+    def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
+        super(Mouse, sub).__init__(subject_id , **kwargs)
+        sub.gender = gender
+        sub.birth_date = birth_date
+        sub.strain = strain
+        sub.gene_bkgd = gene_bkgd
         sub.manipulation = []
 
     def __eq__(sub, other):
-        if isinstance(other, Mouse) and (sub.subjectID == other.subjectID):
+        if isinstance(other, Mouse) and (sub.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowedGenders(sub):
-        return ['Male', 'Female']
+    def allowed_genders(sub):
+        return ['Male', 'Female', 'Unknown']
 
-    def allowedStrains(sub):
+    def allowed_strains(sub):
         return ['C57BL/6J', '129S1/SvlmJ', 'BALB/c']
 
-    def allowedGeneBkgd(sub):
+    def allowed_gene_bkgd(sub):
         return ['WT', 'Pvalb-cre', 'Pvalb-COP4-EYFP', 'Somst-cre']
 
 
 class DefaultMouse(Mouse):
     def __init__(sub):
-        pass
-
-    def createSubject(sub, **kwargs):
-        return Mouse(**kwargs)
+        super(DefaultMouse, sub).__init__(subject_id='demoMouse',gender='Unknown',
+                                          birth_date='',strain='C57BL/6J',gene_bkgd='WT')
 
 
 class Rat(Subject):
@@ -127,36 +124,34 @@ class Rat(Subject):
         manipulation              : three-ple list
     """
 
-    def __init__(sub, **kwargs):
-        super(Rat, sub).__init__(subjectID=kwargs['subjectID'])
-        sub.gender = kwargs['gender']
-        sub.birthDate = kwargs['birthDate']
-        sub.strain = kwargs['strain']
-        sub.geneBkgd = kwargs['geneBkgd']
+    def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
+        super(Rat, sub).__init__(subject_id, **kwargs)
+        sub.gender = gender
+        sub.birth_date = birth_date
+        sub.strain = strain
+        sub.gene_bkgd = gene_bkgd
         sub.manipulation = []
 
     def __eq__(sub, other):
-        if isinstance(other, Rat) and (sub.subjectID == other.subjectID):
+        if isinstance(other, Rat) and (sub.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowedGenders(sub):
-        return ['Male', 'Female']
+    def allowed_genders(sub):
+        return ['Male', 'Female', 'Unknown']
 
-    def allowedStrains(sub):
+    def allowed_strains(sub):
         return ['Wistar', 'Sprague-Dawley', 'Long-Evans']
 
-    def allowedGeneBkgd(sub):
+    def allowed_gene_bkgd(sub):
         return ['WT']
 
 
 class DefaultRat(Rat):
     def __init__(sub):
-        pass
-
-    def createSubject(sub, **kwargs):
-        return Rat(**kwargs)
+        super(DefaultRat, sub).__init__(subject_id='demoRat',gender='Unknown',
+                                          birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
 
 class Virtual(Subject):
@@ -165,11 +160,11 @@ class Virtual(Subject):
         subjectID                 : string ID sent to SUBJECT
     """
 
-    def __init__(sub, **kwargs):
-        super(Virtual, sub).__init__(**kwargs)
+    def __init__(sub, subject_id, **kwargs):
+        super(Virtual, sub).__init__(subject_id, **kwargs)
 
     def __eq__(sub, other):
-        if isinstance(other, Virtual) and (sub.subjectID == other.subjectID):
+        if isinstance(other, Virtual) and (sub.subject_id == other.subject_id):
             return True
         else:
             return False
@@ -186,10 +181,8 @@ class Virtual(Subject):
 
 class DefaultVirtual(Virtual):
     def __init__(sub):
-        pass
+        super(Virtual, sub).__init__(subject_id='demoVirtual')
 
-    def createSubject(sub, **kwargs):
-        return Virtual(**kwargs)
 
 
 class Human(Subject):
@@ -204,23 +197,23 @@ class Human(Subject):
         anonymize                 : True/False
     """
 
-    def __init__(sub, **kwargs):
-        super(Human, sub).__init__(**kwargs)
-        sub.gender = kwargs['gender']
-        sub.birthDate = kwargs['birthDate']
-        sub.firstName = kwargs['firstName']
-        sub.lastName = kwargs['lastName']
-        sub.initials = sub.firstName[0] + '.' + sub.lastName[0] + '.'
-        sub.anonymize = False
+    def __init__(sub, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
+        super(Human, sub).__init__(subject_id, **kwargs)
+        sub.gender = gender
+        sub.birth_date = birth_date
+        sub.first_name = first_name
+        sub.last_name = last_name
+        sub.initials = sub.first_name[0] + '.' + sub.last_name[0] + '.'
+        sub.anonymize = anonymize
 
     def __eq__(sub, other):
-        if isinstance(other, Human) and (sub.subjectID == other.subjectID):
+        if isinstance(other, Human) and (sub.subject_id == other.subject_id):
             return True
         else:
             return False
 
     def allowedGenders(sub):
-        return ['Male', 'Female', 'Other', 'NA']
+        return ['Male', 'Female', 'Other', 'Unknown']
 
     def allowedStrains(sub):
         return None
@@ -231,10 +224,8 @@ class Human(Subject):
 
 class DefaultHuman(Human):
     def __init__(sub):
-        pass
+        super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith', anonymize=False)
 
-    def createSubject(sub, **kwargs):
-        return Human(**kwargs)
 
 
 if __name__ == '__main__':

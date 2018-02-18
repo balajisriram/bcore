@@ -123,18 +123,18 @@ class StandardVisionBehaviorStation(Station):
             the server side, this should provide scalable, TCP communications
             with the server
         """
-        self.server_connection = TCPServerConnection(ipaddr=self.IPAddr,
+        self.server_connection = TCPServerConnection(ipaddr=self.ip_address,
             port=self.port)
-        self.BServerConnection.start()
-        BServerConnDetails = self.BServerConnection.recvData()
-        # use BServerConnDetails to connect to the BServer as a client
+        self.server_connection.start()
+        server_connection_details = self.server_connection.recvData()
+        # use server_connection_details to connect to the BServer as a client
         print('Closing connection as server...')
-        self.BServerConnection.stop()
-        self.BServerConnection = BehaviorClientConnection(
-            ipaddr=BServerConnDetails['ipaddr'],
-            port=BServerConnDetails['port'])
+        self.server_connection.stop()
+        self.server_connection = BehaviorClientConnection(
+            ipaddr=server_connection_details['ipaddr'],
+            port=server_connection_details['port'])
         print(('Starting connection as client...'))
-        self.BServerConnection.start()
+        self.server_connection.start()
 
     def get_subject(self):
         """
@@ -144,27 +144,27 @@ class StandardVisionBehaviorStation(Station):
         raise NotImplementedError()
 
     def close_all_valves(self):
-        self.parallelPort['pPort'].writePins(
-            self.parallelPort['valvePins'], PPORT_LO)
+        self.parallel_port_conn.write_pins(
+            self.parallel_port['valvePins'], PPORT_LO)
 
     def read_ports(self):
-        self.parallelPort['pPort'].readPins(
-            self.parallelPort['portPins'])
+        self.parallel_port_conn.read_pins(
+            self.parallel_port['portPins'])
 
     def open_valve(self, valve):
-        self.parallelPort['pPort'].writePins(
-            self.parallelPort[valve], PPORT_HI)
+        self.parallel_port_conn.write_pins(
+            self.parallel_port[valve], PPORT_HI)
 
     def close_valve(self, valve):
-        self.parallelPort['pPort'].writePins(
-            self.parallelPort[valve], PPORT_LO)
+        self.parallel_port_conn.write_pins(
+            self.parallel_port[valve], PPORT_LO)
 
-    def flush_valves(self, dur):
-        self.parallelPort['pPort'].writePins(
-            self.parallelPort['valvePins'], PPORT_HI)
+    def flush_valves(self, dur=1):
+        self.parallel_port_conn.write_pins(
+            self.parallel_port['valvePins'], PPORT_HI)
         time.sleep(dur)
-        self.parallelPort['pPort'].writePins(
-            self.parallelPort['valvePins'], PPORT_LO)
+        self.parallel_port_conn.write_pins(
+            self.parallel_port['valvePins'], PPORT_LO)
 
     def splash(self):
         pygame.init()
