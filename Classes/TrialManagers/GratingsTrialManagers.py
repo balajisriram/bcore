@@ -20,43 +20,37 @@ class Gratings(StandardVisionBehaviorTrialManager):
             Scale = "ScaleToHeight"
     """
 
-    PixPerCycs = 128
-    Orientations = PI / 4
-    DriftFrequencies = 0
-    Phases = numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)
-    Contrasts = 1
-    Durations = float('Inf')
-
-    def __init__(grating, PixPerCycs=128,
-                 Orientations=PI/4,
-                 DriftFrequencies=0,
-                 Phases=0,
-                 Contrasts=1,
-                 Durations=1,
+    def __init__(self, pix_per_cycs=128,
+                 orientations=PI/4,
+                 driftfrequencies=0,
+                 phases=0,
+                 contrasts=1,
+                 durations=1,
                  **kwargs):
-        super(StandardVisionBehaviorTrialManager, grating).__init__(**kwargs)
+        super(StandardVisionBehaviorTrialManager, self).__init__(**kwargs)
 
-        grating.PixPerCycs=PixPerCycs
-        grating.Orientations=Orientations
-        grating.DriftFrequencies=DriftFrequencies
-        grating.Phases=Phases
-        grating.Contrasts=Contrasts
-        grating.Durations=Durations
+        self.pix_per_cycs=pix_per_cycs
+        self.orientations=orientations
+        self.driftfrequencies=driftfrequencies
+        self.phases=phases
+        self.contrasts=contrasts
+        self.durations=durations
 
-    def CalcStim(gratings, **kwargs):
-        tR = kwargs['trialRecord'] # for saving trial specific info
+        self._internal_objects = []
 
-        (H, W, Hz) = gratings.ChooseResolution(kwargs)
+    def calc_stim(self, tR, **kwargs):
+
+        (H, W, Hz) = self.choose_resolution(kwargs)
         tR.Resolution = (H,W,Hz)
 
 
-    def ChooseResolution(gratings, **kwargs):
+    def choose_resolution(self, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
 
-    def _setupPhases(gratings, **kwargs):
+    def _setup_phases(self, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
@@ -64,14 +58,14 @@ class Gratings(StandardVisionBehaviorTrialManager):
         phase. There is no "correct" and no responses are required/recorded
         """
         (stimulus, stimType, resolution, hz, bitDepth, scaleFactor,
-            framesTotal) = gratings.calcStim(kwargs)
+            framesTotal) = self.calcStim(kwargs)
         # Just display stim
-        doNothing = []
-        gratings.Phases[0] = PhaseSpecs(
+        do_nothing = []
+        self.Phases[0] = PhaseSpecs(
             stimulus=stimulus,
             stimType=stimType,
             startFrame=0,
-            transitions={doNothing: 1},
+            transitions={do_nothing: 1},
             framesUntilTransition=framesTotal,
             autoTrigger=False,
             scaleFactor=scaleFactor,
@@ -80,11 +74,11 @@ class Gratings(StandardVisionBehaviorTrialManager):
             isStim=True,
             indexPulses=False,
             soundPlayed=('trialStartSound', 50))
-        gratings.Phases[1] = PhaseSpecs(
+        self.Phases[1] = PhaseSpecs(
             stimulus=0.5,
             stimType=('timedFrames',10),
             startFrame=0,
-            transitions={doNothing:2},
+            transitions={do_nothing:2},
             framesUntilTransition=10,
             autoTrigger=False,
             scaleFactor=scaleFactor,
@@ -94,8 +88,11 @@ class Gratings(StandardVisionBehaviorTrialManager):
             indexPulses =False,
             soundPlayed=('trialEndSound', 50))
 
-    def _simulate(gratings, **kwargs):
+    def _simulate(self, **kwargs):
         pass
+
+    def decache(self):
+        self._internal_objects = []
 
 
 class AFCGratings(Gratings):

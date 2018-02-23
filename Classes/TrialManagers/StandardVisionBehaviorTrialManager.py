@@ -1,7 +1,7 @@
 from .TrialManager import TrialManager
 from verlib import NormalizedVersion as Ver
 
-doNothing = []
+do_nothing = []
 
 
 class StandardVisionBehaviorTrialManager(TrialManager):
@@ -9,12 +9,12 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         STANDARDVISIONBEHAVIORTRIALMANAGER defines a standard vision
         behavior trial manager.
     """
-    SoundManager = []
-    ReinforcementManager = []
-    RequestPort = 'center'  # 'center' or 'all' or 'none'
-    FrameDropCorner = 'off'
-    TextureCaches = []
-    Phases = []
+    sound_manager = []
+    reinforcement_manager = []
+    request_port = 'center'  # 'center' or 'all' or 'none'
+    frame_drop_corner = 'off'
+    texture_caches = []
+    phases = []
 
     ver = Ver('0.0.1')
 
@@ -22,12 +22,12 @@ class StandardVisionBehaviorTrialManager(TrialManager):
 
     def __init__(tm, **kwargs):
         super(StandardVisionBehaviorTrialManager, tm).__init__(**kwargs)
-        tm.SoundManager = kwargs['soundManager']
-        tm.ReinforcementManager = kwargs['reinforcementmanager']
-        if 'requestPort'in kwargs:
-            tm.RequestPort = kwargs['requestPort']
-        if 'frameDropCorner' in kwargs:
-            tm.FrameDropCorner = kwargs['frameDropCorner']
+        tm.sound_manager = kwargs['sound_manager']
+        tm.reinforcement_manager = kwargs['reinforcement_manager']
+        if 'request_port'in kwargs:
+            tm.request_port = kwargs['request_port']
+        if 'frame_drop_corner' in kwargs:
+            tm.frame_drop_corner = kwargs['frame_drop_corner']
 
     def doTrial(tm, **kwargs):
         # tm - trialManager
@@ -36,26 +36,26 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         # sub - subject
         # tR - trialRecord (current)
         # cR - compiledRecord
-        # tR = kwargs['trialRecords']  # need to send this to _setupPhases
-        tm._setupPhases(kwargs)  # should call calcStim
-        tm._validatePhases()
-        tm._stationOKForTrialManager(kwargs['station'])
+        # tR = kwargs['trialRecords']  # need to send this to _setup_phases
+        tm._setup_phases(kwargs)  # should call calcStim
+        tm._validate_phases()
+        tm._station_ok_for_trial_manager(kwargs['station'])
 
         # important data common to all trials
         tR = kwargs['trialRecords']
-        tR.reinforcementManagerName = tm.ReinforcementManager.name
+        tR.reinforcementManagerName = tm.reinforcement_manager.name
         tR.reinforcementManagerClass = \
-            tm.ReinforcementManager.__class__.__name__
+            tm.reinforcement_manager.__class__.__name__
 
     def decache(tm):
         tm.TextureCaches = []
         return tm
 
-    def _setupPhases(tm):
+    def _setup_phases(tm):
         raise NotImplementedError('Cannot run on an abstract class - call on a',
             ' concrete example')
 
-    def compileRecords(tm):
+    def compile_records(tm):
         pass
 
 
