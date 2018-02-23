@@ -1,5 +1,9 @@
 from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
 from .PhaseSpec import PhaseSpecs
+import psychopy
+import random
+
+PI = 3.14159
 
 __version__ = '0.0.1'
 __author__ = 'Balaji Sriram'
@@ -29,20 +33,35 @@ class Gratings(StandardVisionBehaviorTrialManager):
                  **kwargs):
         super(StandardVisionBehaviorTrialManager, self).__init__(**kwargs)
 
-        self.pix_per_cycs=pix_per_cycs
-        self.orientations=orientations
-        self.driftfrequencies=driftfrequencies
-        self.phases=phases
-        self.contrasts=contrasts
-        self.durations=durations
+        self.pix_per_cycs = pix_per_cycs
+        self.orientations = orientations
+        self.driftfrequencies = driftfrequencies
+        self.phases = phases
+        self.contrasts = contrasts
+        self.durations = durations
 
         self._internal_objects = []
 
     def calc_stim(self, tR, **kwargs):
 
-        (H, W, Hz) = self.choose_resolution(kwargs)
-        tR.Resolution = (H,W,Hz)
+        (H, W, Hz) = self.choose_resolution(**kwargs)
+        resolution = (H,W,Hz)
+        tR.resolution = resolution
 
+        # select from values
+        stimulus = dict()
+        stimulus['pix_per_cyc'] = random.choice(self.pix_per_cycs)
+        stimulus['orientation'] = random.choice(self.orientations)
+        stimulus['driftfrequency'] = random.choice(self.driftfrequencies)
+        stimulus['phase'] = random.choice(self.phases)
+        stimulus['contrast'] = random.choice(self.contrasts)
+        stimulus['duration'] = random.choice(self.durations)
+        tR.stimulus_details = dict()
+        tR.stimulus_details['chosen_stim'] = stimulus
+
+        frames_total = round(Hz*stimulus['duration'])
+
+        return (stimulus, resolution, frames_total)
 
     def choose_resolution(self, **kwargs):
         H = 1080
@@ -57,18 +76,16 @@ class Gratings(StandardVisionBehaviorTrialManager):
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
         """
-        (stimulus, stimType, resolution, hz, bitDepth, scaleFactor,
-            framesTotal) = self.calcStim(kwargs)
+        (stimulus, resolution,frames_total) = self.calc_stim(kwargs)
         # Just display stim
         do_nothing = []
         self.Phases[0] = PhaseSpecs(
             stimulus=stimulus,
-            stimType=stimType,
             startFrame=0,
             transitions={do_nothing: 1},
-            framesUntilTransition=framesTotal,
+            framesUntilTransition=frames_total,
             autoTrigger=False,
-            scaleFactor=scaleFactor,
+            scaleFactor=scale_factor,
             phaseType='stimulus',
             phaseName='stim',
             isStim=True,

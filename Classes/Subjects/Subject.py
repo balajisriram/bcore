@@ -62,8 +62,8 @@ class Subject(object):
         tR.current_step_name = sub.protocol.step().name
         tR.numSteps = sub.protocol.numSteps()
 
-        currentStep = sub.protocol.step()
-        tR = currentStep.do_trial(tR,**kwargs)
+        current_step = sub.protocol.step()
+        tR = current_step.do_trial(tR,**kwargs)
 
         if kwargs['graduate']:
             tR.criterionMet = True
@@ -169,20 +169,19 @@ class Virtual(Subject):
         else:
             return False
 
-    def allowedGenders(sub):
+    def allowed_genders(sub):
         return None
 
-    def allowedStrains(sub):
+    def allowed_strains(sub):
         return None
 
-    def allowedGeneBkgd(sub):
+    def allowed_gene_bkgd(sub):
         return None
 
 
 class DefaultVirtual(Virtual):
     def __init__(sub):
         super(Virtual, sub).__init__(subject_id='demoVirtual')
-
 
 
 class Human(Subject):
@@ -212,20 +211,20 @@ class Human(Subject):
         else:
             return False
 
-    def allowedGenders(sub):
+    def allowed_genders(sub):
         return ['Male', 'Female', 'Other', 'Unknown']
 
-    def allowedStrains(sub):
+    def allowed_strains(sub):
         return None
 
-    def allowedGeneBkgd(sub):
+    def allowed_gene_bkgd(sub):
         return None
 
 
 class DefaultHuman(Human):
     def __init__(sub):
-        super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith', anonymize=False)
-
+        super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
+                                          anonymize=False, gender='Unknown')
 
 
 if __name__ == '__main__':
