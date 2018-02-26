@@ -1,4 +1,5 @@
-class PhaseSpecs(object):
+do_nothing = []
+class PhaseSpec(object):
     """
         PHASESPEC acts as a kind of state machine. You start at the first phase
         which specifies rules for moving through phases and keep going.
@@ -7,7 +8,7 @@ class PhaseSpecs(object):
                     'cache', - relevant texs are stored in stimManager cache
                     'loop', - given stims are looped
                     {'timedFrames', numFrames}, - present 'numFrames' frames
-                    'expert' - use stimManager.drawExpertFrame()
+                    'expert' - use trial_manager.draw_expert_frame()
             default is 'loop'
         stimulus: a dictionary containing
             scaleFactor, hz and frames for ('static', 'cache','loop')
@@ -35,33 +36,39 @@ class PhaseSpecs(object):
             indicating what to output on the station's indexPin during each
             frame (defaults to all False)
     """
-    stimType = 'loop'
-    stimulus = {}
-    startFrame = 0
-    transitions = {}
-    framesUntilTransition = float('inf')
-    autoTrigger = {}
-    scaleFactor = [1, 1]
-    isFinalPhase = False
-    hz = 60
-    phaseType = ''
-    phaseName = ''
-    isStim = False
-    indexPulses = False
+    frames_until_transition = float('inf')
     soundPlayed = {}
 
-    def __init__(spec, **kwargs):
-        spec.stimulus = kwargs['stimulus']
-        spec.stimType = kwargs['stimType']
-        spec.startFrame = kwargs['startFrame']
-        spec.transitions = kwargs['transitions']
-        spec.framesUntilTransition = kwargs['framesUntilTransition']
-        spec.autoTrigger = kwargs['autoTrigger']
-        spec.scaleFactor = kwargs['scaleFactor']
-        spec.isFinalPhase = kwargs['isFinalPhase']
-        spec.hz = kwargs['hz']
-        spec.phaseType = kwargs['phaseType']
-        spec.phaseName = kwargs['phaseName']
-        spec.isStim = kwargs['isStim']
-        spec.indexPulses = kwargs['indexPulses']
-        spec.soundPlayed = kwargs['soundPlayed']
+    def __init__(self,
+                 phase_number = 0,
+                 stimulus = 0.5,
+                 stim_type = 'loop',
+                 start_frame = 0,
+                 transitions = {do_nothing: 1},
+                 frames_until_transition = float('inf'),
+                 auto_trigger = False,
+                 is_final_phase = True,
+                 phase_type = '',
+                 phase_name = '',
+                 pins_to_trigger = [],
+                 sounds_played = {},
+                 **kwargs):
+        self.phase_number = phase_number
+        self.stimulus = stimulus
+        self.stim_type = stim_type
+        self.start_frame = start_frame
+        self.transitions = transitions
+        self.frames_until_transition = frames_until_transition
+        self.auto_trigger = auto_trigger
+        self.is_final_phase = is_final_phase
+        self.hz = kwargs['hz']
+        self.phase_type = phase_type
+        self.phase_name = phase_name
+        self.pins_to_trigger = pins_to_trigger
+        self.sounds_played = sounds_played
+
+    def on_enter (self):
+        pass
+
+    def on_exit(self):
+        pass

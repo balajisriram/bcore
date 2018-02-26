@@ -5,21 +5,22 @@ class TrialManager(object):
         happens at StandardVisionBehaviorTrialManager
     """
     name = ''
-    textDisplay = 'full'
+    text_display = 'full'
 
-    needToUpdate = False
+    need_to_update = False
 
-    def __init__(tm, **kwargs):
-        if 'name' in kwargs:
-            tm.name = kwargs['name']
-        if 'textDisplay' in kwargs:
-            tm.textDisplay = kwargs['textDisplay']
-        assert tm.textDisplay in ['full', 'light', 'off'],\
-            "textDisplay not one of ['full','light','off']"
+    _internal_objects = dict()
 
-    def doTrial(tm, **kwargs):
+    def __init__(self, name, **kwargs):
+        self.name = name
+
+
+    def do_trial(self, **kwargs):
         raise NotImplementedError('Abstract Class in TrialManager does\
             not implement doTrial()')
 
-    def loop(tm, **kwargs):
+    def loop(self, **kwargs):
         pass
+
+    def decache(self):
+        self._internal_objects = dict()

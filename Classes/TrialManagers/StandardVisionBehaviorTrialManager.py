@@ -9,27 +9,22 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         STANDARDVISIONBEHAVIORTRIALMANAGER defines a standard vision
         behavior trial manager.
     """
-    sound_manager = []
-    reinforcement_manager = []
-    request_port = 'center'  # 'center' or 'all' or 'none'
-    frame_drop_corner = 'off'
-    texture_caches = []
     phases = []
 
     ver = Ver('0.0.1')
 
-    allowRepeats = True
+    allow_repeats = True
 
-    def __init__(tm, **kwargs):
-        super(StandardVisionBehaviorTrialManager, tm).__init__(**kwargs)
-        tm.sound_manager = kwargs['sound_manager']
-        tm.reinforcement_manager = kwargs['reinforcement_manager']
-        if 'request_port'in kwargs:
-            tm.request_port = kwargs['request_port']
-        if 'frame_drop_corner' in kwargs:
-            tm.frame_drop_corner = kwargs['frame_drop_corner']
+    def __init__(tm, name = 'DefaultVisBehTrManager',
+                 sound_manager = None, reinforcement_manager = None, text_display='full, ', **kwargs):
+        super(StandardVisionBehaviorTrialManager, tm).__init__(name, **kwargs)
+        tm.sound_manager = sound_manager
+        tm.reinforcement_manager = reinforcement_manager
+        tm.text_display = text_display
 
-    def doTrial(tm, tR, station, **kwargs):
+        assert tm.text_display in ['full', 'light', 'off'], "text_display not one of ['full','light','off']"
+
+    def do_trial(tm, tR, station, **kwargs):
         # tm - trialManager
         # st - station
         # p - protocol
@@ -47,7 +42,6 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         tR.reinforcement_manager_class = tm.reinforcement_manager.__class__.__name__
 
     def decache(tm):
-        tm.TextureCaches = []
         return tm
 
     def _setup_phases(tm):

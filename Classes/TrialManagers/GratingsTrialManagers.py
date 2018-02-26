@@ -1,5 +1,5 @@
 from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
-from .PhaseSpec import PhaseSpecs
+from .PhaseSpec import PhaseSpec
 import psychopy
 import random
 
@@ -12,35 +12,38 @@ __author__ = 'Balaji Sriram'
 class Gratings(StandardVisionBehaviorTrialManager):
     """
         GRATINGS defines a standard gratings trial manager
-            PixPerCycs
-            Orientations
-            DriftFrequencies
-            Phases
-            Contrasts
-            Durations
-            Radii # in units of "Scale"
+            deg_per_cycs
+            orientations
+            driftfrequencies
+            phases
+            contrasts
+            durations
+            radii
 
-            RadiusType = "HardEdge"
-            Scale = "ScaleToHeight"
     """
 
-    def __init__(self, pix_per_cycs=128,
-                 orientations=PI/4,
-                 driftfrequencies=0,
+    def __init__(self,
+                 deg_per_cycs=10, #degrees
+                 orientations=45, #degrees
+                 driftfrequencies=0, #hz
                  phases=0,
                  contrasts=1,
-                 durations=1,
+                 durations=1, #seconds
+                 radii=40, #degrees
+                 iti=1, #seconds
                  **kwargs):
         super(StandardVisionBehaviorTrialManager, self).__init__(**kwargs)
 
-        self.pix_per_cycs = pix_per_cycs
+        self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
         self.driftfrequencies = driftfrequencies
         self.phases = phases
         self.contrasts = contrasts
         self.durations = durations
+        self.radii = radii
 
-        self._internal_objects = []
+        self.iti = iti # inter trial interval
+
 
     def calc_stim(self, tR, **kwargs):
 
@@ -56,8 +59,10 @@ class Gratings(StandardVisionBehaviorTrialManager):
         stimulus['phase'] = random.choice(self.phases)
         stimulus['contrast'] = random.choice(self.contrasts)
         stimulus['duration'] = random.choice(self.durations)
+        stimulus['radius'] = random.choice(self.radii)
         tR.stimulus_details = dict()
         tR.stimulus_details['chosen_stim'] = stimulus
+
 
         frames_total = round(Hz*stimulus['duration'])
 
@@ -79,23 +84,23 @@ class Gratings(StandardVisionBehaviorTrialManager):
         (stimulus, resolution,frames_total) = self.calc_stim(kwargs)
         # Just display stim
         do_nothing = []
-        self.Phases[0] = PhaseSpecs(
+        self.Phases[0] = PhaseSpec(
             stimulus=stimulus,
-            startFrame=0,
+            stim_type='dynamic',
+            start_frame=0,
             transitions={do_nothing: 1},
-            framesUntilTransition=frames_total,
-            autoTrigger=False,
-            scaleFactor=scale_factor,
-            phaseType='stimulus',
-            phaseName='stim',
-            isStim=True,
-            indexPulses=False,
-            soundPlayed=('trialStartSound', 50))
-        self.Phases[1] = PhaseSpecs(
+            frames_until_transition=frames_total,
+            auto_trigger=False,
+            phase_type='stimulus',
+            phase_name='stim',
+            is_stim=True,
+            index_pulses=False,
+            sound_played=('trialStartSound', 50))
+        self.Phases[1] = PhaseSpec(
             stimulus=0.5,
             stimType=('timedFrames',10),
-            startFrame=0,
-            transitions={do_nothing:2},
+            start_frame=0,
+            transitions={do_nothing: 2},
             framesUntilTransition=10,
             autoTrigger=False,
             scaleFactor=scaleFactor,
@@ -109,7 +114,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
         pass
 
     def decache(self):
-        self._internal_objects = []
+        self._internal_objects = dict()
 
 
 class AFCGratings(Gratings):
