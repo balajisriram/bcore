@@ -44,8 +44,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
         self.iti = iti # inter trial interval
 
-
-    def calc_stim(self, tR, **kwargs):
+    def calc_stim(self, tR, station, **kwargs):
 
         (H, W, Hz) = self.choose_resolution(**kwargs)
         resolution = (H,W,Hz)
@@ -66,7 +65,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
         frames_total = round(Hz*stimulus['duration'])
 
-        return (stimulus, resolution, frames_total)
+        return stimulus, resolution, frames_total
 
     def choose_resolution(self, **kwargs):
         H = 1080
@@ -74,14 +73,14 @@ class Gratings(StandardVisionBehaviorTrialManager):
         Hz = 60
         return (H,W,Hz)
 
-    def _setup_phases(self, **kwargs):
+    def _setup_phases(self, tR, station, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
         """
-        (stimulus, resolution,frames_total) = self.calc_stim(kwargs)
+        (stimulus, resolution,frames_total) = self.calc_stim(tR, station, kwargs)
         # Just display stim
         do_nothing = []
         self.Phases[0] = PhaseSpec(

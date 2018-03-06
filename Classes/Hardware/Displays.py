@@ -1,8 +1,11 @@
+from psychopy import monitors
+
 def StandardDisplay():
     return Dell_E3211H()
 
 
-class Dell_E3211H(object):
+def Dell_E3211H():
+    name = 'Dell_E3211H'
     x_pixels = 1920
     y_pixels = 1080
     x_size = 509.8  # mm
@@ -11,5 +14,8 @@ class Dell_E3211H(object):
     make = 'Dell'
     model = 'E2311H'
 
-    def __init__(self):
-        pass
+    mon = psychopy.monitors.Monitor(name,
+                                    width = 50.98,
+                                    distance = 12,
+                                    gamma = 1.2)
+    return mon
