@@ -2,14 +2,17 @@
 import sys
 import os
 from ... import get_base_directory, get_ip_addr
-from ..Classes.ClientAndServer.BServerLocal import BServerLocal
+from ..Classes.ClientAndServer.BServer import BServerLocal
+from ..Classes.Protocol import DemoProtocol
+from ..Classes.Subject import DefaultVirtual
 
 SERVER_PORT = 12345
-def stand_alone_run(subject = 'demo1', bserver_path = None, protocol = 'demo_protocol'):
+def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoProtocol):
     # look for local server and collect information about the Subject being run
     b_server = BServerLocal.load_server(bserver_path) # load the server from path
-    if subject not in b_server.get_subject_ids():
-        raise ValueError('subect % ')
+    if subject_id not in b_server.get_subject_ids():
+        raise RuntimeWarning('subect % wasn''t found in server. Adding...\n',subject_id)
+        sub = DefaultVirtual()
 
     # find protocol and and training step num of subject being run.
 
@@ -24,7 +27,7 @@ if __name__ == '__main__':
     SARKWArgs = {
         'subject_id': 'demo1',
         'bserver_path': None,
-        'protocol': None,
+        'protocol': DemoProtocol,
         }
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time

@@ -154,14 +154,14 @@ class DefaultRat(Rat):
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
 
-class Virtual(Subject):
+class VirtualSubject(Subject):
     """
-        VIRTUAL has the following attributes
+        VIRTUALSUBJECT has the following attributes
         subjectID                 : string ID sent to SUBJECT
     """
 
     def __init__(sub, subject_id, **kwargs):
-        super(Virtual, sub).__init__(subject_id, **kwargs)
+        super(VirtualSubject, sub).__init__(subject_id, **kwargs)
 
     def __eq__(sub, other):
         if isinstance(other, Virtual) and (sub.subject_id == other.subject_id):

@@ -15,8 +15,12 @@ class StandardVisionBehaviorTrialManager(TrialManager):
 
     allow_repeats = True
 
-    def __init__(tm, name = 'DefaultVisBehTrManager',
-                 sound_manager = None, reinforcement_manager = None, text_display='full, ', **kwargs):
+    def __init__(tm, 
+	             name = 'DefaultVisBehTrManager',
+                 sound_manager = None, 
+				 reinforcement_manager = None, 
+				 text_display='full', 
+				 **kwargs):
         super(StandardVisionBehaviorTrialManager, tm).__init__(name, **kwargs)
         tm.sound_manager = sound_manager
         tm.reinforcement_manager = reinforcement_manager

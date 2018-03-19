@@ -1,5 +1,6 @@
 from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
 from .PhaseSpec import PhaseSpec
+from ..ReinforcementManager import ConstantReinforcement
 import psychopy
 import random
 
@@ -32,7 +33,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
                  radii=40, #degrees
                  iti=1, #seconds
                  **kwargs):
-        super(StandardVisionBehaviorTrialManager, self).__init__(**kwargs)
+        super(Gratings, self).__init__(**kwargs)
 
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -97,17 +98,17 @@ class Gratings(StandardVisionBehaviorTrialManager):
             sound_played=('trialStartSound', 50))
         self.Phases[1] = PhaseSpec(
             stimulus=0.5,
-            stimType=('timedFrames',10),
+            stim_type=('timedFrames',10),
             start_frame=0,
             transitions={do_nothing: 2},
-            framesUntilTransition=10,
-            autoTrigger=False,
+            frames_until_transition=10,
+            auto_trigger=False,
             scaleFactor=scaleFactor,
-            phaseType='inter-trial',
-            phaseName='inter-trial',
-            isStim=False,
-            indexPulses =False,
-            soundPlayed=('trialEndSound', 50))
+            phase_type='inter-trial',
+            phase_name='inter-trial',
+            is_stim=False,
+            index_pulses =False,
+            sound_played=('trialEndSound', 50))
 
     def _simulate(self, **kwargs):
         pass
@@ -119,7 +120,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
 class AFCGratings(Gratings):
     """
         GRATINGS defines a standard gratings trial manager
-            PixPerCycs
+            deg_per_cycs
             Orientations
             DriftFrequencies
             Phases
@@ -130,34 +131,67 @@ class AFCGratings(Gratings):
             RadiusType = "HardEdge"
             Scale = "ScaleToHeight"
     """
-
-    PixPerCycs = [[128],[128]]
-    Orientations = [[-PI / 4], [PI / 4]]
-    DriftFrequencies = [[0],[0]]
-    Phases = [numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True),numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)]
-    Contrasts = [[1],[1]]
-    Durations = [[float('Inf')],[float('Inf')]]
-
     ver = Ver('0.0.1')
+	n_afc = None
 
-    def __init__(afcgrating, **kwargs):
-        super(Gratings, grating).__init__(**kwargs)
-
-        if 'PixPerCycs'in kwargs:
-            grating.PixPerCycs = kwargs['PixPerCycs']
-        if 'Orientations' in kwargs:
-            grating.Orientations = kwargs['Orientations']
-        if 'DriftFrequencies'in kwargs:
-            grating.DriftFrequencies = kwargs['DriftFrequencies']
-        if 'Phases' in kwargs:
-            grating.Phases = kwargs['Phases']
-        if 'Contrasts'in kwargs:
-            grating.Contrasts = kwargs['Contrasts']
-        if 'Durations' in kwargs:
-            grating.Durations = kwargs['Durations']
-
-    def CalcStim(gratings, **kwargs):
-        (H, W, Hz) = gratings.ChooseResolution(kwargs)
+    def __init__(self, 
+	             deg_per_cycs = {'L':[10],R':[10]},
+				 orientations = {'L':[-PI / 4], R':[PI / 4]},
+				 driftfrequencies = {'L':[0],R':[0]},
+				 phases = {'L':numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True),R':numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)},
+				 contrasts = {'L':[1],R':[1]},
+				 durations = {'L':[float('Inf')],R':[float('Inf')]},
+				 radii = {'L':[40],'R':[40]},
+				 iti = 1,
+				 do_combos = True,
+				 reinforcement_manager = ConstantReinforcement,
+				 delay_manager = NoDelay,
+				 **kwargs):
+        super(AFCGratings, self).__init__(deg_per_cycs=deg_per_cycs, #degrees
+                                          orientations = orientations, #degrees
+                                          driftfrequencies = driftfrequencies, #hz
+                                          phases = phases,
+                                          contrasts = contrasts,
+                                          durations = durations, #seconds
+                                          radii = radii, #degrees
+                                          iti = iti, #seconds
+                                          **kwargs)
+		self.do_combos = do_combos
+		
+		n_afc = len(deg_per_cycs)
+		assert(len(self.orientations)==n_afc,'orientations not same length as %',n_afc)
+		assert(len(self.driftfrequencies)==n_afc,'driftfrequencies not same length as %',n_afc)
+		assert(len(self.phases)==n_afc,'phases not same length as %',n_afc)
+		assert(len(self.contrasts)==n_afc,'contrasts not same length as %',n_afc)
+		assert(len(self.durations)==n_afc,'durations not same length as %',n_afc)
+		assert(len(self.radii)==n_afc,'radii not same length as %',n_afc)
+		
+		if do_combos:
+		    # if do_combos, don't have to worry about the lengths of each values
+		else:
+		    num_options_L = len(self.deg_per_cycs['L'])
+			assert(len(self.orientations['L'])==num_options_L,'L orientations not same length as deg_per_cycs')
+		    assert(len(self.driftfrequencies['L'])==num_options_L,'L driftfrequencies not same length as deg_per_cycs')
+		    assert(len(self.phases['L'])==num_options_L,'L phases not same length as deg_per_cycs')
+		    assert(len(self.contrasts['L'])==num_options_L,'L contrasts not same length as deg_per_cycs')
+		    assert(len(self.durations['L'])==num_options_L,'L durations not same length as deg_per_cycs')
+		    assert(len(self.radii['L'])==num_options_L,'L radii not same length as deg_per_cycs')
+			
+		    num_options_R = len(self.deg_per_cycs['R'])
+			assert(len(self.orientations['R'])==num_options_R,'R orientations not same length as deg_per_cycs')
+		    assert(len(self.driftfrequencies['R'])==num_options_R,'R driftfrequencies not same length as deg_per_cycs')
+		    assert(len(self.phases['R'])==num_options_R,'R phases not same length as deg_per_cycs')
+		    assert(len(self.contrasts['R'])==num_options_R,'R contrasts not same length as deg_per_cycs')
+		    assert(len(self.durations['R'])==num_options_R,'R durations not same length as deg_per_cycs')
+		    assert(len(self.radii['R'])==num_options_R,'R radii not same length as deg_per_cycs')
+			
+	@property
+	def n_afc():
+	    return len(self.deg_per_cycs)
+		
+    def calc_stim(self, tR, station, **kwargs):
+        (H, W, Hz) = self.ChooseResolution(kwargs)
+		tR.chosen_
 
     def ChooseResolution(gratings, **kwargs):
         H = 1080

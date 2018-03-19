@@ -63,7 +63,7 @@ class SimpleProtocol(Protocol):
 class SequentialProtocol(SimpleProtocol):
     """
         SEQUENTIALPROTOCOL is a SIMPLEPROTOCOL that only allows for graduate
-        and degraduate function with the changeToStep function erroring
+        and degraduate function with the change_to_step function erroring
     """
     def __init__(self, **kwargs):
         super(SequentialProtocol, self).__init__(**kwargs)

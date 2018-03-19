@@ -36,8 +36,6 @@ class TrainingStep(object):
         tR.scheduler_version_number = ts.scheduler.ver
         tR.criterion_version_number = ts.criterion.ver
 
-        kwargs['trialManager'] = ts.TrialManager
-
         if ts.schedule_ok(**kwargs):
             tR = ts.trial_manager.do_trial(tR, **kwargs)
 
