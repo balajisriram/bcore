@@ -15,7 +15,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
         GRATINGS defines a standard gratings trial manager
             deg_per_cycs
             orientations
-            driftfrequencies
+            drift_frequencies
             phases
             contrasts
             durations
@@ -26,7 +26,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
     def __init__(self,
                  deg_per_cycs=10, #degrees
                  orientations=45, #degrees
-                 driftfrequencies=0, #hz
+                 drift_frequencies=0, #hz
                  phases=0,
                  contrasts=1,
                  durations=1, #seconds
@@ -37,7 +37,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
-        self.driftfrequencies = driftfrequencies
+        self.drift_frequencies = drift_frequencies
         self.phases = phases
         self.contrasts = contrasts
         self.durations = durations
@@ -53,9 +53,9 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
         # select from values
         stimulus = dict()
-        stimulus['pix_per_cyc'] = random.choice(self.pix_per_cycs)
+        stimulus['deg_per_cyc'] = random.choice(self.deg_per_cycs)
         stimulus['orientation'] = random.choice(self.orientations)
-        stimulus['driftfrequency'] = random.choice(self.driftfrequencies)
+        stimulus['drift_frequency'] = random.choice(self.drift_frequencies)
         stimulus['phase'] = random.choice(self.phases)
         stimulus['contrast'] = random.choice(self.contrasts)
         stimulus['duration'] = random.choice(self.durations)

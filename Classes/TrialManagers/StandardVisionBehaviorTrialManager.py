@@ -36,7 +36,7 @@ class StandardVisionBehaviorTrialManager(TrialManager):
         # tR - trialRecord (current)
         # cR - compiledRecord
         # tR = kwargs['trialRecords']  # need to send this to _setup_phases
-        tm._setup_phases(tR, station)  # should call calc_stim
+        tm._setup_phases(tR, station, **kwargs)  # should call calc_stim
         tm._validate_phases()
         tm._station_ok_for_trial_manager(station)
 
