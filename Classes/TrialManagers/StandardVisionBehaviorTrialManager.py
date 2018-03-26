@@ -3,6 +3,8 @@ from verlib import NormalizedVersion as Ver
 
 do_nothing = []
 
+__author__ = 'Balaji Sriram'
+
 
 class StandardVisionBehaviorTrialManager(TrialManager):
     """

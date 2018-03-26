@@ -1,3 +1,5 @@
+__author__ = 'Balaji Sriram'
+
 class TrainingStep(object):
     """
         TRAININGSTEP is added to a protocol. This will determine the behavior

@@ -22,7 +22,7 @@ def add_paths():
                   ]
                   # make a list of all the directories
     sys.path.append(baseDirTree)
-    print('INFO:: added module fodlers to path')
+    print('INFO:: added module folders to path')
 
 
 def get_ip_addr(*args):

@@ -1,6 +1,14 @@
 import time
 from verlib import NormalizedVersion as Ver
 
+__author__ = "Balaji Sriram"
+__version__ = "0.0.1"
+__copyright__ = "Copyright 2018"
+__license__ = "GPL"
+__version__ = "1.0.1"
+__maintainer__ = "Balaji Sriram"
+__email__ = "balajisriram@gmail.com"
+__status__ = "Production"
 
 class Subject(object):
     """
@@ -19,6 +27,7 @@ class Subject(object):
         """
         sub.subject_id = subject_id
         sub.protocol = []
+		sub.session_manager = []
         sub.creation_date = time.time()
 
     def __eq__(sub, other):
@@ -29,11 +38,21 @@ class Subject(object):
         if not sub.protocol:
             sub.protocol = new_protocol
         else:
-            raise ValueError('cannot add newProtocol. protocol is not empty. \
-            Maybe you meant replaceProtocol()?')
+            raise ValueError('cannot add new_protocol. protocol is not empty. \
+            Maybe you meant replace_protocol()?')
+			
+	def add_session_manager(sub, new_session_manager):
+        if not sub.session_manager:
+            sub.session_manager = new_session_manager
+        else:
+            raise ValueError('cannot add new_session_manager. session_manager is not empty. \
+            Maybe you meant replace_session_manager()?')
 
     def replace_protocol(sub, new_protocol):
         sub.protocol = new_protocol
+
+	def replace_session_manager(sub, new_session_manager):
+        sub.session_manager = new_session_manager
 
     def allowed_genders(sub):
         return None
@@ -82,7 +101,9 @@ class Mouse(Subject):
         geneBkgd                  : string identifier
         manipulation              : three-ple list
     """
-
+	
+	ver = Ver('0.0.1')
+	
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Mouse, sub).__init__(subject_id , **kwargs)
         sub.gender = gender
@@ -108,6 +129,8 @@ class Mouse(Subject):
 
 
 class DefaultMouse(Mouse):
+    ver = Ver('0.0.1')
+	
     def __init__(sub):
         super(DefaultMouse, sub).__init__(subject_id='demoMouse',gender='Unknown',
                                           birth_date='',strain='C57BL/6J',gene_bkgd='WT')
@@ -123,7 +146,9 @@ class Rat(Subject):
         geneBkgd                  : string identifier
         manipulation              : three-ple list
     """
-
+	
+	ver = Ver('0.0.1')
+	
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Rat, sub).__init__(subject_id, **kwargs)
         sub.gender = gender
@@ -149,6 +174,8 @@ class Rat(Subject):
 
 
 class DefaultRat(Rat):
+    ver = Ver('0.0.1')
+	
     def __init__(sub):
         super(DefaultRat, sub).__init__(subject_id='demoRat',gender='Unknown',
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
@@ -159,7 +186,9 @@ class VirtualSubject(Subject):
         VIRTUALSUBJECT has the following attributes
         subjectID                 : string ID sent to SUBJECT
     """
-
+	
+    ver = Ver('0.0.1')
+	
     def __init__(sub, subject_id, **kwargs):
         super(VirtualSubject, sub).__init__(subject_id, **kwargs)
 
@@ -180,6 +209,8 @@ class VirtualSubject(Subject):
 
 
 class DefaultVirtual(Virtual):
+	ver = Ver('0.0.1')
+	
     def __init__(sub):
         super(Virtual, sub).__init__(subject_id='demoVirtual')
 
@@ -195,7 +226,8 @@ class Human(Subject):
         initials                  : f.l.
         anonymize                 : True/False
     """
-
+    ver = Ver('0.0.1')
+	
     def __init__(sub, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
         super(Human, sub).__init__(subject_id, **kwargs)
         sub.gender = gender
@@ -222,6 +254,8 @@ class Human(Subject):
 
 
 class DefaultHuman(Human):
+    ver = Ver('0.0.1')
+	
     def __init__(sub):
         super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
                                           anonymize=False, gender='Unknown')

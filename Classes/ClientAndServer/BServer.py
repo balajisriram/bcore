@@ -7,6 +7,7 @@ import zmq
 
 from verlib import NormalizedVersion as Ver
 from ... import get_base_directory, get_ip_addr, get_time_stamp
+__author__ = 'Balaji Sriram'
 
 
 class BServer(object):

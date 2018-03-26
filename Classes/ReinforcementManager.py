@@ -1,5 +1,7 @@
 from verlib import NormalizedVersion as Ver
 
+__author__ = 'Balaji Sriram'
+
 
 class ReinforcementManager(object):
     ver = Ver('0.0.1')

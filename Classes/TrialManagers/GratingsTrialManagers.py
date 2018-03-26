@@ -6,7 +6,6 @@ import random
 
 PI = 3.14159
 
-__version__ = '0.0.1'
 __author__ = 'Balaji Sriram'
 
 
