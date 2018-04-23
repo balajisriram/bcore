@@ -26,26 +26,28 @@ __status__ = "Production"
 
 SERVER_PORT = 12345
 
-def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGratingsProtocol()):
+def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGratingsProtocol(), create_objects_if_absent = False):
     # look for local server and collect information about the Subject being run
-    if not bserver_path:
-        bserver_path = os.path.join(get_base_directory(),'ServerData','dB.Server')
-    
-    if not os.path.exists(bserver_path):
-        print("Server not found at location. Creating new server by default.")
-        b_server = BServerLocal()
-        b_server._setup_paths()
-        b_server.save()
-    else:
-        b_server = BServerLocal.load_server(bserver_path) # load the server from path
-    
-    if subject_id not in b_server.get_subject_ids():
-        raise RuntimeWarning('Subject % wasn''t found in server. Adding...\n',subject_id)
-        sub = DefaultVirtual()
-        prot = DemoGratingsProtocol()
-        sub.add_protocol(prot)
-        sess = NoTimeOff()
-        sub.add_session_manager(sess)
+    if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
+
+    if create_objects_if_absent:
+        if not os.path.exists(bserver_path):
+            print("STANDALONERUN:Server not found at location. Creating new server by default.")
+            b_server = BServerLocal()
+            b_server._setup_paths()
+            b_server.save()
+        else:
+            b_server = BServerLocal.load_server(bserver_path) # load the server from path
+        
+        if subject_id not in b_server.get_subject_ids():
+            print("STANDALONERUN:Subject %r wasn''t found in server. Adding...\n" %subject_id)
+            sub = DefaultVirtual()
+            prot = DemoGratingsProtocol()
+            sub.add_protocol(prot)
+            b_server.add_subject(sub)
+            
+        if not b_server.get_station_ids():
+            print("STANDALONERUN:No Stations found in server. Creating new station...\n")
 	
     # find protocol and and training step num of subject being run.
     
@@ -82,5 +84,5 @@ if __name__ == '__main__':
             print (SARKWArgs)
             added = False
 			
-    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)
+    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol, create_objects_if_absent=True)
 

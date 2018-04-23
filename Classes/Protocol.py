@@ -2,6 +2,7 @@ from verlib import NormalizedVersion as Ver
 from .Criteria.Criterion import RepeatIndefinitely
 from .SessionManager import NoTimeOff
 from .TrialManagers.GratingsTrialManagers import Gratings
+from .ReinforcementManager import NoReinforcement
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -124,5 +125,5 @@ class DemoGratingsProtocol(SimpleProtocol):
 	
     def __init__(self):
         name = "DemoGratingsProtocol"
-        training_steps = ("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings())
+        training_steps = ("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings(), NoReinforcement())
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)

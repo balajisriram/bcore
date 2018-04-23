@@ -235,6 +235,8 @@ class BServerLocal(object):
         self.server_data_path = os.path.join(get_base_directory(),'BCoreData','ServerData')
         self.server_ip = 'http://localhost'
         self.creation_time = time.time()
+        
+        print("BSERVER:BSERVERLOCAL:__INIT__:Initialized new BServerLocal object")
 
     @staticmethod
     def load():
@@ -255,7 +257,7 @@ class BServerLocal(object):
         if os.path.isfile(dbLoc):
             with open(dbLoc, 'rb') as f:
                 server = pickle.load(f)
-            print('BServer loaded')
+            print("BSERVER:BSERVERLOCAL:LOAD_SERVER:Loading server")
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
@@ -271,7 +273,7 @@ class BServerLocal(object):
         srcDir = os.path.join(
             get_base_directory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_directory(), 'BCoreData', 'ServerData', 'Backups')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
@@ -285,12 +287,12 @@ class BServerLocal(object):
                 os.path.join(srcDir, 'db.BServer'),  # source
                 os.path.join(desDir, desName)  # destination
                 )
-            print(('Moved to backup... deleting old copy'))
+            print("BSERVER:BSERVERLOCAL:SAVE_SERVER:Moved to backup... deleting old copy")
             os.remove(os.path.join(srcDir, 'db.BServer'))
 
         # there might be some attributes that need to be deleted
         # delete them here before continuing
-        print(('Cleaning and pickling object'))
+        print("BSERVER:BSERVERLOCAL:SAVE_SERVER:Cleaning and pickling object")
         cleanedBServer = copy.deepcopy(self)
         cleanedBServer.StationConnections = {}
         with open(os.path.join(srcDir, 'db.BServer'), 'wb') as f:
@@ -332,7 +334,6 @@ class BServerLocal(object):
         if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','Backups')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','Backups'))
 
-
     def initialize_server(force_delete=False):
         # setup the paths
         _setup_paths(force_delete)
@@ -342,6 +343,7 @@ class BServerLocal(object):
         if (new_station.station_id in self.get_station_ids() or
                 new_station.station_name in self.get_station_names()):
             raise ValueError('Station IDs and Station Names have to be unique')
+        print("BSERVER:BSERVERLOCAL:SAVE_SERVER:Adding station")
         self.stations.append(new_station)
         # now enable station specific data
         self.save()
@@ -349,6 +351,7 @@ class BServerLocal(object):
     def add_subject(self, new_subject):
         if new_subject in self.subjects:
             raise ValueError('Cannot add replica of subjects to BServer')
+        print("BSERVER:BSERVERLOCAL:ADD_SUBJECT:Adding subject")
         self.subjects.append(new_subject)
         self.save()
 
@@ -378,7 +381,10 @@ class BServerLocal(object):
         for subject in self.subjects:
             subject_ids.append(subject.subject_id)
         return subject_ids
-
+    
+    @staticmethod
+    def get_standard_server_path():
+        return os.path.join(get_base_directory(),'BCoreData','ServerData','dB.BServer')
 
 if __name__ == "__main__":
     print("here")
