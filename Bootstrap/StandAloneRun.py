@@ -7,10 +7,9 @@ StandAloneRun
 	 --server-path    server path to BServer
 	 -p, --protocol   protocol object. See ../User folder for example protocols
 """
-
 import sys
 import os
-from ... import get_base_directory, get_ip_addr
+from .. import get_base_directory, get_ip_addr
 from ..Classes.ClientAndServer.BServer import BServerLocal
 from ..Classes.Protocol import DemoProtocol
 from ..Classes.SessionManager import NoTimeOff
@@ -33,10 +32,10 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoPr
     if subject_id not in b_server.get_subject_ids():
         raise RuntimeWarning('subect % wasn''t found in server. Adding...\n',subject_id)
         sub = DefaultVirtual()
-		prot = DemoProtocol()
-		sub.add_protocol(prot)
-		sess = NoTimeOff()
-		sub.add_session_manager(sess)
+        prot = DemoProtocol()
+        sub.add_protocol(prot)
+        sess = NoTimeOff()
+        sub.add_session_manager(sess)
 	
     # find protocol and and training step num of subject being run.
     

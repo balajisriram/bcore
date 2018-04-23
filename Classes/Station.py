@@ -8,6 +8,14 @@ from ... import get_base_directory, get_ip_addr
 from uuid import getnode
 from verlib import NormalizedVersion as Ver
 
+__author__ = "Balaji Sriram"
+__version__ = "0.0.1"
+__copyright__ = "Copyright 2018"
+__license__ = "GPL"
+__version__ = "1.0.1"
+__maintainer__ = "Balaji Sriram"
+__email__ = "balajisriram@gmail.com"
+__status__ = "Production"
 
 PPORT_LO = 0
 PPORT_HI = 1
