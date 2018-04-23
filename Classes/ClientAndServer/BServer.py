@@ -280,7 +280,7 @@ class BServerLocal(object):
         if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
             old = BServerLocal()  # standardLoad to old
-            desName = 'db_' + get_time_stamp(old.creationTime) + '.BServer'
+            desName = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
             shutil.copyfile(
                 os.path.join(srcDir, 'db.BServer'),  # source
                 os.path.join(desDir, desName)  # destination
@@ -318,19 +318,19 @@ class BServerLocal(object):
         os.remove(os.path.join(srcDir, newestBkup))
         # load the backup and return it ## TOBEDONE
 
-    def _setup_paths(force_delete=False):
+    def _setup_paths(self, force_delete=False):
         if force_delete:
-            import shutils
-            shutils.rmtree(os.path.join(BCore.get_base_directory,'BCoreData'))
+            import shutil
+            shutil.rmtree(os.path.join(get_base_directory(),'BCoreData'))
 
-        if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData')):
-            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData'))
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData'))
 
-        if not os.path.exist(os.path.join(BCore.get_base_directory,'BCoreData','ServerData')):
-            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData'))
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData'))
 
-        if not os.path.exist(os.path.join(BCore.get_base_directory,'BcoreData','ServerData','Backups')):
-            os.mkdir(os.path.join(BCore.get_base_directory,'BCoreData','ServerData','Backups'))
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','Backups')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','Backups'))
 
 
     def initialize_server(force_delete=False):

@@ -27,7 +27,7 @@ class Subject(object):
         """
         sub.subject_id = subject_id
         sub.protocol = []
-		sub.session_manager = []
+        sub.session_manager = []
         sub.creation_date = time.time()
 
     def __eq__(sub, other):
@@ -41,7 +41,7 @@ class Subject(object):
             raise ValueError('cannot add new_protocol. protocol is not empty. \
             Maybe you meant replace_protocol()?')
 			
-	def add_session_manager(sub, new_session_manager):
+    def add_session_manager(sub, new_session_manager):
         if not sub.session_manager:
             sub.session_manager = new_session_manager
         else:
@@ -51,7 +51,7 @@ class Subject(object):
     def replace_protocol(sub, new_protocol):
         sub.protocol = new_protocol
 
-	def replace_session_manager(sub, new_session_manager):
+    def replace_session_manager(sub, new_session_manager):
         sub.session_manager = new_session_manager
 
     def allowed_genders(sub):
@@ -102,7 +102,7 @@ class Mouse(Subject):
         manipulation              : three-ple list
     """
 	
-	ver = Ver('0.0.1')
+    ver = Ver('0.0.1')
 	
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Mouse, sub).__init__(subject_id , **kwargs)
@@ -147,7 +147,7 @@ class Rat(Subject):
         manipulation              : three-ple list
     """
 	
-	ver = Ver('0.0.1')
+    ver = Ver('0.0.1')
 	
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Rat, sub).__init__(subject_id, **kwargs)
@@ -208,11 +208,11 @@ class VirtualSubject(Subject):
         return None
 
 
-class DefaultVirtual(Virtual):
-	ver = Ver('0.0.1')
+class DefaultVirtual(VirtualSubject):
+    ver = Ver('0.0.1')
 	
     def __init__(sub):
-        super(Virtual, sub).__init__(subject_id='demoVirtual')
+        super(DefaultVirtual, sub).__init__(subject_id='demoVirtual')
 
 
 class Human(Subject):

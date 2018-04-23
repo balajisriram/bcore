@@ -7,7 +7,7 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-do_nothing = []
+do_nothing = None
 class PhaseSpec(object):
     """
         PHASESPEC acts as a kind of state machine. You start at the first phase

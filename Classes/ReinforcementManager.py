@@ -10,14 +10,21 @@ __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 class ReinforcementManager(object):
-    ver = Ver('0.0.1')
+    ver = Ver("0.0.1")
 
     def __init__(self, name='DefaultReinforcementManager'):
         self.name = name
 
+		
+class NoReinforcement(ReinforcementManager):
+    ver = Ver("0.0.1")
+
+    def __init__(self, name='NoReinforcement'):
+        super(NoReinforcement, self).__init__(name = name)
+	
 
 class ConstantReinforcement(ReinforcementManager):
-    ver = Ver('0.0.1')
+    ver = Ver("0.0.1")
 
     def __init__(self,
                  reward_scalar = 1,

@@ -1,4 +1,7 @@
 from verlib import NormalizedVersion as Ver
+from .Criteria.Criterion import RepeatIndefinitely
+from .SessionManager import NoTimeOff
+from .TrialManagers.GratingsTrialManagers import Gratings
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -14,8 +17,8 @@ class Protocol(object):
     ver = Ver('0.0.1')  # Feb 28 2014
     name = ''
 
-    def __init__(self, **kwargs):
-        self.name = kwargs['name']
+    def __init__(self, name='DefaultProtocol'):
+        self.name = name
 
     def ProtocolOKForSessionMgr(self, **kwargs):
         return False
@@ -50,13 +53,13 @@ class SimpleProtocol(Protocol):
     training_steps = []
     current_step = 0
 
-    def __init__(self, **kwargs):
-        super(SimpleProtocol, self).__init__(**kwargs)
-        self.training_steps = kwargs['training_steps']
+    def __init__(self, training_steps, name="DefaultSimpleProtocol"):
+        super(SimpleProtocol, self).__init__(name = name)
+        self.training_steps = training_steps
         self.current_step = 0
 
-    def change_to_step(self, stepNum):
-        self.current_step = stepNum
+    def change_to_step(self, step_num):
+        self.current_step = step_num
 
     def step(self):
         return self.training_steps[self.current_step]
@@ -98,7 +101,7 @@ class RandomizedProtocol(SimpleProtocol):
     def __init__(self, **kwargs):
         super(RandomizedProtocol, self).__init__(**kwargs)
 
-    def changeToStep(self, stepNum):
+    def changeToStep(self, step_num):
         raise NotImplementedError('RandomizedProtocol does not allow arbitrary\
         step changes. Use graduate() only')
 
@@ -112,3 +115,14 @@ class RandomizedProtocol(SimpleProtocol):
             while current_step == new_step:
                 new_step = random.randint(0, self.num_steps() - 1)
             self.current_step = new_step
+			
+
+class DemoGratingsProtocol(SimpleProtocol):
+    """
+	    DEMOGRATINGSPROTOCOL shows a simple Gratings stimulus
+    """
+	
+    def __init__(self):
+        name = "DemoGratingsProtocol"
+        training_steps = ("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings())
+        super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
