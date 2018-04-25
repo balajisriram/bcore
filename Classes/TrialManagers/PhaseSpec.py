@@ -45,8 +45,6 @@ class PhaseSpec(object):
             indicating what to output on the station's indexPin during each
             frame (defaults to all False)
     """
-    frames_until_transition = float('inf')
-    soundPlayed = {}
 
     def __init__(self,
                  phase_number = 0,

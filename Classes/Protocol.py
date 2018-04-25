@@ -8,7 +8,6 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
@@ -16,7 +15,6 @@ __status__ = "Production"
 class Protocol(object):
 
     ver = Ver('0.0.1')  # Feb 28 2014
-    name = ''
 
     def __init__(self, name='DefaultProtocol'):
         self.name = name
@@ -51,8 +49,7 @@ class SimpleProtocol(Protocol):
                     criterionManager,sessionManager,trialManager,
                     reinforcementManager)
     """
-    training_steps = []
-    current_step = 0
+    ver = Ver('0.0.1')  # Feb 28 2014
 
     def __init__(self, training_steps, name="DefaultSimpleProtocol"):
         super(SimpleProtocol, self).__init__(name = name)
@@ -77,6 +74,8 @@ class SequentialProtocol(SimpleProtocol):
         SEQUENTIALPROTOCOL is a SIMPLEPROTOCOL that only allows for graduate
         and degraduate function with the change_to_step function erroring
     """
+    ver = Ver('0.0.1')  # Feb 28 2014
+
     def __init__(self, **kwargs):
         super(SequentialProtocol, self).__init__(**kwargs)
 
@@ -99,6 +98,8 @@ class RandomizedProtocol(SimpleProtocol):
     """
         RANDOMIZEDPROTOCOL is a SIMPLEPROTOCOL
     """
+    ver = Ver('0.0.1')  # Feb 28 2014
+
     def __init__(self, **kwargs):
         super(RandomizedProtocol, self).__init__(**kwargs)
 
@@ -116,13 +117,14 @@ class RandomizedProtocol(SimpleProtocol):
             while current_step == new_step:
                 new_step = random.randint(0, self.num_steps() - 1)
             self.current_step = new_step
-			
+
 
 class DemoGratingsProtocol(SimpleProtocol):
     """
-	    DEMOGRATINGSPROTOCOL shows a simple Gratings stimulus
+        DEMOGRATINGSPROTOCOL shows a simple Gratings stimulus
     """
-	
+    ver = Ver('0.0.1')  # Feb 28 2014
+
     def __init__(self):
         name = "DemoGratingsProtocol"
         training_steps = ("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings(), NoReinforcement())

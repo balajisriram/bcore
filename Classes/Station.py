@@ -2,9 +2,9 @@ import time
 import os
 import psychopy
 
-from ..Hardware.Displays import StandardDisplay
-from ..Hardware.Ports import StandardParallelPort
-from ... import get_base_directory, get_ip_addr
+from .Hardware.Displays import StandardDisplay
+from .Hardware.Ports import StandardParallelPort
+from .. import get_base_directory, get_ip_addr
 from uuid import getnode
 from verlib import NormalizedVersion as Ver
 
@@ -12,13 +12,13 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 PPORT_LO = 0
 PPORT_HI = 1
+
 
 class Station(object):
     """
@@ -31,13 +31,6 @@ class Station(object):
                           card. string identifier
     """
     version = Ver('0.0.1')
-    station_id = 0
-    station_name = ''
-    station_path = ''
-    station_location = []
-    mac_address = ''
-    ip_address = ''
-    port = 0
 
     def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
         """ Use Station as an abstract class - do not allow setting of
@@ -79,6 +72,7 @@ class Station(object):
 
     def do_trials(self, **kwargs):
         raise NotImplementedError('Run doTrials() on a subclass')
+
 
 class StandardVisionBehaviorStation(Station):
     """
@@ -126,6 +120,11 @@ class StandardVisionBehaviorStation(Station):
         parallel_port['led_0'] = 5
         parallel_port['led_1'] = 7
     """
+    version = Ver('0.0.1')
+    _window = None
+    _session = None
+    _server_conn = None
+    _subject = None
 
     def __init__(self,
                  sound_on=False,
@@ -138,19 +137,16 @@ class StandardVisionBehaviorStation(Station):
         self.station_id = station_id
         self.station_name = "Station" + str(station_id)
         self.sound_on = sound_on
-        self.parallel_port_conn = StandardParallelPort(pport_addr=pport_addr)
         self.parallel_port = parallel_port
-        self._window = None
-        self._session = None
-        self._server_conn = None
         self.display = None
-        self._subject = None
         pPort = self.initialize_parallel_port()
         if pPort:
             self.parallel_port = pPort
+            self.parallel_port_conn = StandardParallelPort(pport_addr=pport_addr)
             self.close_all_valves()
         else:
             self.parallel_port = None
+            self.parallel_port_conn = None
 
     def initialize_parallel_port(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
@@ -172,7 +168,6 @@ class StandardVisionBehaviorStation(Station):
             return None # need to write code that checks if allowable
 
     def run(self):
-        self.splash()
         self.connect_to_server()
         run_trials = False
         while True:
@@ -218,25 +213,22 @@ class StandardVisionBehaviorStation(Station):
             the server side, this should provide scalable, TCP communications
             with the server
         """
-        self.server_connection = TCPServerConnection(ipaddr=self.ip_address,
+        self._server_conn = TCPServerConnection(ipaddr=self.ip_address,
             port=self.port)
-        self.server_connection.start()
-        server_connection_details = self.server_connection.recvData()
+        self._server_conn.start()
+        server_connection_details = self._server_conn.recvData()
         # use server_connection_details to connect to the BServer as a client
         print('Closing connection as server...')
-        self.server_connection.stop()
-        self.server_connection = BehaviorClientConnection(
+        self._server_conn.stop()
+        self._server_conn = BehaviorClientConnection(
             ipaddr=server_connection_details['ipaddr'],
             port=server_connection_details['port'])
         print(('Starting connection as client...'))
-        self.server_connection.start()
+        self._server_conn.start()
 
-    def get_subject(self):
-        """
-            For STANDARDVISIONBEHAVIORSTATION.GETSUBJECT(), get data from
-            BServer
-        """
-        raise NotImplementedError()
+    @property
+    def subject(self):
+        return self._subject
 
     def add_subject(self, sub):
         self._subject = sub
@@ -450,6 +442,7 @@ class StandardLocalVisionBehaviorStation(StandardVisionBehaviorStation):
             cR.append(tR)
 
 def make_standard_behavior_station():
+    pass
 
 
 if __name__ == '__main__':

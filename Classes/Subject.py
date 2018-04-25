@@ -10,6 +10,7 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
+
 class Subject(object):
     """
         SUBJECT contains all relevant details about the subject.
@@ -40,7 +41,7 @@ class Subject(object):
         else:
             raise ValueError('cannot add new_protocol. protocol is not empty. \
             Maybe you meant replace_protocol()?')
-			
+
     def add_session_manager(sub, new_session_manager):
         if not sub.session_manager:
             sub.session_manager = new_session_manager
@@ -101,9 +102,9 @@ class Mouse(Subject):
         geneBkgd                  : string identifier
         manipulation              : three-ple list
     """
-	
+
     ver = Ver('0.0.1')
-	
+
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Mouse, sub).__init__(subject_id , **kwargs)
         sub.gender = gender
@@ -130,7 +131,7 @@ class Mouse(Subject):
 
 class DefaultMouse(Mouse):
     ver = Ver('0.0.1')
-	
+
     def __init__(sub):
         super(DefaultMouse, sub).__init__(subject_id='demoMouse',gender='Unknown',
                                           birth_date='',strain='C57BL/6J',gene_bkgd='WT')
@@ -146,9 +147,9 @@ class Rat(Subject):
         geneBkgd                  : string identifier
         manipulation              : three-ple list
     """
-	
+
     ver = Ver('0.0.1')
-	
+
     def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         super(Rat, sub).__init__(subject_id, **kwargs)
         sub.gender = gender
@@ -175,9 +176,9 @@ class Rat(Subject):
 
 class DefaultRat(Rat):
     ver = Ver('0.0.1')
-	
-    def __init__(sub):
-        super(DefaultRat, sub).__init__(subject_id='demoRat',gender='Unknown',
+
+    def __init__(sub,subject_id='demoRat'):
+        super(DefaultRat, sub).__init__(subject_id=subject_id,gender='Unknown',
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
 
@@ -186,14 +187,14 @@ class VirtualSubject(Subject):
         VIRTUALSUBJECT has the following attributes
         subjectID                 : string ID sent to SUBJECT
     """
-	
+
     ver = Ver('0.0.1')
-	
+
     def __init__(sub, subject_id, **kwargs):
         super(VirtualSubject, sub).__init__(subject_id, **kwargs)
 
     def __eq__(sub, other):
-        if isinstance(other, Virtual) and (sub.subject_id == other.subject_id):
+        if isinstance(other, VirtualSubject) and (sub.subject_id == other.subject_id):
             return True
         else:
             return False
@@ -210,9 +211,9 @@ class VirtualSubject(Subject):
 
 class DefaultVirtual(VirtualSubject):
     ver = Ver('0.0.1')
-	
-    def __init__(sub):
-        super(DefaultVirtual, sub).__init__(subject_id='demoVirtual')
+
+    def __init__(sub,subject_id='demo_virtual'):
+        super(DefaultVirtual, sub).__init__(subject_id)
 
 
 class Human(Subject):
@@ -227,7 +228,7 @@ class Human(Subject):
         anonymize                 : True/False
     """
     ver = Ver('0.0.1')
-	
+
     def __init__(sub, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
         super(Human, sub).__init__(subject_id, **kwargs)
         sub.gender = gender
@@ -255,7 +256,7 @@ class Human(Subject):
 
 class DefaultHuman(Human):
     ver = Ver('0.0.1')
-	
+
     def __init__(sub):
         super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
                                           anonymize=False, gender='Unknown')

@@ -7,33 +7,31 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
+
 
 class StandardVisionBehaviorTrialManager(TrialManager):
     """
         STANDARDVISIONBEHAVIORTRIALMANAGER defines a standard vision
         behavior trial manager.
     """
-    phases = []
 
     ver = Ver('0.0.1')
 
-    allow_repeats = True
-
-    def __init__(tm, 
-	             name = 'DefaultVisBehTrManager',
+    def __init__(tm,
+                 name = 'DefaultVisBehTrManager',
                  sound_manager = None, 
-				 reinforcement_manager = None, 
-				 text_display='full', 
-				 **kwargs):
+                 reinforcement_manager = None,
+                 text_display='full',
+                 **kwargs):
         super(StandardVisionBehaviorTrialManager, tm).__init__(name, **kwargs)
         tm.sound_manager = sound_manager
         tm.reinforcement_manager = reinforcement_manager
         tm.text_display = text_display
 
+        tm.allow_repeats = True
         assert tm.text_display in ['full', 'light', 'off'], "text_display not one of ['full','light','off']"
 
     def do_trial(tm, tR, station, **kwargs):

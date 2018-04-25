@@ -12,10 +12,10 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
+
 
 class BServer(object):
     """
@@ -33,16 +33,6 @@ class BServer(object):
                                 and values being list of stationIDs
     """
     version = Ver('0.0.1')  # Feb 5, 2014
-    server_id = ''
-    server_name = ''
-    server_data_path = ''
-    server_ip = ''
-    creation_time = 0
-    stations = []
-    subjects = []
-    assignments = {}
-    server_connection = []
-    station_connections = {}
 
     def __init__(self, **kwargs):
         if len(kwargs) in (0, 1):
@@ -61,6 +51,7 @@ class BServer(object):
             self.stations = []
             self.subjects = []
             self.assignments = {}
+            self.server_connection = []
             self.station_connections = {}
             self.save_server()
 
@@ -220,22 +211,16 @@ class BServerLocal(object):
             assignments         : dictionary with keys being subjectID
                                 and values being list of stationIDs
     """
-    version = Ver('0.0.1')  # Nov 7, 2017
-    server_id = ''
-    server_data_path = ''
-    server_ip = ''
-    creation_time = 0
-    stations = []
-    subjects = []
-    assignments = {}
-    StationConnections = {}
 
     def __init__(self):
         self.server_id = 0
-        self.server_data_path = os.path.join(get_base_directory(),'BCoreData','ServerData')
+        self.server_data_path = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
         self.server_ip = 'http://localhost'
         self.creation_time = time.time()
-        
+        self.stations = []
+        self.subjects = []
+        self.assignments = {}
+
         print("BSERVER:BSERVERLOCAL:__INIT__:Initialized new BServerLocal object")
 
     @staticmethod
@@ -261,6 +246,7 @@ class BServerLocal(object):
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before \
                 calling loadServer')
+
         return server
 
     def save(self):

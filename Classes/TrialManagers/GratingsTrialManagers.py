@@ -12,10 +12,10 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
+
 
 class Gratings(StandardVisionBehaviorTrialManager):
     """
@@ -140,7 +140,6 @@ class AFCGratings(Gratings):
             Scale = "ScaleToHeight"
     """
     ver = Ver('0.0.1')
-    n_afc = None
 
     def __init__(self,deg_per_cycs = {'L':[10],'R':[10]},\
     orientations = {'L':[-PI / 4], 'R':[PI / 4]},\
@@ -151,7 +150,7 @@ class AFCGratings(Gratings):
     radii = {'L':[40],'R':[40]},\
     iti = 1,\
     do_combos = True,\
-    reinforcement_manager = ConstantReinforcement,\
+    reinforcement_manager = ConstantReinforcement(),\
     **kwargs):
         super(AFCGratings, self).__init__(deg_per_cycs=deg_per_cycs, #degrees
                                           orientations = orientations, #degrees

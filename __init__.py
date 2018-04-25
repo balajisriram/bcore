@@ -2,7 +2,7 @@ import os
 import sys
 import socket
 import time
-import fcntl
+#import fcntl
 import struct
 
 __author__ = "Balaji Sriram"
