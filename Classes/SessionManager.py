@@ -10,7 +10,6 @@ __status__ = "Production"
 
 
 class SessionManager(object):
-
     ver = Ver('0.0.1')
 
     def __init__(self, name='Unknown', **kwargs):
@@ -24,7 +23,7 @@ class NoTimeOff(SessionManager):
     ver = Ver('0.0.1')
 
     def __init__(self, name='DefaultNoTimeOff', **kwargs):
-        super(NoTimeOff,self).__init__(name, **kwargs)
+        super(NoTimeOff, self).__init__(name=name, **kwargs)
 
     def check_schedule(self):
         return True
@@ -34,7 +33,7 @@ class MinutesPerSession(SessionManager):
     ver = Ver('0.0.1')
 
     def __init__(self, name='DefaultMinutesPerSession', minutes = 60, hours_between_sessions = 23, **kwargs):
-        super(MinutesPerSession, self).__init__(name, **kwargs)
+        super(MinutesPerSession, self).__init__(name=name, **kwargs)
         self.minutes = minutes
         self.hours_between_sessions = hours_between_sessions
 

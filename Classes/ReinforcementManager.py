@@ -57,13 +57,13 @@ class RewardNCorrectInARow(ReinforcementManager):
     ver = Ver('0.0.1')
 
     def __init__(self,
-                 reward_scalar = 1,
-                 request_reward_scalar = 1,
-                 penalty_scalar = 1,
-                 fraction_reward_sound_in_on = 0,
-                 fraction_penalty_sound_is_on = 0,
-                 request_mode = 'first',
-                 name = 'DefaultNCorrectReinforcement'):
+                 reward_scalar=1,
+                 request_reward_scalar=1,
+                 penalty_scalar=1,
+                 fraction_reward_sound_in_on=0,
+                 fraction_penalty_sound_is_on=0,
+                 request_mode='first',
+                 name='DefaultNCorrectReinforcement'):
         super(RewardNCorrectInARow, self).__init__(name = name)
         self.reward_scalar = reward_scalar
         self.request_reward_scalar = request_reward_scalar

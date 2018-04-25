@@ -1,4 +1,5 @@
 import time
+import zmq
 
 from ...Util.parallel.parallelppdev import Parallel
 
