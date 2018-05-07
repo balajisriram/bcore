@@ -28,7 +28,7 @@ SERVER_PORT = 12345
 
 def load_bserver(path, subject_id):
     if not os.path.exists(path):
-        print("STANDALONERUN:Server not found at location. Creating new server by default.")
+        print("STANDALONERUN:LOAD_BSERVER:Server not found at location. Creating new server by default.")
         b_server = BServerLocal()
         b_server._setup_paths()
         b_server.save()
@@ -36,21 +36,21 @@ def load_bserver(path, subject_id):
         b_server = BServerLocal.load_server(bserver_path)  # load the server from path
 
     if subject_id not in b_server.get_subject_ids():
-        print("STANDALONERUN:Subject %r wasn''t found in server. Adding...\n" % subject_id)
+        print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
         sub = DefaultVirtual(subject_id='demo1')
         prot = protocol
         sub.add_protocol(prot)
         b_server.add_subject(sub)
 
     if not b_server.get_station_ids():
-        print("STANDALONERUN:No Stations found in server. Creating new station...\n")
-        stn = StandardVisionBehaviorStation(sound_on=False, station_id=0, station_location=(0, 0, 0), pport_addr=None,
+        print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
+        stn  = StandardVisionBehaviorStation(sound_on=False, station_id=0, station_location=(0, 0, 0), pport_addr=None,
                                             parallel_port=None)
         b_server.add_station(stn)
     elif len(b_server.get_station_ids())>1:
-        RuntimeError('STANDALONERUN: too many stations for server')
+        RuntimeError('STANDALONERUN:LOAD_BSERVER:too many stations for server')
     else:
-        print("STANDALONERUN:Will run on station %r" % b_server.get_station_ids())
+        print("STANDALONERUN:LOAD_BSERVER:Will run on station %r" % b_server.get_station_ids())
 
     return b_server
 
@@ -60,14 +60,18 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
     if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
 
     b_server = load_bserver(bserver_path, subject_id)
-
-
-
-    # find protocol and and training step num of subject being run.
     
-    # run doTrials on subject
+    # add subject to station
+    stn = b_server.stations[0]
+    sub = b_server.subjects[0]
+    stn.add_subject(sub)
+    
+    # find protocol and and training step num of subject being run.
+    print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
+    # run doTrials on station
 
     # clean up at end of trials
+    stn.remove_subject()
 
 
 if __name__ == '__main__':

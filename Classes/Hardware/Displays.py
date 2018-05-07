@@ -1,3 +1,4 @@
+import psychopy
 from psychopy import monitors
 
 __author__ = "Balaji Sriram"
