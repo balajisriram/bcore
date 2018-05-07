@@ -12,6 +12,7 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
+
 class Protocol(object):
 
     ver = Ver('0.0.1')  # Feb 28 2014
@@ -19,7 +20,8 @@ class Protocol(object):
     def __init__(self, name='DefaultProtocol'):
         self.name = name
 
-    def ProtocolOKForSessionMgr(self, **kwargs):
+    @staticmethod
+    def protocol_ok_for_session_manager(self, **kwargs):
         return False
 
 

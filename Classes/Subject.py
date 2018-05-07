@@ -5,7 +5,6 @@ __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
 __license__ = "GPL"
-__version__ = "1.0.1"
 __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
@@ -30,6 +29,10 @@ class Subject(object):
         sub.protocol = []
         sub.session_manager = []
         sub.creation_date = time.time()
+        sub._current_trial_num = 0
+
+    def _clean(self):
+        pass
 
     def __eq__(sub, other):
         # if this method is called, then clearly
