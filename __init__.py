@@ -46,6 +46,7 @@ def get_ip_addr(*args):
 
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:
+            import fcntl
             ip = socket.inet_ntoa(fcntl.ioctl(
                 s.fileno(),
                 0x8927,  # SIOCGIFADDR

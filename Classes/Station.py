@@ -37,8 +37,8 @@ class Station(object):
         anything except the basic details"""
         self.station_id = station_id
         self.station_name = station_name
-        self.station_path = os.path.join(
-            get_base_directory(), 'BStationData', 'StationData',
+        self.station_path = os.path.join
+            get_base_directory(), 'BCoreData', s'BStationData', 'StationData',
             str(self.station_id))
         self.station_location = station_location
 
