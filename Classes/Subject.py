@@ -68,7 +68,7 @@ class Subject(object):
         return None
 
     def do_trial(sub, tR, **kwargs):
-        # Called by station.doTrials()
+        # Called by station.do_trials()
         if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
             a protocol')
@@ -94,6 +94,43 @@ class Subject(object):
 
         return tR
 
+    def load_compiled_records(self):
+        # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
+        from BCore import get_base_directory
+        import os
+        import pickle
+        compiled_file_loc = os.path.join(get_base_directory(),"BCoreData","CompiledTrialRecords")
+        files = [i for i in os.listdir(compiled_file_loc) if \
+                 os.path.isfile(os.path.join(compiled_file_loc,i)) and self.subject_id in i]
+        if len(files)>1:
+            RuntimeError("SUBJECT:SUBJECT:LOAD_COMPILED_RECORDS:Too many records")
+        elif len(files)==1:
+            with open(os.path.join(compiled_file_loc,files[0]),"rb") as f:
+                cR = pickle.load(f)
+        else:
+            cR = None
+
+        return cR
+
+    def save_compiled_records(self, cR):
+        # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
+        from BCore import get_base_directory
+        import os
+        import pickle
+        compiled_file_loc = os.path.join(get_base_directory(), "BCoreData", "CompiledTrialRecords")
+        files = [i for i in os.listdir(compiled_file_loc) if \
+                 os.path.isfile(os.path.join(compiled_file_loc, i)) and self.subject_id in i]
+
+        if len(files)>1:
+        elif len(files)==1:
+            os.remove(os.path.join(compiled_file_loc,files[0]))
+        else:
+            pass
+
+        tNum = cR[-1]["trialNumber"]
+        cR_name = f"{self.subject_id}.1-{tNum}.compiled_record"
+        with open(os.path.join(compiled_file_loc,cR_name), "wb") as f:
+            pickle.dump(cR,f)
 
 class Mouse(Subject):
     """

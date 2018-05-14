@@ -288,20 +288,21 @@ class StandardVisionBehaviorStation(Station):
         if __debug__:
             pass
 
-        # find the subject
-        self.get_session()
-        cR = self.get_compiled_records()
+        # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
+        # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
+        # the previous trial, please add it to compiled records
+        cR = self._subject.load_compiled_records()
 
         Quit = False
 
         # session starts here
-        sR = VisionBehaviorSessionRecord()  # make new session record
+        sR = []  # make new session record
 
         while not Quit and not self.session.stop():
             # it loops in here every trial
             tR = VisionBehaviorTrialRecord()
             # just assign relevant details here
-            tR.trialNumber = cR.trialNumber[-1] + 1
+            tR.trialNumber = cR[-1]["trialNumber"] + 1
             tR.sessionNumber = self.session.sessionNumber
             tR.stationID = self.stationID
             tR.stationName = self.stationName
@@ -314,216 +315,12 @@ class StandardVisionBehaviorStation(Station):
 
             tR.stopTime = time.localtime()
             # update sessionRecord and compiledRecord
-            sR.append(tR)
+            sR.append(tR.copy())
             cR.append(tR)
 
-            
-class StandardVisionPresentationStation(Station):
-    """
-        STANDARDVISIONPRESENTATIONSTATION(SVPS) defines a subclass of STATION.
-        It defines a station with a standard display, a parallel port for i/o
-        with standard pin-out settings, sounds settings which can only be
-        turned on or off
-        Attributes allowed are:
-            station_id       : numeric ID to be sent to STATION
-            station_path     : DO NOT SEND - STATION WILL SET IT
-            display          : dictionary containing details about the
-                               display unit
-            soundOn          : True/False
-            parallelPort     : dictionary containing details about the parallel
-                               port
+        # save compiled records
+        self._subject.save_compiled_records(cR)
 
-        For the StandardVisualBehaviorStation, with Rev 2/3 breakout boards
-        ("The Bomb"), only certain ports are used and for specific purposes:
-            Pin 5            :            LED1
-            Pin 7            :            LED2
-            Pin 8            :            indexPulse
-            Pin 9            :            framePulse
-        While, these values are not hard coded here, use these values if you
-        want your system to work :)
-
-        Use these defaults unless you know what you are doing
-        parallel_port = {}
-        parallel_port['right_valve'] = 2
-        parallel_port['center_valve'] = 3
-        parallel_port['left_valve'] = 4
-        parallel_port['valve_pins'] = (2, 3, 4)
-        parallel_port['center_port'] = 10
-        parallel_port['right_port'] = 12
-        parallel_port['left_port'] = 13
-        parallel_port['port_pins'] = (12, 10, 13)
-        parallel_port['index_pin'] = 8
-        parallel_port['frame_pin'] = 9
-        parallel_port['led_0'] = 5
-        parallel_port['led_1'] = 7
-    """
-    version = Ver('0.0.1')
-    _window = None
-    _session = None
-    _server_conn = None
-    _subject = None
-
-    def __init__(self,
-                 sound_on=False,
-                 station_id= 0,
-                 station_location=(0,0,0),
-                 pport_addr=0xD010,
-                 parallel_port='standardVisionBehaviorDefault'):
-        super(StandardVisionPresentationStation, self).__init__(station_id=station_id, station_name=station_name,
-                                                          station_location=station_location)
-        self.station_id = station_id
-        self.station_name = "Station" + str(station_id)
-        self.sound_on = sound_on
-        self.parallel_port = parallel_port
-        self.display = None
-        pPort = self.initialize_parallel_port()
-        if pPort:
-            from .Hardware.Ports import StandardParallelPort
-            self.parallel_port = pPort
-            self.parallel_port_conn = StandardParallelPort(pport_addr=pport_addr)
-            self.close_all_valves()
-        else:
-            self.parallel_port = None
-            self.parallel_port_conn = None
-
-    def initialize_parallel_port(self):
-        if self.parallel_port == 'standardVisionBehaviorDefault':
-            pPort = {}
-            pPort['index_pin'] = 8
-            pPort['frame_pin'] = 9
-            pPort['led_0'] = 5
-            pPort['led_1'] = 7
-            return pPort
-        else:
-            return None # need to write code that checks if allowable
-
-    def run(self):
-        self.connect_to_server()
-        run_trials = False
-        while True:
-            # look for data from server
-            msg = self.get_server_msg()
-            quit = False
-            if run_trials and ~quit:
-                # get info anout session
-                self.get_session()
-
-                sub = self._session['subject']
-                tR = self._session['trial_record']
-                cR = self._session['compiled_record']
-                prot = self._session['protocol']
-                trial_num = self._session['trial_num']
-
-    def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.window(display = display,
-                                              color = (0,0,0),
-                                              fullscr = True,
-                                              winType = 'pyglet',
-                                              allowGUI = False,
-                                              units = 'deg',
-                                              screen = 0,
-                                              viewScale = None,
-                                              waitBlanking = True,
-                                              allowStencil = True,
-                                              )
-        self._window.flip()
-
-    def connect_to_server(self):
-        """
-            This is a somewhat complicated handshake. Initially, the
-            station acts as a server exposing its IP::port to the server.
-            Since the server knows this IP::port it can create a client
-            connection easily. Upon connection, BServer(currently client)
-            sends a connection info for a separate connection(BServer will
-            reserve the space for this connection) to the station and the
-            station will connect to the BServer now as a client. This way
-            new stations can be added to the server without any
-            station-side code modification. BServer can dynamically manage
-            its resources. Along with threaded TCP server connections on
-            the server side, this should provide scalable, TCP communications
-            with the server
-        """
-        self._server_conn = TCPServerConnection(ipaddr=self.ip_address,
-            port=self.port)
-        self._server_conn.start()
-        server_connection_details = self._server_conn.recvData()
-        # use server_connection_details to connect to the BServer as a client
-        print('Closing connection as server...')
-        self._server_conn.stop()
-        self._server_conn = BehaviorClientConnection(
-            ipaddr=server_connection_details['ipaddr'],
-            port=server_connection_details['port'])
-        print(('Starting connection as client...'))
-        self._server_conn.start()
-
-    @property
-    def subject(self):
-        return self._subject
-
-    def add_subject(self, sub):
-        self._subject = sub
-
-    def remove_subject(self):
-        self._subject = None
-
-    def get_display_size(self):
-        pass
-
-    def get_session(self):
-        """
-            Connect to BServer and request session details to be loaded
-        """
-        self._session = self._server_conn.client_to_server(self._server_conn.SESSION_REQUESTED)
-
-    def get_compiled_records(self):
-        """
-            Connect to BServer and request compiledRecords
-        """
-        return None
-
-    def decache(self):
-        """
-            Remove session specific details. ideal for pickling
-        """
-        self._window = None
-        self._session = None
-        self._server_conn = None
-        self._parallelport_conn = None
-
-    def do_trials(self, **kwargs):
-        # first step in the running of trials. called directly by station
-        # or through the BServer
-        if __debug__:
-            pass
-
-        # find the subject
-        self.get_session()
-        cR = self.get_compiled_records()
-
-        Quit = False
-
-        # session starts here
-        sR = VisionBehaviorSessionRecord()  # make new session record
-
-        while not Quit and not self.session.stop():
-            # it loops in here every trial
-            tR = VisionBehaviorTrialRecord()
-            # just assign relevant details here
-            tR.trialNumber = cR.trialNumber[-1] + 1
-            tR.sessionNumber = self.session.sessionNumber
-            tR.stationID = self.stationID
-            tR.stationName = self.stationName
-            tR.numPortsInStation = self.numPorts()
-            tR.startTime = time.localtime()
-            tR.subjectsInStation = self.subjectsInStation()
-            # doTrial - only tR will be returned as its type will be changed
-            tR = self.session.subject.do_trial(station=self, trialRecord=tR,
-                compiledRecord=cR, quit=Quit)
-
-            tR.stopTime = time.localtime()
-            # update sessionRecord and compiledRecord
-            sR.append(tR)
-            cR.append(tR)
 
 def make_standard_behavior_station():
     pass

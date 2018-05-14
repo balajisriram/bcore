@@ -68,7 +68,9 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
     
     # find protocol and and training step num of subject being run.
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
-    # run doTrials on station
+
+    # run do_trials on station
+    stn.do_trials()
 
     # clean up at end of trials
     stn.remove_subject()
