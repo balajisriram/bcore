@@ -64,14 +64,13 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
     # add subject to station
     stn = b_server.stations[0]
     sub = b_server.subjects[0]
+    stn._stand_alone = True
     stn.add_subject(sub)
     
     # find protocol and and training step num of subject being run.
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
-
     # run do_trials on station
     stn.do_trials()
-
     # clean up at end of trials
     stn.remove_subject()
 
@@ -81,7 +80,7 @@ if __name__ == '__main__':
     # function
 
     subject_id = 'demo1'
-    bserver_path =  None
+    bserver_path = None
     protocol = DemoGratingsProtocol()
 
     # parse input arguments and send to bootstrap
@@ -101,7 +100,7 @@ if __name__ == '__main__':
             added = True
 
         if added:
-            print (SARKWArgs)
+            print(SARKWArgs)
             added = False
 
     stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)

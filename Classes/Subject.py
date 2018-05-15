@@ -132,6 +132,21 @@ class Subject(object):
         with open(os.path.join(compiled_file_loc,cR_name), "wb") as f:
             pickle.dump(cR,f)
 
+    def save_session_records(self,sR):
+        # location is get_base_directory->BCoreData->PermanentTrialRecords->subject_id->trialRecord.1-N.session_record
+        from BCore import get_base_directory
+        import os
+        import pickle
+        session_file_loc = os.path.join(get_base_directory(), "BCoreData", "PermanentTrialRecords",self.subject_id)
+        if not os.path.exists(session_file_loc):
+            os.makedirs(session_file_loc)
+        tnum_lo = sR[0]["trial_number"]
+        tnum_hi = sR[-1]["trial_number"]
+
+        sR_name = f"trialRecords.{tnum_lo}-{tnum_hi}.session_record"
+        with open(os.path.join(session_file_loc, sR_name), "wb") as f:
+            pickle.dump(sR, f)
+
 class Mouse(Subject):
     """
         MOUSE has the following attributes

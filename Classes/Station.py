@@ -76,7 +76,8 @@ class StandardVisionBehaviorStation(Station):
         STANDARDVISIONBEHAVIORSTATION(SVBS) defines a subclass of STATION.
         It defines a station with a standard display, a parallel port for i/o
         with standard pin-out settings, sounds settings which can only be
-        turned on or off, three valve pins, three sensor pins
+        turned on or off, three valve pins, three sensor pins. Only allows
+        stand alone running
         Attributes allowed are:
             station_id       : numeric ID to be sent to STATION
             station_path     : DO NOT SEND - STATION WILL SET IT
@@ -227,13 +228,25 @@ class StandardVisionBehaviorStation(Station):
     def subject(self):
         return self._subject
 
-    def add_subject(self, sub):
-        print("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT: Adding subject_id " + sub.subject_id +" to station_id " + str(self.station_id))
-        self._subject = sub
+    @property
+    def session(self):
+        return self._session
 
-    def remove_subject(self):
-        print("STATION:STANDARDVISIONBEHAVIORSTATION:REMOVE_SUBJECT: Removing subject_id " + self.subject.subject_id +" from station_id " + str(self.station_id))
-        self._subject = None
+    def add_subject(self, sub):
+        self.subject = sub
+            #if sub.subject_id in self.get_subjects():
+            #    RuntimeError("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT:Subject "+ sub.subject_id + " already in station. Cannot add twice")
+            #
+            #print("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT: Adding subject_id " + sub.subject_id +" to station_id " + str(self.station_id))
+            #self.subjects.append(sub)
+
+    def remove_subject(self,sub):
+        self.subject = None
+            #if sub.subject_id not in self.get_subjects():
+            #    RuntimeError("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT:Subject "+ sub.subject_id + " not in station. Cannot remove.")
+            #print("STATION:STANDARDVISIONBEHAVIORSTATION:REMOVE_SUBJECT: Removing subject_id " + sub.subject_id +" from station_id " + str(self.station_id))
+            #idx = [i for (i,x) in enumerate(self.get_subjects()) if x==sub.subject_id]
+            #self.subjects = self.subjects[:idx[0]]+self.subjects[idx[0]+1:]
 
     def close_all_valves(self):
         self.parallel_port_conn.write_pins(
@@ -267,12 +280,6 @@ class StandardVisionBehaviorStation(Station):
         """
         self._session = self._server_conn.client_to_server(self._server_conn.SESSION_REQUESTED)
 
-    def get_compiled_records(self):
-        """
-            Connect to BServer and request compiledRecords
-        """
-        return None
-
     def decache(self):
         """
             Remove session specific details. ideal for pickling
@@ -291,33 +298,35 @@ class StandardVisionBehaviorStation(Station):
         # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
         # the previous trial, please add it to compiled records
-        cR = self._subject.load_compiled_records()
+        cR = self.subject.load_compiled_records()
 
         Quit = False
 
         # session starts here
-        sR = []  # make new session record
+        sR = []  # just a list of tRs
 
-        while not Quit and not self.session.stop():
+
+        while not Quit:
             # it loops in here every trial
-            tR = VisionBehaviorTrialRecord()
+            tR = []
             # just assign relevant details here
-            tR.trialNumber = cR[-1]["trialNumber"] + 1
-            tR.sessionNumber = self.session.sessionNumber
-            tR.stationID = self.stationID
-            tR.stationName = self.stationName
-            tR.numPortsInStation = self.numPorts()
-            tR.startTime = time.localtime()
-            tR.subjectsInStation = self.subjectsInStation()
+            tR["trial_number"] = cR[-1]["trial_number"] + 1
+            tR["session_number"] = cR[-1].["session_number"] + 1
+            tR["station_id"] = self.station_id
+            tR["station_name"]= self.station_name
+            tR["num_ports_in_station"] = self.num_ports()
+            tR["start_time"] = time.localtime()
             # doTrial - only tR will be returned as its type will be changed
             tR = self.session.subject.do_trial(station=self, trialRecord=tR,
                 compiledRecord=cR, quit=Quit)
 
-            tR.stopTime = time.localtime()
+            tR["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
             sR.append(tR.copy())
             cR.append(tR)
 
+        # save session records
+        self._subject.save_session_records(sR)
         # save compiled records
         self._subject.save_compiled_records(cR)
 
