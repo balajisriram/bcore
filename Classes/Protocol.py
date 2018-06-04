@@ -129,5 +129,5 @@ class DemoGratingsProtocol(SimpleProtocol):
 
     def __init__(self):
         name = "DemoGratingsProtocol"
-        training_steps = ("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings(), NoReinforcement())
+        training_steps = [("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings(), NoReinforcement())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
