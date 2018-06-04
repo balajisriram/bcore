@@ -319,7 +319,34 @@ class BServerLocal(object):
 
         if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','Backups')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','Backups'))
+            
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData'))
+            
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','PermanentTrialRecords')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','PermanentTrialRecords'))
+        
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
+    def add_subject_permanent_trial_record_store(self,subject_id):
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','PermanentTrialRecords',subject_id)):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','PermanentTrialRecords',subject_id))
+    
+    def create_base_compiled_record_file(self,subject_id):
+        compiled_folder_path = os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')
+        compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
+        if not compiled_file_for_subject:
+            cR = []
+            cR0 = {}
+            cR0['trial_number'] = 0
+            cR0['session_number'] = 0
+            cR.append(cR0)
+            cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
+            with open(os.path.join(compiled_folder_path, cR_file_name),'wb') as f:
+                pickle.dump(cR, f, pickle.HIGHEST_PROTOCOL)
+             
+        
     def initialize_server(force_delete=False):
         # setup the paths
         _setup_paths(force_delete)
@@ -339,6 +366,8 @@ class BServerLocal(object):
             raise ValueError('Cannot add replica of subjects to BServer')
         print("BSERVER:BSERVERLOCAL:ADD_SUBJECT:Adding subject")
         self.subjects.append(new_subject)
+        self.add_subject_permanent_trial_record_store(new_subject.subject_id)
+        self.create_base_compiled_record_file(new_subject.subject_id)
         self.save()
 
     def change_assignment(self, subject, new_assignment):
