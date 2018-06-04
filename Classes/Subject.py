@@ -122,13 +122,15 @@ class Subject(object):
                  os.path.isfile(os.path.join(compiled_file_loc, i)) and self.subject_id in i]
 
         if len(files)>1:
+            pass
         elif len(files)==1:
             os.remove(os.path.join(compiled_file_loc,files[0]))
         else:
             pass
 
         tNum = cR[-1]["trialNumber"]
-        cR_name = f"{self.subject_id}.1-{tNum}.compiled_record"
+        sid = self.subject_id
+        cR_name = '{0}.1-{1}.compiled_record'.format(sid,tNum)
         with open(os.path.join(compiled_file_loc,cR_name), "wb") as f:
             pickle.dump(cR,f)
 
@@ -143,7 +145,7 @@ class Subject(object):
         tnum_lo = sR[0]["trial_number"]
         tnum_hi = sR[-1]["trial_number"]
 
-        sR_name = f"trialRecords.{tnum_lo}-{tnum_hi}.session_record"
+        sR_name = "trialRecords.{0}-{1}.session_record".format(tnum_lo,tnum_hi)
         with open(os.path.join(session_file_loc, sR_name), "wb") as f:
             pickle.dump(sR, f)
 

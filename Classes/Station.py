@@ -37,8 +37,8 @@ class Station(object):
         anything except the basic details"""
         self.station_id = station_id
         self.station_name = station_name
-        self.station_path = os.path.join
-            get_base_directory(), 'BCoreData', s'BStationData', 'StationData',
+        self.station_path = os.path.join(
+            get_base_directory(), 'BCoreData', 'BStationData', 'StationData',
             str(self.station_id))
         self.station_location = station_location
 
@@ -227,10 +227,18 @@ class StandardVisionBehaviorStation(Station):
     @property
     def subject(self):
         return self._subject
+        
+    @subject.setter
+    def subject(self,value):
+        self._subject = value
 
     @property
     def session(self):
         return self._session
+    
+    @session.setter
+    def subject(self,value):
+        self._session = value
 
     def add_subject(self, sub):
         self.subject = sub
@@ -311,7 +319,7 @@ class StandardVisionBehaviorStation(Station):
             tR = []
             # just assign relevant details here
             tR["trial_number"] = cR[-1]["trial_number"] + 1
-            tR["session_number"] = cR[-1].["session_number"] + 1
+            tR["session_number"] = cR[-1]["session_number"] + 1
             tR["station_id"] = self.station_id
             tR["station_name"]= self.station_name
             tR["num_ports_in_station"] = self.num_ports()
