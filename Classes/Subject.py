@@ -67,7 +67,7 @@ class Subject(object):
     def allowed_gene_bkgd(sub):
         return None
 
-    def do_trial(sub, tR, **kwargs):
+    def do_trial(sub, station, trial_record, compiled_record, quit):
         # Called by station.do_trials()
         if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
@@ -75,31 +75,32 @@ class Subject(object):
 
         # new consideration in  protocol and training step
         graduate = False
-        kwargs['graduate'] = graduate
-        kwargs['subject'] = sub
-
+        
         # figure out the protocol, and the trainingStep details
-        tR.protocol_name = sub.protocol.name
-        tR.protocol_version_number = sub.protocol.ver
-        tR.current_step = sub.protocol.current_step
-        tR.current_step_name = sub.protocol.step().name
-        tR.numSteps = sub.protocol.numSteps()
+        trial_record['protocol_name'] = sub.protocol.name
+        trial_record['protocol_version_number'] = sub.protocol.ver
+        trial_record['current_step'] = sub.protocol.current_step
+        import pdb
+        pdb.set_trace()
+        trial_record['current_step_name'] = sub.protocol.step().name
+        trial_record['numSteps'] = sub.protocol.numSteps()
 
         current_step = sub.protocol.step()
-        tR = current_step.do_trial(tR,**kwargs)
+        trial_record, quit = current_step.do_trial(trial_record,subject=sub, station=station, 
+                   trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
         if kwargs['graduate']:
-            tR.criterionMet = True
+            trial_record.criterionMet = True
             sub.protocol.graduate()
 
-        return tR
+        return trial_record, quit
 
     def load_compiled_records(self):
         # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
         from BCore import get_base_directory
         import os
         import pickle
-        compiled_file_loc = os.path.join(get_base_directory(),"BCoreData","CompiledTrialRecords")
+        compiled_file_loc = os.path.join(get_base_directory(),"BCoreData","SubjectData","CompiledTrialRecords")
         files = [i for i in os.listdir(compiled_file_loc) if \
                  os.path.isfile(os.path.join(compiled_file_loc,i)) and self.subject_id in i]
         if len(files)>1:

@@ -239,6 +239,13 @@ class StandardVisionBehaviorStation(Station):
     @session.setter
     def subject(self,value):
         self._session = value
+        
+    @property
+    def num_ports(self):
+        if self.parallel_port:
+            return len(self.parallel_port['port_pins'])
+        else:
+            return 0
 
     def add_subject(self, sub):
         self.subject = sub
@@ -307,30 +314,26 @@ class StandardVisionBehaviorStation(Station):
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
         # the previous trial, please add it to compiled records
         cR = self.subject.load_compiled_records()
-
         Quit = False
 
         # session starts here
         sR = []  # just a list of tRs
 
-
         while not Quit:
             # it loops in here every trial
-            tR = []
+            tR = {}
             # just assign relevant details here
             tR["trial_number"] = cR[-1]["trial_number"] + 1
             tR["session_number"] = cR[-1]["session_number"] + 1
             tR["station_id"] = self.station_id
             tR["station_name"]= self.station_name
-            tR["num_ports_in_station"] = self.num_ports()
+            tR["num_ports_in_station"] = self.num_ports
             tR["start_time"] = time.localtime()
             # doTrial - only tR will be returned as its type will be changed
-            tR = self.session.subject.do_trial(station=self, trialRecord=tR,
-                compiledRecord=cR, quit=Quit)
+            tR, quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
 
             tR["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
-            sR.append(tR.copy())
             cR.append(tR)
 
         # save session records
