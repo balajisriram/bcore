@@ -25,7 +25,7 @@ class NoTimeOff(SessionManager):
     def __init__(self, name='DefaultNoTimeOff', **kwargs):
         super(NoTimeOff, self).__init__(name=name, **kwargs)
 
-    def check_schedule(self):
+    def check_schedule(self, **kwargs):
         return True
 
 
@@ -38,4 +38,16 @@ class MinutesPerSession(SessionManager):
         self.hours_between_sessions = hours_between_sessions
 
     def check_schedule(self):
-        return True
+        return NotImplementedError()
+        
+class TimeRange(SessionManager):
+    ver = Ver('0.0.1')
+
+    def __init__(self, name='DefaultHourRange',time_start=0, time_stop=1, **kwargs):
+        super(HourRange, self).__init__(name=name, **kwargs)
+        self.time_start = time_start
+        self.time_stop = time_stop
+
+    def check_schedule(self):
+        return NotImplementedError()
+        
