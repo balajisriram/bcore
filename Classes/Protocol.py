@@ -12,7 +12,40 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-
+###########################################################################
+class TrainingStep(object):
+    """
+        TRAINING STEP contains the following information for each step
+        name ::  nme of the step
+        
+    """
+    ver = Ver('0.0.1')
+    
+    def __init__(self, name, criterion, session_manager, trial_manager, reinforcement_manager):
+        self.name = name
+        self.criterion=criterion
+        self.session_manager=session_manager
+        self.trial_manager=trial_manager
+        self.reinforcement_manager=reinforcement_manager
+        
+    def do_trial(self, subject, station, trial_record, compiled_record, quit):
+        graduate = False
+        manual_ts_change = False
+        
+        try:
+            keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject, trial_record)
+            if keep_doing_trials:
+                stop_early, trial_record = self.trial_manager.do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+                
+                graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+        except:
+            station.close_session()
+            
+        
+    
+###########################################################################
+# PROTOCOLS
+###########################################################################
 class Protocol(object):
 
     ver = Ver('0.0.1')  # Feb 28 2014
@@ -105,7 +138,7 @@ class RandomizedProtocol(SimpleProtocol):
     def __init__(self, **kwargs):
         super(RandomizedProtocol, self).__init__(**kwargs)
 
-    def changeToStep(self, step_num):
+    def change_to_step(self, step_num):
         raise NotImplementedError('RandomizedProtocol does not allow arbitrary\
         step changes. Use graduate() only')
 
@@ -129,5 +162,10 @@ class DemoGratingsProtocol(SimpleProtocol):
 
     def __init__(self):
         name = "DemoGratingsProtocol"
-        training_steps = [("DemoGratingStepNum1", RepeatIndefinitely(), NoTimeOff(), Gratings(), NoReinforcement())]
+        training_steps = [TrainingStep(
+        name="DemoGratingStepNum1", 
+        criterion=RepeatIndefinitely(), 
+        schedule=NoTimeOff(), 
+        trial_manager=Gratings(), 
+        reinforcement_manager=NoReinforcement())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
