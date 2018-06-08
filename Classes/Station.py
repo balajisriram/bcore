@@ -6,6 +6,7 @@ from .Hardware.Displays import StandardDisplay
 from .. import get_base_directory, get_ip_addr
 from uuid import getnode
 from verlib import NormalizedVersion as Ver
+from .TrialManagers.TrialManager import compile_records
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -330,11 +331,11 @@ class StandardVisionBehaviorStation(Station):
             tR["num_ports_in_station"] = self.num_ports
             tR["start_time"] = time.localtime()
             # doTrial - only tR will be returned as its type will be changed
-            tR, quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
+            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
 
             tR["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
-            cR.append(tR)
+            cR = compile_records(cR,tR)
 
         # save session records
         self._subject.save_session_records(sR)

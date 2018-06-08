@@ -8,6 +8,8 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
+def compile_records(cR,tR):
+    pass
 
 class TrialManager(object):
     """

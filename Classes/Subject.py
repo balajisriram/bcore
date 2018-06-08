@@ -83,10 +83,10 @@ class Subject(object):
         import pdb
         pdb.set_trace()
         trial_record['current_step_name'] = sub.protocol.step().name
-        trial_record['numSteps'] = sub.protocol.numSteps()
+        trial_record['num_steps'] = sub.protocol.num_steps()
 
         current_step = sub.protocol.step()
-        trial_record, quit = current_step.do_trial(trial_record,subject=sub, station=station, 
+        trial_record, quit = current_step.do_trial(subject=sub, station=station, 
                    trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
         if kwargs['graduate']:
