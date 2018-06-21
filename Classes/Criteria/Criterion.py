@@ -12,7 +12,7 @@ class Criterion(object):
     def __init__(self, name='Unknown'):
         self.name = name
 
-    def graduate(self, **kwargs):
+    def check_criterion(self, **kwargs):
         return False
 
 
@@ -23,7 +23,7 @@ class NumTrialsDoneCriterion(Criterion):
         self.num_trials = num_trials
         self.num_trials_mode = num_trials_mode
 
-    def graduate(self, cR, **kwargs):
+    def check_criterion(self, cR, **kwargs):
         # find the latest number of
         if self.num_trials_mode == 'consecutive':
             raise NotImplementedError()
@@ -46,7 +46,7 @@ class PerformanceCriterion(Criterion):
         self.num_trials = num_trials
         self.num_trials_mode = num_trials_mode
 
-    def graduate(self, cR, **kwargs):
+    def check_criterion(self, cR, **kwargs):
         # find the latest number of
         if self.num_trials_mode == 'consecutive':
             pass
@@ -65,7 +65,7 @@ class RateCriterion(Criterion):
         self.trials_per_minute = trials_per_minute
         self.consecutive_minutes = consecutive_minutes
 
-    def graduate(self, **kwargs):
+    def check_criterion(self, **kwargs):
         Graduate = False
         raise NotImplementedError()
         return graduate
@@ -76,5 +76,5 @@ class RepeatIndefinitely(Criterion):
     def __init__(self, name='Unknown'):
         super(RepeatIndefinitely, self).__init__(name)
 
-    def graduate(self, cR, **kwargs):
+    def check_criterion(self, **kwargs):
         return False
