@@ -33,10 +33,11 @@ class TrainingStep(object):
         manual_ts_change = False
         
         try:
-            keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject, trial_record)
+            keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
             if keep_doing_trials:
                 stop_early, trial_record = self.trial_manager.do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-                
+                import pdb
+                pdb.set_trace()
                 graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
         except:
             station.close_session()
@@ -165,7 +166,7 @@ class DemoGratingsProtocol(SimpleProtocol):
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
         criterion=RepeatIndefinitely(), 
-        schedule=NoTimeOff(), 
+        session_manager=NoTimeOff(), 
         trial_manager=Gratings(), 
         reinforcement_manager=NoReinforcement())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)

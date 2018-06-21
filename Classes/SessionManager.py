@@ -26,7 +26,10 @@ class NoTimeOff(SessionManager):
         super(NoTimeOff, self).__init__(name=name, **kwargs)
 
     def check_schedule(self, **kwargs):
-        return True
+        # Returns keep_doing_trials, secs_remaining_until_state_flip
+        keep_doing_trials = True
+        secs_remaining_until_state_flip = 0
+        return keep_doing_trials, secs_remaining_until_state_flip
 
 
 class MinutesPerSession(SessionManager):
