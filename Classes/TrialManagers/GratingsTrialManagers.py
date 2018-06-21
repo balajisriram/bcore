@@ -30,6 +30,8 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
     """
     ver = Ver('0.0.1')
+    _Phases = None
+    _Cached_Textures = None
     
     def __init__(self,
                  deg_per_cycs=10, #degrees
@@ -53,11 +55,11 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
         self.iti = iti # inter trial interval
 
-    def calc_stim(self, tR, station, **kwargs):
+    def calc_stim(self, trial_record, station, **kwargs):
 
-        (H, W, Hz) = self.choose_resolution(**kwargs)
+        (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
-        tR.resolution = resolution
+        trial_record['resolution'] = resolution
 
         # select from values
         stimulus = dict()
@@ -68,28 +70,31 @@ class Gratings(StandardVisionBehaviorTrialManager):
         stimulus['contrast'] = random.choice(self.contrasts)
         stimulus['duration'] = random.choice(self.durations)
         stimulus['radius'] = random.choice(self.radii)
-        tR.stimulus_details = dict()
-        tR.stimulus_details['chosen_stim'] = stimulus
-
+        trial_record['chosen_stim'] = stimulus
 
         frames_total = round(Hz*stimulus['duration'])
+        
+        port_details = {}
+        port_details['target_ports'] = None
+        port_details['distractor_ports'] = station.get_ports()
 
-        return stimulus, resolution, frames_total
+        return stimulus, resolution, frames_total, port_details
 
-    def choose_resolution(self, **kwargs):
+    def choose_resolution(self, station, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
 
-    def _setup_phases(self, tR, station, **kwargs):
+    def _setup_phases(self, trial_record, station, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
         """
-        (stimulus, resolution,frames_total) = self.calc_stim(tR, station, kwargs)
+        (stimulus,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station, kwargs)
+        self.Phases = {}
         # Just display stim
         do_nothing = []
         self.Phases[0] = PhaseSpec(
@@ -123,6 +128,23 @@ class Gratings(StandardVisionBehaviorTrialManager):
 
     def decache(self):
         self._internal_objects = dict()
+        
+    def do_trial(self, station, subject, trial_record, compiled_record):
+        ## returns quit and trial_record
+        
+        ## _setup_phases
+        self._setup_phases(trial_record=trial_record, statoin=station,compiled_record=compiled_record)
+        self._cache_textures()
+        self._cache_sounds()
+        
+        quit = False
+        
+        current_phase_num = 0
+        manual_quit = False
+        manual_reward = False
+        
+        
+                
 
 
 class AFCGratings(Gratings):
