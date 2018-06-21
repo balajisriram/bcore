@@ -76,23 +76,25 @@ class Subject(object):
         # new consideration in  protocol and training step
         graduate = False
         
+        # some basic info about the subject
+        trial_record['subject_id'] = sub.subject_id
+        
         # figure out the protocol, and the trainingStep details
         trial_record['protocol_name'] = sub.protocol.name
         trial_record['protocol_version_number'] = sub.protocol.ver
         trial_record['current_step'] = sub.protocol.current_step
-        import pdb
-        pdb.set_trace()
         trial_record['current_step_name'] = sub.protocol.step().name
         trial_record['num_steps'] = sub.protocol.num_steps()
 
         current_step = sub.protocol.step()
-        trial_record, quit = current_step.do_trial(subject=sub, station=station, 
-                   trial_record=trial_record, compiled_record=compiled_record, quit=quit)
+        trial_record, quit = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
         if kwargs['graduate']:
-            trial_record.criterionMet = True
+            trial_record['criterion_met'] = True
             sub.protocol.graduate()
-
+        else:
+            trial_record['criterion_met'] = False
+            
         return trial_record, quit
 
     def load_compiled_records(self):

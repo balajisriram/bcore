@@ -319,13 +319,13 @@ class StandardVisionBehaviorStation(Station):
 
         # session starts here
         sR = []  # just a list of tRs
-
+        session_number = cR["session_number"][-1] + 1
         while not Quit:
             # it loops in here every trial
             tR = {}
             # just assign relevant details here
-            tR["trial_number"] = cR[-1]["trial_number"] + 1
-            tR["session_number"] = cR[-1]["session_number"] + 1
+            tR["trial_number"] = cR["trial_number"][-1] + 1
+            tR["session_number"] = session_number
             tR["station_id"] = self.station_id
             tR["station_name"]= self.station_name
             tR["num_ports_in_station"] = self.num_ports
@@ -342,6 +342,8 @@ class StandardVisionBehaviorStation(Station):
         # save compiled records
         self._subject.save_compiled_records(cR)
 
+    def close_session(self, **kwargs):
+        print("Closing Session")
 
 def make_standard_behavior_station():
     pass
