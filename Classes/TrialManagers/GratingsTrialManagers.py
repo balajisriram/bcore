@@ -94,10 +94,10 @@ class Gratings(StandardVisionBehaviorTrialManager):
         phase. There is no "correct" and no responses are required/recorded
         """
         (stimulus,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station, kwargs)
-        self.Phases = {}
+        self._Phases = {}
         # Just display stim
         do_nothing = []
-        self.Phases[0] = PhaseSpec(
+        self._Phases[0] = PhaseSpec(
             stimulus=stimulus,
             stim_type='dynamic',
             start_frame=0,
@@ -109,7 +109,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
             is_stim=True,
             index_pulses=False,
             sound_played=('trialStartSound', 50))
-        self.Phases[1] = PhaseSpec(
+        self._Phases[1] = PhaseSpec(
             stimulus=0.5,
             stim_type=('timedFrames',10),
             start_frame=0,
@@ -127,7 +127,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
         pass
 
     def decache(self):
-        self._internal_objects = dict()
+        self._Phases = dict()
         
     def do_trial(self, station, subject, trial_record, compiled_record):
         ## returns quit and trial_record
