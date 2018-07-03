@@ -1,12 +1,12 @@
-from .StandardVisionBehaviorTrialManager import StandardVisionBehaviorTrialManager
 from verlib import NormalizedVersion as Ver
 from .PhaseSpec import PhaseSpec
 from ..ReinforcementManager import ConstantReinforcement
+from ..Station import StandardKeyboardStation
 import psychopy
 import random
 import numpy
-
-PI = 3.14159
+import psychopy.visual,psychopy.core
+import pdb
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -17,7 +17,7 @@ __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 
-class Gratings(StandardVisionBehaviorTrialManager):
+class Gratings(object):
     """
         GRATINGS defines a standard gratings trial manager
             deg_per_cycs
@@ -31,7 +31,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
     """
     ver = Ver('0.0.1')
     _Phases = None
-    _Cached_Textures = None
+    _Cached_Stimuli = None
     
     def __init__(self,
                  deg_per_cycs=10, #degrees
@@ -42,6 +42,7 @@ class Gratings(StandardVisionBehaviorTrialManager):
                  durations=1, #seconds
                  radii=40, #degrees
                  iti=1, #seconds
+                 itl=0.2, #inter trial luminance
                  **kwargs):
         super(Gratings, self).__init__(**kwargs)
 
@@ -53,7 +54,12 @@ class Gratings(StandardVisionBehaviorTrialManager):
         self.durations = durations
         self.radii = radii
 
-        self.iti = iti # inter trial interval
+        self.iti = iti # inter trial interval (s)
+        
+        if numpy.isscalar(itl):
+            self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
+        else:
+            self.itl = numpy.asarray(itl) #itl as color
 
     def calc_stim(self, trial_record, station, **kwargs):
 
@@ -93,10 +99,11 @@ class Gratings(StandardVisionBehaviorTrialManager):
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
         """
-        (stimulus,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station, kwargs)
+        (stimulus,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
+        hz = resolution[2]
         self._Phases = {}
         # Just display stim
-        do_nothing = []
+        do_nothing = ()
         self._Phases[0] = PhaseSpec(
             stimulus=stimulus,
             stim_type='dynamic',
@@ -108,44 +115,84 @@ class Gratings(StandardVisionBehaviorTrialManager):
             phase_name='stim',
             is_stim=True,
             index_pulses=False,
+            hz=hz,
             sound_played=('trialStartSound', 50))
         self._Phases[1] = PhaseSpec(
             stimulus=0.5,
             stim_type=('timedFrames',10),
             start_frame=0,
             transitions={do_nothing: 2},
-            frames_until_transition=10,
+            frames_until_transition=round(self.iti*hz),
             auto_trigger=False,
-            scaleFactor=scaleFactor,
             phase_type='inter-trial',
             phase_name='inter-trial',
             is_stim=False,
             index_pulses =False,
+            hz=hz,
             sound_played=('trialEndSound', 50))
 
-    def _simulate(self, **kwargs):
-        pass
+    def _simulate(self):
+        station = StandardKeyboardStation()
+        station.initialize_display()
+        trial_record = {}
+        Quit = False
+        while not Quit:
+            Quit = self.do_trial(trial_record=trial_record,station=station,subject=None,compiled_record=None)
+            print("Quit::",Quit)
+        station.close_window()
 
     def decache(self):
         self._Phases = dict()
+    
+    def _cache_stimuli(self,station):
+        stimulus = self._Phases[0].stimulus
         
+        self._Cached_Stimuli= []        
+        self._Cached_Stimuli.append(psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus['deg_per_cyc'],size=stimulus['radius'],ori=stimulus['orientation'],phase=stimulus['phase'],contrast=stimulus['contrast'],units='deg',mask='gauss'))
+    
     def do_trial(self, station, subject, trial_record, compiled_record):
-        ## returns quit and trial_record
+        # returns quit and trial_record
+        # resetup the window according to the itl
+        myMon = psychopy.monitors.Monitor('BasicWrkStn',distance=30,width=30)
+        myMon.setSizePix((1920, 1080))
+        station._window = psychopy.visual.Window(color = (0,0,0),
+                                              fullscr = True,
+                                              winType = 'pyglet',
+                                              allowGUI = False,
+                                              units = 'deg',
+                                              screen = 0,
+                                              viewScale = None,
+                                              waitBlanking = True,
+                                              allowStencil = True,
+                                              monitor = myMon,
+                                              )
         
         ## _setup_phases
-        self._setup_phases(trial_record=trial_record, statoin=station,compiled_record=compiled_record)
-        self._cache_textures()
-        self._cache_sounds()
+        Quit = False
+        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
+        self._cache_stimuli(station)
+        station._key_pressed = []
         
-        quit = False
-        
-        current_phase_num = 0
-        manual_quit = False
-        manual_reward = False
-        
-        
-                
-
+        # Phase 0
+        frames_until_transition = self._Phases[0].frames_until_transition
+        phase_done = False
+        while not phase_done:
+            self._Cached_Stimuli[0].draw()
+            station._window.flip()
+            frames_until_transition = frames_until_transition-1
+            if frames_until_transition==0: phase_done = True
+            Quit = Quit or station.check_manual_quit()
+            
+        # Phase 1
+        frames_until_transition = self._Phases[1].frames_until_transition
+        phase_done = False
+        while not phase_done:
+            station._window.flip()
+            frames_until_transition = frames_until_transition-1
+            if frames_until_transition==0: phase_done = True
+            Quit = Quit or station.check_manual_quit()
+            
+        return Quit
 
 class AFCGratings(Gratings):
     """
@@ -164,9 +211,9 @@ class AFCGratings(Gratings):
     ver = Ver('0.0.1')
 
     def __init__(self,deg_per_cycs = {'L':[10],'R':[10]},\
-    orientations = {'L':[-PI / 4], 'R':[PI / 4]},\
+    orientations = {'L':[-numpy.pi / 4], 'R':[numpy.pi / 4]},\
     driftfrequencies = {'L':[0],'R':[0]},\
-    phases = {'L':numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True),'R':numpy.linspace(start=-PI, stop=PI, num=8, endpoint=True)},\
+    phases = {'L':numpy.linspace(start=-numpy.pi, stop=numpy.pi, num=8, endpoint=True),'R':numpy.linspace(start=-numpy.pi, stop=numpy.pi, num=8, endpoint=True)},\
     contrasts = {'L':[1],'R':[1]},\
     durations = {'L':[float('Inf')],'R':[float('Inf')]},\
     radii = {'L':[40],'R':[40]},\
@@ -235,7 +282,7 @@ class AFCGratings(Gratings):
         phase. There is no "correct" and no responses are required/recorded
         """
         (stimulus, stimType, resolution, hz, bitDepth, scaleFactor,
-            framesTotal) = gratings.calcStim(kwargs)
+            framesTotal) = gratings.calc_stim(kwargs)
         # Just display stim
 
         gratings.Phases[0] = PhaseSpecs(
@@ -293,3 +340,17 @@ class Gratings_HardEdge(Gratings):
 
         if 'Radii'in kwargs:
             grating.Radii = kwargs['Radii']
+            
+if __name__=='__main__':
+    g = Gratings(deg_per_cycs=[1], #cpd?
+                 orientations=[-45,45], #degrees
+                 drift_frequencies=[0], #hz
+                 phases=[0],
+                 contrasts=[1,0.15],
+                 durations=[1], #seconds
+                 radii=[4], #degrees
+                 iti=1, #seconds
+                 itl=0.5, #inter trial luminance
+                 )
+    
+    g._simulate()

@@ -58,6 +58,7 @@ class PhaseSpec(object):
                  phase_type = '',
                  phase_name = '',
                  pins_to_trigger = [],
+                 hz = None,
                  sounds_played = {},
                  **kwargs):
         self.phase_number = phase_number
@@ -68,7 +69,7 @@ class PhaseSpec(object):
         self.frames_until_transition = frames_until_transition
         self.auto_trigger = auto_trigger
         self.is_final_phase = is_final_phase
-        self.hz = kwargs['hz']
+        self.hz = hz
         self.phase_type = phase_type
         self.phase_name = phase_name
         self.pins_to_trigger = pins_to_trigger
