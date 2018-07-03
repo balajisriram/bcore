@@ -7,7 +7,7 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-do_nothing = None
+do_nothing = ()
 class PhaseSpec(object):
     """
         PHASESPEC acts as a kind of state machine. You start at the first phase
@@ -49,12 +49,9 @@ class PhaseSpec(object):
     def __init__(self,
                  phase_number = 0,
                  stimulus = 0.5,
-                 stim_type = 'loop',
-                 start_frame = 0,
                  transitions = {do_nothing: 1},
                  frames_until_transition = float('inf'),
                  auto_trigger = False,
-                 is_final_phase = True,
                  phase_type = '',
                  phase_name = '',
                  pins_to_trigger = [],
@@ -63,12 +60,9 @@ class PhaseSpec(object):
                  **kwargs):
         self.phase_number = phase_number
         self.stimulus = stimulus
-        self.stim_type = stim_type
-        self.start_frame = start_frame
         self.transitions = transitions
         self.frames_until_transition = frames_until_transition
         self.auto_trigger = auto_trigger
-        self.is_final_phase = is_final_phase
         self.hz = hz
         self.phase_type = phase_type
         self.phase_name = phase_name
