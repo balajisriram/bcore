@@ -141,7 +141,7 @@ class Gratings(object):
         stimulus = self._Phases[0].stimulus
         
         self._Cached_Stimuli= []        
-        self._Cached_Stimuli.append(psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus['deg_per_cyc'],size=stimulus['radius'],ori=stimulus['orientation'],phase=stimulus['phase'],contrast=stimulus['contrast'],units='deg',mask='gauss'))
+        self._Cached_Stimuli.append(psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus['deg_per_cyc'],size=stimulus['radius'],ori=stimulus['orientation'],phase=stimulus['phase'],contrast=stimulus['contrast'],units='deg',mask=None))
     
     def do_trial(self, station, subject, trial_record, compiled_record):
         # returns quit and trial_record
@@ -324,14 +324,14 @@ class Gratings_HardEdge(Gratings):
             grating.Radii = kwargs['Radii']
             
 if __name__=='__main__':
-    g = Gratings(deg_per_cycs=[0.1], #cpd?
-                 orientations=[-45,45], #degrees
-                 drift_frequencies=[1], #hz
+    g = Gratings(deg_per_cycs=[0.01,0.1,1], #cpd?
+                 orientations=[-45,-22.5,0,22.5,45], #degrees
+                 drift_frequencies=[0,1], #hz
                  phases=[0],
                  contrasts=[1,0.15],
                  durations=[1], #seconds
-                 radii=[100], #degrees
-                 iti=1, #seconds
+                 radii=[200], #degrees
+                 iti=0.1, #seconds
                  itl=0.5, #inter trial luminance
                  )
     
