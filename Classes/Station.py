@@ -361,11 +361,11 @@ class StandardKeyboardStation(Station):
                                display unit
             soundOn          : True/False
 
-        For the StandardVisualBehaviorStation, with Rev 2/3 breakout boards
-        ("The Bomb"), only certain ports are used and for specific purposes:
+        For the StandardKeyboardStation:
             K+1              :            Left Sensor
             K+2              :            Center Sensor
             K+3              :            Right Sensor
+            K+Q              :            Quit
             
     """
     version = Ver('0.0.1')
@@ -398,6 +398,7 @@ class StandardKeyboardStation(Station):
                                               waitBlanking = True,
                                               allowStencil = True,
                                               monitor = display,
+                                              size = display.getSizePix()
                                               )
         self._window.flip()
         
