@@ -25,6 +25,7 @@ def Dell_E3211H():
 
     mon = psychopy.monitors.Monitor(name,
                                     width = 50.98,
-                                    distance = 12,
+                                    distance = distance_to_subject/10, # in cm?
                                     gamma = 1.2)
+    mon.setSizePix((x_pixels,y_pixels))
     return mon

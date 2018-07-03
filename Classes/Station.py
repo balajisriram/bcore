@@ -196,6 +196,7 @@ class StandardVisionBehaviorStation(Station):
                                               viewScale = None,
                                               waitBlanking = True,
                                               allowStencil = True,
+                                              monitor = display,
                                               )
         self._window.flip()
 
@@ -396,6 +397,7 @@ class StandardKeyboardStation(Station):
                                               viewScale = None,
                                               waitBlanking = True,
                                               allowStencil = True,
+                                              monitor = display,
                                               )
         self._window.flip()
         
@@ -432,24 +434,28 @@ class StandardKeyboardStation(Station):
         self.subject = None
 
     def read_ports(self):
-        (keys,modifiers,ts) = psychopy.event.getKeys(keyList=['1','2','3','k'])
+        key = psychopy.event.getKeys(keyList=['1','2','3','k'])
         ports = numpy.asarray([False,False,False])
-        if 'k' in keys:
-            if '1' in keys:
-                ports = numpy.bitwise_or(ports,[True,False,False])
-            if '2' in keys:
-                ports = numpy.bitwise_or(ports,[False,True,False])
-            if '3' in keys:
-                ports = numpy.bitwise_or(ports,[False,False,True])
+        if key:
+            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
+        if 'k' in keys and '1' in keys:
+            ports = numpy.bitwise_or(ports,[True,False,False])
+            psychopy.event.clearEvents()
+        if 'k' in keys and '2' in keys:
+            ports = numpy.bitwise_or(ports,[False,True,False])
+            psychopy.event.clearEvents()
+        if 'k' in keys and '3' in keys:
+            ports = numpy.bitwise_or(ports,[False,False,True])
+            psychopy.event.clearEvents()
+            
+        return ports
     
     def check_manual_quit(self):
         key = psychopy.event.getKeys(keyList=['k','q'])
         if key:
             if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
         if 'k' in self._key_pressed and 'q' in self._key_pressed:
-            print(self._key_pressed)
             psychopy.event.clearEvents()
-            print('here')
             return True
         else:
             return False
