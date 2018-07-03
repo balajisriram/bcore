@@ -105,29 +105,23 @@ class Gratings(object):
         # Just display stim
         do_nothing = ()
         self._Phases[0] = PhaseSpec(
+            phase_number=1,
             stimulus=stimulus,
-            stim_type='dynamic',
-            start_frame=0,
             transitions={do_nothing: 1},
             frames_until_transition=frames_total,
             auto_trigger=False,
             phase_type='stimulus',
             phase_name='stim',
-            is_stim=True,
-            index_pulses=False,
             hz=hz,
             sound_played=('trialStartSound', 50))
         self._Phases[1] = PhaseSpec(
+            phase_number=2,
             stimulus=0.5,
-            stim_type=('timedFrames',10),
-            start_frame=0,
             transitions={do_nothing: 2},
             frames_until_transition=round(self.iti*hz),
             auto_trigger=False,
             phase_type='inter-trial',
             phase_name='inter-trial',
-            is_stim=False,
-            index_pulses =False,
             hz=hz,
             sound_played=('trialEndSound', 50))
 
@@ -138,7 +132,6 @@ class Gratings(object):
         Quit = False
         while not Quit:
             Quit = self.do_trial(trial_record=trial_record,station=station,subject=None,compiled_record=None)
-            print("Quit::",Quit)
         station.close_window()
 
     def decache(self):
@@ -153,20 +146,7 @@ class Gratings(object):
     def do_trial(self, station, subject, trial_record, compiled_record):
         # returns quit and trial_record
         # resetup the window according to the itl
-        myMon = psychopy.monitors.Monitor('BasicWrkStn',distance=30,width=30)
-        myMon.setSizePix((1920, 1080))
-        station._window = psychopy.visual.Window(color = (0,0,0),
-                                              fullscr = True,
-                                              winType = 'pyglet',
-                                              allowGUI = False,
-                                              units = 'deg',
-                                              screen = 0,
-                                              viewScale = None,
-                                              waitBlanking = True,
-                                              allowStencil = True,
-                                              monitor = myMon,
-                                              )
-        
+                
         ## _setup_phases
         Quit = False
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
@@ -175,9 +155,11 @@ class Gratings(object):
         
         # Phase 0
         frames_until_transition = self._Phases[0].frames_until_transition
+        drift_frequency = self._Phases[0].stimulus['drift_frequency']
         phase_done = False
         while not phase_done:
             self._Cached_Stimuli[0].draw()
+            self._Cached_Stimuli[0].phase += float(drift_frequency/60.)
             station._window.flip()
             frames_until_transition = frames_until_transition-1
             if frames_until_transition==0: phase_done = True
@@ -342,13 +324,13 @@ class Gratings_HardEdge(Gratings):
             grating.Radii = kwargs['Radii']
             
 if __name__=='__main__':
-    g = Gratings(deg_per_cycs=[1], #cpd?
+    g = Gratings(deg_per_cycs=[0.1], #cpd?
                  orientations=[-45,45], #degrees
-                 drift_frequencies=[0], #hz
+                 drift_frequencies=[1], #hz
                  phases=[0],
                  contrasts=[1,0.15],
                  durations=[1], #seconds
-                 radii=[4], #degrees
+                 radii=[100], #degrees
                  iti=1, #seconds
                  itl=0.5, #inter trial luminance
                  )
