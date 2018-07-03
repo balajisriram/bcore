@@ -1,6 +1,8 @@
 import time
 import os
 import psychopy
+import psychopy.event
+import numpy
 
 from .Hardware.Displays import StandardDisplay
 from .. import get_base_directory, get_ip_addr
@@ -286,6 +288,180 @@ class StandardVisionBehaviorStation(Station):
         time.sleep(dur)
         self.parallel_port_conn.write_pins(
             self.parallel_port['valvePins'], PPORT_LO)
+
+    def get_display_size(self):
+        pass
+
+    def get_session(self):
+        """
+            Connect to BServer and request session details to be loaded
+        """
+        self._session = self._server_conn.client_to_server(self._server_conn.SESSION_REQUESTED)
+
+    def decache(self):
+        """
+            Remove session specific details. ideal for pickling
+        """
+        self._window = None
+        self._session = None
+        self._server_conn = None
+        self._parallelport_conn = None
+
+    def do_trials(self, **kwargs):
+        # first step in the running of trials. called directly by station
+        # or through the BServer
+        if __debug__:
+            pass
+
+        # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
+        # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
+        # the previous trial, please add it to compiled records
+        cR = self.subject.load_compiled_records()
+        Quit = False
+
+        # session starts here
+        sR = []  # just a list of tRs
+        session_number = cR["session_number"][-1] + 1
+        while not Quit:
+            # it loops in here every trial
+            tR = {}
+            # just assign relevant details here
+            tR["trial_number"] = cR["trial_number"][-1] + 1
+            tR["session_number"] = session_number
+            tR["station_id"] = self.station_id
+            tR["station_name"]= self.station_name
+            tR["num_ports_in_station"] = self.num_ports
+            tR["start_time"] = time.localtime()
+            # doTrial - only tR will be returned as its type will be changed
+            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
+
+            tR["stop_time"] = time.localtime()
+            # update sessionRecord and compiledRecord
+            cR = compile_records(cR,tR)
+
+        # save session records
+        self._subject.save_session_records(sR)
+        # save compiled records
+        self._subject.save_compiled_records(cR)
+
+    def close_session(self, **kwargs):
+        print("Closing Session")
+
+class StandardKeyboardStation(Station):
+    """
+        STANDARDKEYBOARDSTATION(SKBS) defines a subclass of STATION.
+        It defines a station with a standard display, sounds settings 
+        which can only be turned on or off, three sensor pins 
+        [connected to the keyboard]. Only allows stand alone running
+        Attributes allowed are:
+            station_id       : numeric ID to be sent to STATION
+            station_path     : DO NOT SEND - STATION WILL SET IT
+            display          : dictionary containing details about the
+                               display unit
+            soundOn          : True/False
+
+        For the StandardVisualBehaviorStation, with Rev 2/3 breakout boards
+        ("The Bomb"), only certain ports are used and for specific purposes:
+            K+1              :            Left Sensor
+            K+2              :            Center Sensor
+            K+3              :            Right Sensor
+            
+    """
+    version = Ver('0.0.1')
+    _window = None
+    _session = None
+    _server_conn = None
+    _subject = None
+    _key_pressed = []
+
+    def __init__(self,
+                 sound_on=False,
+                 station_id= 0,
+                 station_location=(0,0,0)):
+        super(StandardKeyboardStation, self).__init__(station_location=station_location)
+        self.station_id = station_id
+        self.station_name = "Station" + str(station_id)
+        self.sound_on = sound_on
+        self.display = None
+
+
+
+    def initialize_display(self, display = StandardDisplay()):
+        self._window = psychopy.visual.Window(color = (0,0,0),
+                                              fullscr = True,
+                                              winType = 'pyglet',
+                                              allowGUI = False,
+                                              units = 'deg',
+                                              screen = 0,
+                                              viewScale = None,
+                                              waitBlanking = True,
+                                              allowStencil = True,
+                                              )
+        self._window.flip()
+        
+    def close_window(self):
+        self._window.close()
+
+    @property
+    def subject(self):
+        return self._subject
+        
+    @subject.setter
+    def subject(self,value):
+        self._subject = value
+
+    @property
+    def session(self):
+        return self._session
+    
+    @session.setter
+    def subject(self,value):
+        self._session = value
+        
+    @property
+    def num_ports(self):
+        return 3
+        
+    def get_ports(self):
+        return [0,1,2]
+
+    def add_subject(self, sub):
+        self.subject = sub
+
+    def remove_subject(self,sub):
+        self.subject = None
+
+    def read_ports(self):
+        (keys,modifiers,ts) = psychopy.event.getKeys(keyList=['1','2','3','k'])
+        ports = numpy.asarray([False,False,False])
+        if 'k' in keys:
+            if '1' in keys:
+                ports = numpy.bitwise_or(ports,[True,False,False])
+            if '2' in keys:
+                ports = numpy.bitwise_or(ports,[False,True,False])
+            if '3' in keys:
+                ports = numpy.bitwise_or(ports,[False,False,True])
+    
+    def check_manual_quit(self):
+        key = psychopy.event.getKeys(keyList=['k','q'])
+        if key:
+            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
+        if 'k' in self._key_pressed and 'q' in self._key_pressed:
+            print(self._key_pressed)
+            psychopy.event.clearEvents()
+            print('here')
+            return True
+        else:
+            return False
+            
+    def open_valve(self, valve):
+        pass
+
+    def close_valve(self, valve):
+        pass
+
+    def flush_valves(self, dur=1):
+        pass
 
     def get_display_size(self):
         pass
