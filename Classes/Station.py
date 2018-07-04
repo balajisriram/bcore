@@ -355,7 +355,7 @@ class StandardVisionBehaviorStation(Station):
         # or through the BServer
         if __debug__:
             pass
-
+        self.initialize()
         # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
         # the previous trial, please add it to compiled records
@@ -535,38 +535,38 @@ class StandardKeyboardStation(Station):
         # or through the BServer
         if __debug__:
             pass
-
+        self.initialize()
         # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
         # the previous trial, please add it to compiled records
-        cR = self.subject.load_compiled_records()
-        Quit = False
+        compiled_record = self.subject.load_compiled_records()
+        quit = False
 
         # session starts here
         sR = []  # just a list of tRs
-        session_number = cR["session_number"][-1] + 1
-        while not Quit:
+        session_number = compiled_record["session_number"][-1] + 1
+        while not quit:
             # it loops in here every trial
-            tR = {}
+            trial_record = {}
             # just assign relevant details here
-            tR["trial_number"] = cR["trial_number"][-1] + 1
-            tR["session_number"] = session_number
-            tR["station_id"] = self.station_id
-            tR["station_name"]= self.station_name
-            tR["num_ports_in_station"] = self.num_ports
-            tR["start_time"] = time.localtime()
-            # doTrial - only tR will be returned as its type will be changed
-            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, Quit=Quit)
+            trial_record["trial_number"] = compiled_record["trial_number"][-1] + 1
+            trial_record["session_number"] = session_number
+            trial_record["station_id"] = self.station_id
+            trial_record["station_name"]= self.station_name
+            trial_record["num_ports_in_station"] = self.num_ports
+            trial_record["start_time"] = time.localtime()
+            # doTrial - only trial_record will be returned as its type will be changed
+            trial_record, quit = self.subject.do_trial(station=self, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
-            tR["stop_time"] = time.localtime()
+            trial_record["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
-            #cR = compile_records(cR,tR)
-            sR.append(tR)
+            #compiled_record = compile_records(compiled_record,trial_record)
+            sR.append(trial_record)
 
         # save session records
         self._subject.save_session_records(sR)
         # save compiled records
-        self._subject.save_compiled_records(cR)
+        self._subject.save_compiled_records(compiled_record)
 
     def close_session(self, **kwargs):
         print("Closing Session")

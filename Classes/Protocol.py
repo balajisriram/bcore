@@ -32,15 +32,15 @@ class TrainingStep(object):
         graduate = False
         manual_ts_change = False
         
-        try:
-            keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-            if keep_doing_trials:
-                stop_early, trial_record = self.trial_manager.do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-                import pdb
-                pdb.set_trace()
-                graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-        except:
-            station.close_session()
+        # try:
+        keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+        if keep_doing_trials:
+            stop_early, trial_record = self.trial_manager.do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record,quit=quit)
+            import pdb
+            pdb.set_trace()
+            graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+        # except:
+            # station.close_session()
             
         
     

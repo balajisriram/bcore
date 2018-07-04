@@ -41,13 +41,13 @@ class Gratings(object):
     
     def __init__(self,
                  name,
-                 deg_per_cycs=10, #degrees
-                 orientations=45, #degrees
-                 drift_frequencies=0, #hz
-                 phases=0,
-                 contrasts=1,
-                 durations=1, #seconds
-                 radii=400, #degrees
+                 deg_per_cycs=[10], #degrees
+                 orientations=[45], #degrees
+                 drift_frequencies=[0], #hz
+                 phases=[0],
+                 contrasts=[1],
+                 durations=[1], #seconds
+                 radii=[400], #degrees
                  iti=1, #seconds
                  itl=0.2, #inter trial luminance
                  **kwargs):
@@ -117,6 +117,7 @@ class Gratings(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
+        print('iti::',self.iti)
         self._Phases.append(PhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
@@ -163,7 +164,7 @@ class Gratings(object):
     def do_nothing_to_stim(stimulus,details):
         pass
     
-    def do_trial(self, station, subject, trial_record, compiled_record,Quit):
+    def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
                 
@@ -208,9 +209,9 @@ class Gratings(object):
                 # update the frames
                 frames_until_transition = frames_until_transition-1
                 if frames_until_transition==0: phase_done = True
-                Quit = Quit or station.check_manual_quit()
+                quit = quit or station.check_manual_quit()
             
-        return trial_record,Quit
+        return trial_record,quit
 
 class Gratings_GaussianEdge(Gratings):
     """

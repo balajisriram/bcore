@@ -1,3 +1,5 @@
+from verlib import NormalizedVersion as Ver
+
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
@@ -14,45 +16,43 @@ class TrainingStep(object):
         will need a trialManager. A Scheduler to determine when to show trials.
         And a Criterion to determine when to graduate.
     """
-    name = ''
-    trial_manager = []
-    scheduler = []
-    criterion = []
 
-    def __init__(ts, name, trial_manager, scheduler, criterion, **kwargs):
-        ts.name = name
-        ts.trial_manager = trial_manager
-        ts.scheduler = scheduler
-        ts.criterion = criterion
+    def __init__(self, name, trial_manager, scheduler, criterion, **kwargs):
+        self.ver = Ver('0.0.1')
+        self.name = name
+        self.trial_manager = trial_manager
+        self.scheduler = scheduler
+        self.criterion = criterion
 
-    def schedule_ok(ts):
-        return ts.scheduler.schedule_ok()
+    def schedule_ok(self):
+        return self.scheduler.schedule_ok()
 
-    def do_trial(ts,subject,station, trial_records,compiled_records,Quit):
+    def do_trial(self,subject,station, trial_record,compiled_record,quit):
+        # self,subject,station, trial_record,compiled_record,quit
         # called by subject.doTrial()
         if __debug__:
             assert kwargs['session'].tsOKForSessMgr, ''
 
-        trial_records['trial_manager_name'] = ts.trial_manager.name
-        trial_records['scheduler_name'] = ts.scheduler.name
-        trial_records['criterion_name'] = ts.criterion.name
+        trial_record['trial_manager_name'] = self.trial_manager.name
+        trial_record['scheduler_name'] = self.scheduler.name
+        trial_record['criterion_name'] = self.criterion.name
 
-        trial_records['trial_manager_class'] = ts.trial_manager.__class__.__name__
-        trial_records['scheduler_class'] = ts.scheduler.__class__.__name__
-        trial_records['criterion_class'] = ts.criterion.__class__.__name__
+        trial_record['trial_manager_class'] = self.trial_manager.__class__.__name__
+        trial_record['scheduler_class'] = self.scheduler.__class__.__name__
+        trial_record['criterion_class'] = self.criterion.__class__.__name__
 
-        trial_records['trial_manager_version_number'] = ts.trial_manager.ver
-        trial_records['scheduler_version_number'] = ts.scheduler.ver
-        trial_records['criterion_version_number'] = ts.criterion.ver
+        trial_record['trial_manager_version_number'] = self.trial_manager.ver
+        trial_record['scheduler_version_number'] = self.scheduler.ver
+        trial_record['criterion_version_number'] = self.criterion.ver
         import pdb
         pdb.set_trace()
 
-        if ts.schedule_ok(**kwargs):
-            tR,Quit = ts.trial_manager.do_trial(station=station,subject=subject,trial_record=trial_record,compiled_record=compiled_record,Quit=Quit)
+        if self.schedule_ok(**kwargs):
+            trial_record,quit = self.trial_manager.do_trial(station=station,subject=subject,trial_record=trial_record,compiled_record=compiled_record,Quit=quit)
 
-        if ts.criterion.graduate(tR, **kwargs):
+        if self.criterion.graduate(tR, **kwargs):
             tR.graduated_end_of_trial = True
         else:
             tR.graduated_end_of_trial = False
 
-        return tR,Quit
+        return tR,quit

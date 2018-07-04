@@ -16,8 +16,6 @@ class Subject(object):
                 subjectID               : string identifier
                 protocol                : protocol object
     """
-    ver = Ver('0.0.1')
-
     def __init__(sub, subject_id, **kwargs):
         """
                 Call as follows::
@@ -25,6 +23,7 @@ class Subject(object):
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
+        sub.ver = Ver('0.0.1')
         sub.subject_id = subject_id
         sub.protocol = []
         sub.session_manager = []
@@ -67,7 +66,7 @@ class Subject(object):
     def allowed_gene_bkgd(sub):
         return None
 
-    def do_trial(sub, station, trial_record, compiled_record, Quit):
+    def do_trial(sub, station, trial_record, compiled_record, quit):
         # Called by station.do_trials()
         if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
@@ -87,17 +86,14 @@ class Subject(object):
         trial_record['num_steps'] = sub.protocol.num_steps()
 
         current_step = sub.protocol.step()
-        resp = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record,Quit=Quit)
-        print(resp)
-        trial_record, Quit1 = resp
-        Quit = Quit1
+        resp = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record,quit = quit)
         if kwargs['graduate']:
             trial_record['criterion_met'] = True
             sub.protocol.graduate()
         else:
             trial_record['criterion_met'] = False
             
-        return trial_record, Quit
+        return trial_record, quit
 
     def load_compiled_records(self):
         # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
