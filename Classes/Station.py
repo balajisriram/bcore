@@ -34,6 +34,9 @@ class Station(object):
     """
     version = Ver('0.0.1')
     _subject = None
+    _key_pressed = []
+    _sounds = {}
+    _stims = {}
 
     def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
         """ Use Station as an abstract class - do not allow setting of
@@ -72,7 +75,47 @@ class Station(object):
 
     def do_trials(self, **kwargs):
         raise NotImplementedError('Run doTrials() on a subclass')
+        
+    def initialize_sounds(self):
+        from psychopy import prefs
+        prefs.general['audioLib'] = ['sounddevice']
+        import psychopy.sound
+        
+        sampleRate=44100
+        secs=1
+        nSamples = int(secs * sampleRate)
+        phase = numpy.arange(0.0, 1.0, 1.0 / nSamples)
+        phase *= 2 * numpy.pi
+        
+        # get the trial_start_sound = ('allOctaves',200,20000)
+        trial_start_freqs = numpy.asarray([200,400,800,1600,3200,6400,12800])
+        trial_start_arr = 0*phase
+        for freq in trial_start_freqs:
+            trial_start_arr += phase*freq
+        trial_start_arr /= trial_start_freqs.size   
+        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A')
+        
+        # get the request_sound = ('allOctaves',100,20000)
+        request_freqs = numpy.asarray([100,200,400,800,1600,3200,6400,12800])
+        request_arr = 0*phase
+        for freq in request_freqs:
+            request_arr += phase*freq
+        request_arr /= request_freqs.size
+        self._sounds['request_sound'] = psychopy.sound.Sound('B')
+        
+        # get the correct_sound = ('allOctaves',400,20000)
+        correct_freqs = numpy.asarray([400,800,1600,3200,6400,12800])
+        correct_arr = 0*phase
+        for freq in correct_freqs:
+            correct_arr += phase*freq
+        correct_arr /= correct_freqs.size
+        self._sounds['correct_sound'] = psychopy.sound.Sound('C')
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound('C')
 
+    def _rewind_sounds(self):
+        for sound in self._sounds:
+            self._sounds[sound].seek(0.)
+        
 
 class StandardVisionBehaviorStation(Station):
     """
@@ -125,7 +168,6 @@ class StandardVisionBehaviorStation(Station):
     _window = None
     _session = None
     _server_conn = None
-    _subject = None
 
     def __init__(self,
                  sound_on=False,
@@ -372,8 +414,6 @@ class StandardKeyboardStation(Station):
     _window = None
     _session = None
     _server_conn = None
-    _subject = None
-    _key_pressed = []
 
     def __init__(self,
                  sound_on=False,
@@ -384,11 +424,13 @@ class StandardKeyboardStation(Station):
         self.station_name = "Station" + str(station_id)
         self.sound_on = sound_on
         self.display = None
-
-
+        
+    def initialize(self):
+        self.initialize_display()
+        self.initialize_sounds()
 
     def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.Window(color = (0,0,0),
+        self._window = psychopy.visual.Window(color = (0.5,0.5,0.5),
                                               fullscr = True,
                                               winType = 'pyglet',
                                               allowGUI = False,
@@ -514,11 +556,12 @@ class StandardKeyboardStation(Station):
             tR["num_ports_in_station"] = self.num_ports
             tR["start_time"] = time.localtime()
             # doTrial - only tR will be returned as its type will be changed
-            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
+            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, Quit=Quit)
 
             tR["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
-            cR = compile_records(cR,tR)
+            #cR = compile_records(cR,tR)
+            sR.append(tR)
 
         # save session records
         self._subject.save_session_records(sR)
