@@ -337,11 +337,11 @@ class BServerLocal(object):
         compiled_folder_path = os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')
         compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
         if not compiled_file_for_subject:
-            cR = []
-            cR0 = {}
-            cR0['trial_number'] = 0
-            cR0['session_number'] = 0
-            cR.append(cR0)
+            cR = {}
+            cR["session_number"] = []
+            cR["session_number"].append(0)
+            cR["trial_number"] = []
+            cR["trial_number"].append(0)
             cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
             with open(os.path.join(compiled_folder_path, cR_file_name),'wb') as f:
                 pickle.dump(cR, f, pickle.HIGHEST_PROTOCOL)
