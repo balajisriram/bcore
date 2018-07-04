@@ -13,7 +13,7 @@ from BCore import get_base_directory, get_ip_addr
 from ..Classes.ClientAndServer.BServer import BServerLocal
 from ..Classes.Protocol import DemoGratingsProtocol
 from ..Classes.Subject import DefaultVirtual
-from ..Classes.Station import StandardVisionBehaviorStation
+from ..Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -44,8 +44,7 @@ def load_bserver(path, subject_id):
 
     if not b_server.get_station_ids():
         print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
-        stn  = StandardVisionBehaviorStation(sound_on=False, station_id=0, station_location=(0, 0, 0), pport_addr=None,
-                                            parallel_port=None)
+        stn  = StandardKeyboardStation(sound_on=False, station_id=0, station_location=(0, 0, 0))
         b_server.add_station(stn)
     elif len(b_server.get_station_ids())>1:
         RuntimeError('STANDALONERUN:LOAD_BSERVER:too many stations for server')
