@@ -167,6 +167,6 @@ class DemoGratingsProtocol(SimpleProtocol):
         name="DemoGratingStepNum1", 
         criterion=RepeatIndefinitely(), 
         session_manager=NoTimeOff(), 
-        trial_manager=Gratings(), 
+        trial_manager=Gratings('DemoGratingsTrialManager'), 
         reinforcement_manager=NoReinforcement())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)

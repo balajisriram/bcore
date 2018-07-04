@@ -67,7 +67,7 @@ class Subject(object):
     def allowed_gene_bkgd(sub):
         return None
 
-    def do_trial(sub, station, trial_record, compiled_record, quit):
+    def do_trial(sub, station, trial_record, compiled_record, Quit):
         # Called by station.do_trials()
         if not sub.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
@@ -87,15 +87,17 @@ class Subject(object):
         trial_record['num_steps'] = sub.protocol.num_steps()
 
         current_step = sub.protocol.step()
-        trial_record, quit = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
-
+        resp = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record,Quit=Quit)
+        print(resp)
+        trial_record, Quit1 = resp
+        Quit = Quit1
         if kwargs['graduate']:
             trial_record['criterion_met'] = True
             sub.protocol.graduate()
         else:
             trial_record['criterion_met'] = False
             
-        return trial_record, quit
+        return trial_record, Quit
 
     def load_compiled_records(self):
         # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
