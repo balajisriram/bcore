@@ -10,21 +10,22 @@ __status__ = "Production"
 
 
 class ReinforcementManager(object):
-    ver = Ver("0.0.1")
 
     def __init__(self, name='DefaultReinforcementManager'):
+        self.ver = Ver("0.0.1")
+        
         self.name = name
 
 
 class NoReinforcement(ReinforcementManager):
-    ver = Ver("0.0.1")
 
     def __init__(self, name='NoReinforcement'):
+        self.ver = Ver("0.0.1")
+
         super(NoReinforcement, self).__init__(name = name)
 
 
 class ConstantReinforcement(ReinforcementManager):
-    ver = Ver("0.0.1")
 
     def __init__(self,
                  reward_scalar = 1,
@@ -34,6 +35,7 @@ class ConstantReinforcement(ReinforcementManager):
                  fraction_penalty_sound_is_on = 0,
                  request_mode = 'first',
                  name = 'DefaultConstantReinforcement'):
+        self.ver = Ver("0.0.1")
         super(ConstantReinforcement, self).__init__(name = name)
         self.reward_scalar = reward_scalar
         self.request_reward_scalar = request_reward_scalar
@@ -54,7 +56,6 @@ class ConstantReinforcement(ReinforcementManager):
 
 
 class RewardNCorrectInARow(ReinforcementManager):
-    ver = Ver('0.0.1')
 
     def __init__(self,
                  reward_scalar=1,
@@ -64,6 +65,7 @@ class RewardNCorrectInARow(ReinforcementManager):
                  fraction_penalty_sound_is_on=0,
                  request_mode='first',
                  name='DefaultNCorrectReinforcement'):
+        self.ver = Ver("0.0.1")
         super(RewardNCorrectInARow, self).__init__(name = name)
         self.reward_scalar = reward_scalar
         self.request_reward_scalar = request_reward_scalar

@@ -16,59 +16,59 @@ class Subject(object):
                 subjectID               : string identifier
                 protocol                : protocol object
     """
-    def __init__(sub, subject_id, **kwargs):
+    def __init__(self, subject_id, **kwargs):
         """
                 Call as follows::
                 subject(subjectID='demo')
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        sub.ver = Ver('0.0.1')
-        sub.subject_id = subject_id
-        sub.protocol = []
-        sub.session_manager = []
-        sub.creation_date = time.time()
-        sub._current_trial_num = 0
+        self.ver = Ver('0.0.1')
+        self.subject_id = subject_id
+        self.protocol = []
+        self.session_manager = []
+        self.creation_date = time.time()
+        self._current_trial_num = 0
 
     def _clean(self):
         pass
 
-    def __eq__(sub, other):
+    def __eq__(self, other):
         # if this method is called, then clearly
         return False
 
-    def add_protocol(sub, new_protocol):
-        if not sub.protocol:
-            sub.protocol = new_protocol
+    def add_protocol(self, new_protocol):
+        if not self.protocol:
+            self.protocol = new_protocol
         else:
             raise ValueError('cannot add new_protocol. protocol is not empty. \
             Maybe you meant replace_protocol()?')
 
-    def add_session_manager(sub, new_session_manager):
-        if not sub.session_manager:
-            sub.session_manager = new_session_manager
+    def add_session_manager(self, new_session_manager):
+        if not self.session_manager:
+            self.session_manager = new_session_manager
         else:
             raise ValueError('cannot add new_session_manager. session_manager is not empty. \
             Maybe you meant replace_session_manager()?')
 
-    def replace_protocol(sub, new_protocol):
-        sub.protocol = new_protocol
+    def replace_protocol(self, new_protocol):
+        self.protocol = new_protocol
 
-    def replace_session_manager(sub, new_session_manager):
-        sub.session_manager = new_session_manager
+    def replace_session_manager(self, new_session_manager):
+        self.session_manager = new_session_manager
 
-    def allowed_genders(sub):
+    def allowed_genders(self):
         return None
 
-    def allowed_strains(sub):
+    def allowed_strains(self):
         return None
 
-    def allowed_gene_bkgd(sub):
+    def allowed_gene_bkgd(self):
         return None
 
-    def do_trial(sub, station, trial_record, compiled_record, quit):
+    def do_trial(self, station, trial_record, compiled_record, quit):
         # Called by station.do_trials()
-        if not sub.protocol:
+        if not self.protocol:
             raise ValueError('Protocol Unavailable: cannot run subject without \
             a protocol')
 
@@ -76,20 +76,20 @@ class Subject(object):
         graduate = False
         
         # some basic info about the subject
-        trial_record['subject_id'] = sub.subject_id
+        trial_record['subject_id'] = self.subject_id
         
         # figure out the protocol, and the trainingStep details
-        trial_record['protocol_name'] = sub.protocol.name
-        trial_record['protocol_version_number'] = sub.protocol.ver
-        trial_record['current_step'] = sub.protocol.current_step
-        trial_record['current_step_name'] = sub.protocol.step().name
-        trial_record['num_steps'] = sub.protocol.num_steps()
+        trial_record['protocol_name'] = self.protocol.name
+        trial_record['protocol_version_number'] = self.protocol.ver
+        trial_record['current_step'] = self.protocol.current_step
+        trial_record['current_step_name'] = self.protocol.step().name
+        trial_record['num_steps'] = self.protocol.num_steps()
 
-        current_step = sub.protocol.step()
-        resp = current_step.do_trial(subject=sub, station=station, trial_record=trial_record, compiled_record=compiled_record,quit = quit)
-        if kwargs['graduate']:
+        current_step = self.protocol.step()
+        trial_record,quit = current_step.do_trial(subject=self, station=station, trial_record=trial_record, compiled_record=compiled_record,quit = quit)
+        if trial_record['graduate']:
             trial_record['criterion_met'] = True
-            sub.protocol.graduate()
+            self.protocol.graduate()
         else:
             trial_record['criterion_met'] = False
             
@@ -161,37 +161,38 @@ class Mouse(Subject):
         manipulation              : three-ple list
     """
 
-    ver = Ver('0.0.1')
 
-    def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
-        super(Mouse, sub).__init__(subject_id , **kwargs)
-        sub.gender = gender
-        sub.birth_date = birth_date
-        sub.strain = strain
-        sub.gene_bkgd = gene_bkgd
-        sub.manipulation = []
+    def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
+        self.ver = Ver('0.0.1')
+        
+        super(Mouse, self).__init__(subject_id , **kwargs)
+        self.gender = gender
+        self.birth_date = birth_date
+        self.strain = strain
+        self.gene_bkgd = gene_bkgd
+        self.manipulation = []
 
-    def __eq__(sub, other):
-        if isinstance(other, Mouse) and (sub.subject_id == other.subject_id):
+    def __eq__(self, other):
+        if isinstance(other, Mouse) and (self.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowed_genders(sub):
+    def allowed_genders(self):
         return ['Male', 'Female', 'Unknown']
 
-    def allowed_strains(sub):
+    def allowed_strains(self):
         return ['C57BL/6J', '129S1/SvlmJ', 'BALB/c']
 
-    def allowed_gene_bkgd(sub):
+    def allowed_gene_bkgd(self):
         return ['WT', 'Pvalb-cre', 'Pvalb-COP4-EYFP', 'Somst-cre']
 
 
 class DefaultMouse(Mouse):
-    ver = Ver('0.0.1')
 
-    def __init__(sub):
-        super(DefaultMouse, sub).__init__(subject_id='demoMouse',gender='Unknown',
+    def __init__(self):
+        self.ver = Ver('0.0.1')
+        super(DefaultMouse, self).__init__(subject_id='demoMouse',gender='Unknown',
                                           birth_date='',strain='C57BL/6J',gene_bkgd='WT')
 
 
@@ -206,37 +207,39 @@ class Rat(Subject):
         manipulation              : three-ple list
     """
 
-    ver = Ver('0.0.1')
 
-    def __init__(sub, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
-        super(Rat, sub).__init__(subject_id, **kwargs)
-        sub.gender = gender
-        sub.birth_date = birth_date
-        sub.strain = strain
-        sub.gene_bkgd = gene_bkgd
-        sub.manipulation = []
+    def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
+        self.ver = Ver('0.0.1')
+        
+        super(Rat, self).__init__(subject_id, **kwargs)
+        self.gender = gender
+        self.birth_date = birth_date
+        self.strain = strain
+        self.gene_bkgd = gene_bkgd
+        self.manipulation = []
 
-    def __eq__(sub, other):
-        if isinstance(other, Rat) and (sub.subject_id == other.subject_id):
+    def __eq__(self, other):
+        if isinstance(other, Rat) and (self.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowed_genders(sub):
+    def allowed_genders(self):
         return ['Male', 'Female', 'Unknown']
 
-    def allowed_strains(sub):
+    def allowed_strains(self):
         return ['Wistar', 'Sprague-Dawley', 'Long-Evans']
 
-    def allowed_gene_bkgd(sub):
+    def allowed_gene_bkgd(self):
         return ['WT']
 
 
 class DefaultRat(Rat):
-    ver = Ver('0.0.1')
 
-    def __init__(sub,subject_id='demoRat'):
-        super(DefaultRat, sub).__init__(subject_id=subject_id,gender='Unknown',
+    def __init__(self,subject_id='demoRat'):
+        self.ver = Ver('0.0.1')
+        
+        super(DefaultRat, self).__init__(subject_id=subject_id,gender='Unknown',
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
 
@@ -246,32 +249,34 @@ class VirtualSubject(Subject):
         subjectID                 : string ID sent to SUBJECT
     """
 
-    ver = Ver('0.0.1')
 
-    def __init__(sub, subject_id, **kwargs):
-        super(VirtualSubject, sub).__init__(subject_id, **kwargs)
+    def __init__(self, subject_id, **kwargs):
+        self.ver = Ver('0.0.1')
+        
+        super(VirtualSubject, self).__init__(subject_id, **kwargs)
 
-    def __eq__(sub, other):
-        if isinstance(other, VirtualSubject) and (sub.subject_id == other.subject_id):
+    def __eq__(self, other):
+        if isinstance(other, VirtualSubject) and (self.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowed_genders(sub):
+    def allowed_genders(self):
         return None
 
-    def allowed_strains(sub):
+    def allowed_strains(self):
         return None
 
-    def allowed_gene_bkgd(sub):
+    def allowed_gene_bkgd(self):
         return None
 
 
 class DefaultVirtual(VirtualSubject):
-    ver = Ver('0.0.1')
 
-    def __init__(sub,subject_id='demo_virtual'):
-        super(DefaultVirtual, sub).__init__(subject_id)
+    def __init__(self,subject_id='demo_virtual'):
+        self.ver = Ver('0.0.1')
+        
+        super(DefaultVirtual, self).__init__(subject_id)
 
 
 class Human(Subject):
@@ -285,38 +290,40 @@ class Human(Subject):
         initials                  : f.l.
         anonymize                 : True/False
     """
-    ver = Ver('0.0.1')
 
-    def __init__(sub, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
-        super(Human, sub).__init__(subject_id, **kwargs)
-        sub.gender = gender
-        sub.birth_date = birth_date
-        sub.first_name = first_name
-        sub.last_name = last_name
-        sub.initials = sub.first_name[0] + '.' + sub.last_name[0] + '.'
-        sub.anonymize = anonymize
+    def __init__(self, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
+        self.ver = Ver('0.0.1')
+        
+        super(Human, self).__init__(subject_id, **kwargs)
+        self.gender = gender
+        self.birth_date = birth_date
+        self.first_name = first_name
+        self.last_name = last_name
+        self.initials = self.first_name[0] + '.' + self.last_name[0] + '.'
+        self.anonymize = anonymize
 
-    def __eq__(sub, other):
-        if isinstance(other, Human) and (sub.subject_id == other.subject_id):
+    def __eq__(self, other):
+        if isinstance(other, Human) and (self.subject_id == other.subject_id):
             return True
         else:
             return False
 
-    def allowed_genders(sub):
+    def allowed_genders(self):
         return ['Male', 'Female', 'Other', 'Unknown']
 
-    def allowed_strains(sub):
+    def allowed_strains(self):
         return None
 
-    def allowed_gene_bkgd(sub):
+    def allowed_gene_bkgd(self):
         return None
 
 
 class DefaultHuman(Human):
-    ver = Ver('0.0.1')
 
-    def __init__(sub):
-        super(DefaultHuman, sub).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
+    def __init__(self):
+        self.ver = Ver('0.0.1')
+        
+        super(DefaultHuman, self).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
                                           anonymize=False, gender='Unknown')
 
 

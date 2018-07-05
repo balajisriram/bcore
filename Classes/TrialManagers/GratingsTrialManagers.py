@@ -35,7 +35,6 @@ class Gratings(object):
             radii
 
     """
-    ver = Ver('0.0.1')
     _Phases = None
     _Cached_Stimuli = None
     
@@ -50,8 +49,11 @@ class Gratings(object):
                  radii=[400], #degrees
                  iti=1, #seconds
                  itl=0.2, #inter trial luminance
+                 reinforcement_manager=NoReinforcement(),
                  **kwargs):
-        super(Gratings, self).__init__(**kwargs)
+        self.ver = Ver('0.0.1')
+        
+        self.reinforcement_manager = reinforcement_manager
         
         self.name = name
         self.deg_per_cycs = deg_per_cycs
@@ -117,7 +119,6 @@ class Gratings(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        print('iti::',self.iti)
         self._Phases.append(PhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
@@ -222,9 +223,9 @@ class Gratings_GaussianEdge(Gratings):
             Scale = "ScaleToHeight"
     """
 
-    ver = Ver('0.0.1')
 
     def __init__(self, name, **kwargs):
+        self.ver = Ver('0.0.1')
         super(Gratings_GaussianEdge, self).__init__(name, **kwargs)
 
     def _setup_phases(self, trial_record, station, **kwargs):
@@ -269,13 +270,10 @@ class Gratings_HardEdge(Gratings):
     """
         GRATINGS_HARDEDGE defines a standard gratings trial manager
         with hard edges for a view port
-
-            RadiusType = "HardEdge"
-            Scale = "ScaleToHeight"
     """
-    ver = Ver('0.0.1')
 
     def __init__(self, name, **kwargs):
+        self.ver = Ver('0.0.1')
         super(Gratings_HardEdge, self).__init__(name, **kwargs)
     
     def _setup_phases(self, trial_record, station, **kwargs):
@@ -328,7 +326,6 @@ class AFCGratings(object):
             radii # in units of "Scale"
             positions
     """
-    ver = Ver('0.0.1')
     _Phases = []
 
     def __init__(self,
@@ -343,8 +340,12 @@ class AFCGratings(object):
                  iti = 1,
                  itl = 0.5,
                  do_combos = True,
-                 reinforcement_manager = ConstantReinforcement(),
+                 reinforcement_manager = NoReinforcement(),
                  **kwargs):
+        self.ver = Ver('0.0.1')
+        
+        self.reinforcement_manager = reinforcement_manager
+        
         self.do_combos = do_combos
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -439,10 +440,12 @@ class AFCGratings(object):
 
     def _setupPhases(gratings, **kwargs):
         """
-        Gratings:_setupPhases is a simple trialManager. It is for autopilot
-        It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
-        Contrasts, Durations and shows them one at a time. There is only one
-        phase. There is no "correct" and no responses are required/recorded
+        AFCGratings:_setupPhases 
+        1. Pre-trial: gray screen. REQUEST_PORT -> 2
+        2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
+        3. Correct: Give reward
+        4. Punish: Timeout
+        5. ITI: Gray screen of duration iti, 
         """
         (stimulus_details, resolution, frames_total, port_details) = gratings.calc_stim(kwargs)
         if stimulus_details['duration']==inf:

@@ -3,6 +3,7 @@ from .Criteria.Criterion import RepeatIndefinitely
 from .SessionManager import NoTimeOff
 from .TrialManagers.GratingsTrialManagers import Gratings
 from .ReinforcementManager import NoReinforcement
+import psychopy
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -15,43 +16,63 @@ __status__ = "Production"
 ###########################################################################
 class TrainingStep(object):
     """
-        TRAINING STEP contains the following information for each step
-        name ::  nme of the step
-        
+        TRAININGSTEP is added to a protocol. This will determine the behavior
+        of the step. All training steps will follow a trial structure and
+        will need a trialManager. A SessionManager to determine when to show trials.
+        And a Criterion to determine when to graduate.
     """
-    ver = Ver('0.0.1')
-    
-    def __init__(self, name, criterion, session_manager, trial_manager, reinforcement_manager):
+
+    def __init__(self, name, trial_manager, session_manager, criterion, reinforcement_manager):
+        self.ver = Ver('0.0.1')
         self.name = name
-        self.criterion=criterion
-        self.session_manager=session_manager
-        self.trial_manager=trial_manager
+        self.trial_manager = trial_manager
+        self.session_manager = session_manager
+        self.criterion = criterion
         self.reinforcement_manager=reinforcement_manager
-        
-    def do_trial(self, subject, station, trial_record, compiled_record, quit):
+
+    def do_trial(self,subject,station, trial_record,compiled_record,quit):
         graduate = False
         manual_ts_change = False
-        
-        # try:
-        keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-        if keep_doing_trials:
-            stop_early, trial_record = self.trial_manager.do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record,quit=quit)
-            import pdb
-            pdb.set_trace()
-            graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-        # except:
-            # station.close_session()
+        # self,subject,station, trial_record,compiled_record,quit
+        # called by subject.doTrial()
+        if __debug__:
+            pass
+
+        trial_record['trial_manager_name'] = self.trial_manager.name
+        trial_record['scheduler_name'] = self.session_manager.name
+        trial_record['criterion_name'] = self.criterion.name
+
+        trial_record['trial_manager_class'] = self.trial_manager.__class__.__name__
+        trial_record['scheduler_class'] = self.session_manager.__class__.__name__
+        trial_record['criterion_class'] = self.criterion.__class__.__name__
+
+        trial_record['trial_manager_version_number'] = self.trial_manager.ver
+        trial_record['scheduler_version_number'] = self.session_manager.ver
+        trial_record['criterion_version_number'] = self.criterion.ver
+        try:
+            keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
             
+            if keep_doing_trials:
+                trial_record,quit = self.trial_manager.do_trial(station=station,subject=subject,trial_record=trial_record,compiled_record=compiled_record,quit=quit)
+            else:
+                psychopy.core.wait(secs_remaining_to_state_flip/2.,hogCPUperiod=0.1)
+            
+            graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+            if graduate:
+                trial_record['graduate'] = True
+            else:
+                trial_record['graduate'] = False
+        finally:
+            station.close_session() # should this be here?
+        return trial_record,quit
         
-    
 ###########################################################################
 # PROTOCOLS
 ###########################################################################
 class Protocol(object):
 
-    ver = Ver('0.0.1')  # Feb 28 2014
-
     def __init__(self, name='DefaultProtocol'):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
         self.name = name
 
     @staticmethod
@@ -85,9 +106,9 @@ class SimpleProtocol(Protocol):
                     criterionManager,sessionManager,trialManager,
                     reinforcementManager)
     """
-    ver = Ver('0.0.1')  # Feb 28 2014
 
     def __init__(self, training_steps, name="DefaultSimpleProtocol"):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
         super(SimpleProtocol, self).__init__(name = name)
         self.training_steps = training_steps
         self.current_step = 0
@@ -110,9 +131,9 @@ class SequentialProtocol(SimpleProtocol):
         SEQUENTIALPROTOCOL is a SIMPLEPROTOCOL that only allows for graduate
         and degraduate function with the change_to_step function erroring
     """
-    ver = Ver('0.0.1')  # Feb 28 2014
 
     def __init__(self, **kwargs):
+        self.ver = Ver('0.0.1')
         super(SequentialProtocol, self).__init__(**kwargs)
 
     def graduate(self, safe=False):
@@ -134,9 +155,9 @@ class RandomizedProtocol(SimpleProtocol):
     """
         RANDOMIZEDPROTOCOL is a SIMPLEPROTOCOL
     """
-    ver = Ver('0.0.1')  # Feb 28 2014
 
     def __init__(self, **kwargs):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
         super(RandomizedProtocol, self).__init__(**kwargs)
 
     def change_to_step(self, step_num):
@@ -159,14 +180,14 @@ class DemoGratingsProtocol(SimpleProtocol):
     """
         DEMOGRATINGSPROTOCOL shows a simple Gratings stimulus
     """
-    ver = Ver('0.0.1')  # Feb 28 2014
 
     def __init__(self):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
-        criterion=RepeatIndefinitely(), 
-        session_manager=NoTimeOff(), 
         trial_manager=Gratings('DemoGratingsTrialManager'), 
+        session_manager=NoTimeOff(), 
+        criterion=RepeatIndefinitely(), 
         reinforcement_manager=NoReinforcement())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)

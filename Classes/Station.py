@@ -367,18 +367,18 @@ class StandardVisionBehaviorStation(Station):
         session_number = cR["session_number"][-1] + 1
         while not Quit:
             # it loops in here every trial
-            tR = {}
+            trial_record = {}
             # just assign relevant details here
-            tR["trial_number"] = cR["trial_number"][-1] + 1
-            tR["session_number"] = session_number
-            tR["station_id"] = self.station_id
-            tR["station_name"]= self.station_name
-            tR["num_ports_in_station"] = self.num_ports
-            tR["start_time"] = time.localtime()
+            trial_record["trial_number"] = cR["trial_number"][-1] + 1
+            trial_record["session_number"] = session_number
+            trial_record["station_id"] = self.station_id
+            trial_record["station_name"]= self.station_name
+            trial_record["num_ports_in_station"] = self.num_ports
+            trial_record["start_time"] = time.localtime()
             # doTrial - only tR will be returned as its type will be changed
-            tR, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
+            trial_record, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
 
-            tR["stop_time"] = time.localtime()
+            trial_record["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
             cR = compile_records(cR,tR)
 
@@ -460,7 +460,7 @@ class StandardKeyboardStation(Station):
         return self._session
     
     @session.setter
-    def subject(self,value):
+    def session(self,value):
         self._session = value
         
     @property
@@ -562,11 +562,10 @@ class StandardKeyboardStation(Station):
             # update sessionRecord and compiledRecord
             #compiled_record = compile_records(compiled_record,trial_record)
             sR.append(trial_record)
-
         # save session records
-        self._subject.save_session_records(sR)
+        self.subject.save_session_records(sR)
         # save compiled records
-        self._subject.save_compiled_records(compiled_record)
+        self.subject.save_compiled_records(compiled_record)
 
     def close_session(self, **kwargs):
         print("Closing Session")
