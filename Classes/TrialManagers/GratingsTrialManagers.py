@@ -1,6 +1,6 @@
 from verlib import NormalizedVersion as Ver
 from .PhaseSpec import PhaseSpec
-from ..ReinforcementManager import ConstantReinforcement
+from ..ReinforcementManager import ConstantReinforcement,NoReinforcement
 from ..Station import StandardKeyboardStation
 import psychopy
 import random

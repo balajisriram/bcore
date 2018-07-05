@@ -82,39 +82,28 @@ class Station(object):
         import psychopy.sound
         
         sampleRate=44100
-        secs=1
+        secs=0.1
         nSamples = int(secs * sampleRate)
-        phase = numpy.arange(0.0, 1.0, 1.0 / nSamples)
-        phase *= 2 * numpy.pi
+        phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
         
-        # get the trial_start_sound = ('allOctaves',200,20000)
-        trial_start_freqs = numpy.asarray([200,400,800,1600,3200,6400,12800])
-        trial_start_arr = 0*phase
-        for freq in trial_start_freqs:
-            trial_start_arr += phase*freq
-        trial_start_arr /= trial_start_freqs.size   
-        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A')
-        
-        # get the request_sound = ('allOctaves',100,20000)
-        request_freqs = numpy.asarray([100,200,400,800,1600,3200,6400,12800])
-        request_arr = 0*phase
-        for freq in request_freqs:
-            request_arr += phase*freq
-        request_arr /= request_freqs.size
-        self._sounds['request_sound'] = psychopy.sound.Sound('B')
-        
-        # get the correct_sound = ('allOctaves',400,20000)
-        correct_freqs = numpy.asarray([400,800,1600,3200,6400,12800])
-        correct_arr = 0*phase
-        for freq in correct_freqs:
-            correct_arr += phase*freq
-        correct_arr /= correct_freqs.size
-        self._sounds['correct_sound'] = psychopy.sound.Sound('C')
-        self._sounds['trial_end_sound'] = psychopy.sound.Sound('C')
+        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1)
 
-    def _rewind_sounds(self):
+        self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1)
+        
+        self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
+        
+        # try_again_array = numpy.random.randn(nSamples)
+        # try_again_array[try_again_array>1] = 1
+        # try_again_array[try_again_array<-1] = -1
+        # print(try_again_array.min())
+        # print(try_again_array.max())
+        
+        # self._sounds['try_again_sound'] = psychopy.sound.Sound(try_again_array,stereo=0,secs=secs)
+        
+    def _rewind_sounds(self,time=0.):
         for sound in self._sounds:
-            self._sounds[sound].seek(0.)
+            self._sounds[sound].seek(time)
         
 
 class StandardVisionBehaviorStation(Station):
@@ -543,7 +532,7 @@ class StandardKeyboardStation(Station):
         quit = False
 
         # session starts here
-        sR = []  # just a list of tRs
+        session_record = []  # just a list of tRs
         session_number = compiled_record["session_number"][-1] + 1
         while not quit:
             # it loops in here every trial
@@ -560,10 +549,10 @@ class StandardKeyboardStation(Station):
 
             trial_record["stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
-            #compiled_record = compile_records(compiled_record,trial_record)
-            sR.append(trial_record)
+            compiled_record = compile_records(compiled_record,trial_record)
+            session_record.append(trial_record)
         # save session records
-        self.subject.save_session_records(sR)
+        self.subject.save_session_records(session_record)
         # save compiled records
         self.subject.save_compiled_records(compiled_record)
 
@@ -575,12 +564,8 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
-    import sys
-    print((sys.version))
-    # Create a new StandardVisionBehaviorStation and test it
-    #st = StandardVisionBehaviorStation(stationID=0,
-    #    display=None, soundOn=False, parallelPort=None)
-    st = SimpleVisionBehaviorStation()
-    print(('Testing the station\'s graphics'))
-    st.test_gl()
-    time.sleep(2)
+    st = StandardKeyboardStation()
+    st.initialize_sounds()
+    
+    st._sounds['trial_start_sound'].play()
+    
