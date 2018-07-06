@@ -37,10 +37,12 @@ def load_bserver(path, subject_id):
 
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
-        sub = DefaultVirtual(subject_id='demo1')
+        sub = DefaultVirtual(subject_id=subject_id)
         prot = protocol
         sub.add_protocol(prot)
         b_server.add_subject(sub)
+    else:
+        print("STANDALONERUN:LOAD_BSERVER:Subject {0} was found in server\n".format(subject_id))
 
     if not b_server.get_station_ids():
         print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
@@ -62,7 +64,15 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
     
     # add subject to station
     stn = b_server.stations[0]
-    sub = b_server.subjects[0]
+    
+    subjects = b_server.get_subject_ids()
+    found = False
+    for i,subj in enumerate(subjects):
+        if subj==subject_id:
+            found = True
+            sub = b_server.subjects[i]
+            break
+    
     stn._stand_alone = True
     stn.add_subject(sub)
     
@@ -71,7 +81,7 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
     # run do_trials on station
     stn.do_trials()
     # clean up at end of trials
-    stn.remove_subject()
+    stn.remove_subject(sub)
 
 
 if __name__ == '__main__':
@@ -90,17 +100,20 @@ if __name__ == '__main__':
     for arg in args:
         if (arg == 'subject_id') or (arg == '--subject') or (arg == '-s'):
             subject_id = next(args)
+            which_added = 'subject_id'
             added = True
         elif (arg == 'bserver_path') or (arg == '--server-path'):
             bserver_path = next(args)
+            which_added = 'bserver_path'
             added = True
         elif (arg == 'protocol') or (arg == '--protocol') or (arg == '-p'):
             protocol = next(args)
+            which_added = 'protocol'
             added = True
 
         if added:
-            print(SARKWArgs)
+            print('added ::',which_added)
             added = False
-
+    print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol.name))
     stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)
 

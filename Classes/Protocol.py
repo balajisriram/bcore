@@ -39,16 +39,19 @@ class TrainingStep(object):
             pass
 
         trial_record['trial_manager_name'] = self.trial_manager.name
-        trial_record['scheduler_name'] = self.session_manager.name
+        trial_record['session_manager_name'] = self.session_manager.name
         trial_record['criterion_name'] = self.criterion.name
+        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
 
         trial_record['trial_manager_class'] = self.trial_manager.__class__.__name__
-        trial_record['scheduler_class'] = self.session_manager.__class__.__name__
+        trial_record['session_manager_class'] = self.session_manager.__class__.__name__
         trial_record['criterion_class'] = self.criterion.__class__.__name__
+        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
 
         trial_record['trial_manager_version_number'] = self.trial_manager.ver
-        trial_record['scheduler_version_number'] = self.session_manager.ver
+        trial_record['session_manager_version_number'] = self.session_manager.ver
         trial_record['criterion_version_number'] = self.criterion.ver
+        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver
         try:
             keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
             
@@ -62,7 +65,8 @@ class TrainingStep(object):
                 trial_record['graduate'] = True
             else:
                 trial_record['graduate'] = False
-        finally:
+        except Exception as e:
+            print("type error: " + str(e))
             station.close_session() # should this be here?
         return trial_record,quit
         

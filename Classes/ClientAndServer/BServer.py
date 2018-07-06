@@ -148,15 +148,15 @@ class BServer(object):
         os.mkdir(os.path.join(
             get_base_directory(), 'BCoreData', 'StationData'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'TrialData'))
+            get_base_directory(), 'BCoreData', 'SubjectData'))
         # create 'replacedDBs' in 'ServerData'
         os.mkdir(os.path.join(
             get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs'))
-        # create 'Full' and 'Compiled' in 'TrialData'
+        # create 'Full' and 'Compiled' in 'SubjectData'
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'TrialData', 'Full'))
+            get_base_directory(), 'BCoreData', 'SubjectData', 'SessionRecords'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'TrialData', 'Compiled'))
+            get_base_directory(), 'BCoreData', 'SubjectData', 'CompiledTrialRecords'))
 
     def add_station(self, new_station):
         if (new_station.station_id in self.get_station_ids() or
@@ -259,7 +259,7 @@ class BServerLocal(object):
         srcDir = os.path.join(
             get_base_directory(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'Backups')
+            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
@@ -317,31 +317,64 @@ class BServerLocal(object):
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','Backups')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','Backups'))
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','backupDBs')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs'))
             
         if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData'))
             
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','PermanentTrialRecords')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','PermanentTrialRecords'))
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','SessionRecords')):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords'))
         
         if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
     def add_subject_permanent_trial_record_store(self,subject_id):
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','PermanentTrialRecords',subject_id)):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','PermanentTrialRecords',subject_id))
+        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','SessionRecords',subject_id)):
+            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id))
     
     def create_base_compiled_record_file(self,subject_id):
         compiled_folder_path = os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')
         compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
         if not compiled_file_for_subject:
             cR = {}
-            cR["session_number"] = []
-            cR["session_number"].append(0)
-            cR["trial_number"] = []
-            cR["trial_number"].append(0)
+            # Available in Station.do_trials()
+            cR["session_number"] = [];cR["session_number"].append(0)
+            cR["trial_number"] = [];cR["trial_number"].append(0)
+            cR["station_id"] = [];cR["station_id"].append(None)
+            cR["station_name"] = [];cR["station_name"].append(None)
+            cR["station_version_number"] = [];cR["station_version_number"].append(None)
+            cR["num_ports_in_station"] = [];cR["num_ports_in_station"].append(None)
+            cR["trial_start_time"] = [];cR["trial_start_time"].append(None)
+            cR["trial_stop_time"] = [];cR["trial_stop_time"].append(None)
+            
+            # Available in Subject.do_trial()
+            cR["subject_id"] = [];cR["subject_id"].append(None)
+            cR["subject_version_number"] = [];cR["subject_version_number"].append(None)
+            cR["protocol_name"] = [];cR["protocol_name"].append(None)
+            cR["protocol_version_number"] = [];cR["protocol_version_number"].append(None)
+            cR["current_step"] = [];cR["current_step"].append(None)
+            cR["current_step_name"] = [];cR["current_step_name"].append(None)
+            cR["num_steps"] = [];cR["num_steps"].append(None)
+            cR["criterion_met"] = [];cR["criterion_met"].append(None)
+            
+            # Available in TrainingStep.do_trial()
+            cR["trial_manager_name"] = [];cR["trial_manager_name"].append(None)
+            cR["session_manager_name"] = [];cR["session_manager_name"].append(None)
+            cR["criterion_name"] = [];cR["criterion_name"].append(None)
+            cR["reinforcement_manager_name"] = [];cR["reinforcement_manager_name"].append(None)
+            cR["trial_manager_class"] = [];cR["trial_manager_class"].append(None)
+            cR["session_manager_class"] = [];cR["session_manager_class"].append(None)
+            cR["criterion_class"] = [];cR["criterion_class"].append(None)
+            cR["reinforcement_manager_class"] = [];cR["reinforcement_manager_class"].append(None)
+            cR["trial_manager_version_number"] = [];cR["trial_manager_version_number"].append(None)
+            cR["session_manager_version_number"] = [];cR["session_manager_version_number"].append(None)
+            cR["criterion_version_number"] = [];cR["criterion_version_number"].append(None)
+            cR["reinforcement_manager_version_number"] = [];cR["reinforcement_manager_version_number"].append(None)
+            cR["graduate"] = [];cR["graduate"].append(None)
+            
+            cR['LUT'] = []
+            cR['trial_details'] = {}
             cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
             with open(os.path.join(compiled_folder_path, cR_file_name),'wb') as f:
                 pickle.dump(cR, f, pickle.HIGHEST_PROTOCOL)

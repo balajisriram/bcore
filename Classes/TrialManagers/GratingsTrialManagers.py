@@ -49,11 +49,8 @@ class Gratings(object):
                  radii=[400], #degrees
                  iti=1, #seconds
                  itl=0.2, #inter trial luminance
-                 reinforcement_manager=NoReinforcement(),
                  **kwargs):
         self.ver = Ver('0.0.1')
-        
-        self.reinforcement_manager = reinforcement_manager
         
         self.name = name
         self.deg_per_cycs = deg_per_cycs
@@ -213,6 +210,10 @@ class Gratings(object):
                 quit = quit or station.check_manual_quit()
             
         return trial_record,quit
+    
+    @staticmethod
+    def trial_compiler(compiled_record,trial_record):
+        print('at Gratings trial_compiler')
 
 class Gratings_GaussianEdge(Gratings):
     """

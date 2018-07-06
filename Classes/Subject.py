@@ -1,5 +1,8 @@
 import time
 from verlib import NormalizedVersion as Ver
+import os
+import pickle
+from BCore import get_base_directory
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -77,6 +80,7 @@ class Subject(object):
         
         # some basic info about the subject
         trial_record['subject_id'] = self.subject_id
+        trial_record['subject_version_number'] = self.ver
         
         # figure out the protocol, and the trainingStep details
         trial_record['protocol_name'] = self.protocol.name
@@ -97,12 +101,11 @@ class Subject(object):
 
     def load_compiled_records(self):
         # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
-        from BCore import get_base_directory
-        import os
-        import pickle
         compiled_file_loc = os.path.join(get_base_directory(),"BCoreData","SubjectData","CompiledTrialRecords")
         files = [i for i in os.listdir(compiled_file_loc) if \
                  os.path.isfile(os.path.join(compiled_file_loc,i)) and self.subject_id in i]
+        print(self.subject_id)
+        print(files)
         if len(files)>1:
             RuntimeError("SUBJECT:SUBJECT:LOAD_COMPILED_RECORDS:Too many records")
         elif len(files)==1:
@@ -114,11 +117,11 @@ class Subject(object):
         return cR
 
     def save_compiled_records(self, cR):
-        # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
+        # location is get_base_directory->BCoreData->SubjectData->CompiledTrialRecords->subject_id.compiled_record
         from BCore import get_base_directory
         import os
         import pickle
-        compiled_file_loc = os.path.join(get_base_directory(), "BCoreData", "CompiledTrialRecords")
+        compiled_file_loc = os.path.join(get_base_directory(), "BCoreData", "SubjectData", "CompiledTrialRecords")
         files = [i for i in os.listdir(compiled_file_loc) if \
                  os.path.isfile(os.path.join(compiled_file_loc, i)) and self.subject_id in i]
 
@@ -129,7 +132,7 @@ class Subject(object):
         else:
             pass
 
-        tNum = cR[-1]["trialNumber"]
+        tNum = cR["trial_number"][-1]
         sid = self.subject_id
         cR_name = '{0}.1-{1}.compiled_record'.format(sid,tNum)
         with open(os.path.join(compiled_file_loc,cR_name), "wb") as f:
@@ -140,7 +143,7 @@ class Subject(object):
         from BCore import get_base_directory
         import os
         import pickle
-        session_file_loc = os.path.join(get_base_directory(), "BCoreData", "PermanentTrialRecords",self.subject_id)
+        session_file_loc = os.path.join(get_base_directory(), "BCoreData", "SubjectData", "SessionRecords",self.subject_id)
         if not os.path.exists(session_file_loc):
             os.makedirs(session_file_loc)
         tnum_lo = sR[0]["trial_number"]

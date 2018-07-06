@@ -21,7 +21,46 @@ __status__ = "Production"
 PPORT_LO = 0
 PPORT_HI = 1
 
-
+def add_or_find_in_LUT(LUT,value):
+    n = len(LUT)
+    found = False
+    for i,val in enumerate(LUT):
+        try:
+            if value == val:
+                idx = i
+                found = True
+                break
+        except TypeError:
+            pass
+            # cannot compare error
+    if not found: 
+         idx=n
+         LUT.append(value)
+    return idx,LUT
+    
+def compile_records(compiled_record, trial_record):
+    regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate",]
+    lut_fields = ["station_name","station_version_number","subject_version_number","protocol_name","protocol_version_number","current_step_name","trial_manager_name","session_manager_name","criterion_name","reinforcement_manager_name","trial_manager_class","session_manager_class","criterion_class","reinforcement_manager_class","trial_manager_version_number","session_manager_version_number","criterion_version_number","reinforcement_manager_version_number",]
+    LUT = compiled_record['LUT']
+    for field in regular_fields:
+        compiled_record[field].append(trial_record[field])
+        
+    for field in lut_fields:
+        value = trial_record[field]
+        idx,LUT = add_or_find_in_LUT(LUT,value)
+        compiled_record[field].append(idx)
+    compiled_record['LUT'] = LUT
+    
+    try:
+        trial_specific_compiler = trial_record['trial_compiler']
+        compiled_record = compiler(compiled_record,trial_record)
+    except KeyError:
+        print('No trial specific compiler. Ignoring trial')
+        
+    return compiled_record
+    
+    
+    
 class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
@@ -32,7 +71,6 @@ class Station(object):
         MACAddress      : unique mac address for the processor/ethernet
                           card. string identifier
     """
-    version = Ver('0.0.1')
     _subject = None
     _key_pressed = []
     _sounds = {}
@@ -41,11 +79,11 @@ class Station(object):
     def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
         """ Use Station as an abstract class - do not allow setting of
         anything except the basic details"""
+        self.ver = Ver('0.0.1')
         self.station_id = station_id
         self.station_name = station_name
         self.station_path = os.path.join(
-            get_base_directory(), 'BCoreData', 'BStationData', 'StationData',
-            str(self.station_id))
+            get_base_directory(), 'BCoreData', 'StationData', str(self.station_id))
         self.station_location = station_location
 
         self._setup_paths()
@@ -153,7 +191,6 @@ class StandardVisionBehaviorStation(Station):
         parallel_port['led_0'] = 5
         parallel_port['led_1'] = 7
     """
-    version = Ver('0.0.1')
     _window = None
     _session = None
     _server_conn = None
@@ -164,6 +201,7 @@ class StandardVisionBehaviorStation(Station):
                  station_location=(0,0,0),
                  pport_addr=0xD010,
                  parallel_port='standardVisionBehaviorDefault'):
+        self.ver = Ver('0.0.1')
         super(StandardVisionBehaviorStation, self).__init__(station_location=station_location)
         self.station_id = station_id
         self.station_name = "Station" + str(station_id)
@@ -399,7 +437,6 @@ class StandardKeyboardStation(Station):
             K+Q              :            Quit
             
     """
-    version = Ver('0.0.1')
     _window = None
     _session = None
     _server_conn = None
@@ -408,6 +445,7 @@ class StandardKeyboardStation(Station):
                  sound_on=False,
                  station_id= 0,
                  station_location=(0,0,0)):
+        self.ver = Ver('0.0.1')
         super(StandardKeyboardStation, self).__init__(station_location=station_location)
         self.station_id = station_id
         self.station_name = "Station" + str(station_id)
@@ -539,15 +577,17 @@ class StandardKeyboardStation(Station):
             trial_record = {}
             # just assign relevant details here
             trial_record["trial_number"] = compiled_record["trial_number"][-1] + 1
+            print("Trial number::",trial_record["trial_number"])
             trial_record["session_number"] = session_number
             trial_record["station_id"] = self.station_id
+            trial_record["station_version_number"] = self.ver
             trial_record["station_name"]= self.station_name
             trial_record["num_ports_in_station"] = self.num_ports
-            trial_record["start_time"] = time.localtime()
+            trial_record["trial_start_time"] = time.localtime()
             # doTrial - only trial_record will be returned as its type will be changed
             trial_record, quit = self.subject.do_trial(station=self, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
-            trial_record["stop_time"] = time.localtime()
+            trial_record["trial_stop_time"] = time.localtime()
             # update sessionRecord and compiledRecord
             compiled_record = compile_records(compiled_record,trial_record)
             session_record.append(trial_record)
