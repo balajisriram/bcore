@@ -8,7 +8,6 @@ from .Hardware.Displays import StandardDisplay
 from .. import get_base_directory, get_ip_addr
 from uuid import getnode
 from verlib import NormalizedVersion as Ver
-from .TrialManagers.TrialManager import compile_records
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
