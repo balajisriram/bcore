@@ -23,6 +23,13 @@ __status__ = "Production"
     1. All Ver should be inside the init - Keeping it outside make them irrelevant
     2. Figure out a way to send subject into _setup_phases. Need it for reward and timeout values
 """
+##########################################################################################
+##########################################################################################
+######################### GRATINGS TRIAL MANAGERS - SHOWS ################################
+############################# ONE GRATING AT A TIME ######################################
+##########################################################################################
+##########################################################################################
+
 class Gratings(object):
     """
         GRATINGS defines a standard gratings trial manager
@@ -266,7 +273,6 @@ class Gratings_GaussianEdge(Gratings):
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
     
-
 class Gratings_HardEdge(Gratings):
     """
         GRATINGS_HARDEDGE defines a standard gratings trial manager
@@ -314,6 +320,12 @@ class Gratings_HardEdge(Gratings):
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
     
+##########################################################################################
+##########################################################################################
+####################### AFC GRATINGS TRIAL MANAGERS - SHOWS ##############################
+############################# ONE GRATING AT A TIME ######################################
+##########################################################################################
+##########################################################################################
  
 class AFCGratings(object):
     """
@@ -398,8 +410,75 @@ class AFCGratings(object):
     @property
     def n_afc():
         return len(self.deg_per_cycs)
+    
+    @staticmethod
+    def update_stimulus(stimulus,details):
+        if details['drift_frequency'] !=0:
+            stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
+            
+    @staticmethod
+    def do_nothing_to_stim(stimulus,details):
+        pass
         
-    def calc_stim(self, tR, station, **kwargs):
+    def choose_ports(self, trial_record, station, ):
+        pass
+
+    def do_trial(self, station, subject, trial_record, compiled_record,quit):
+        # returns quit and trial_record
+        # resetup the window according to the itl
+                
+        ## _setup_phases
+        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
+        station._key_pressed = []
+        
+        trial_done = False
+        current_phase_num = 0
+        while not trial_done:
+            phase = self._Phases[current_phase_num]
+            frames_until_transition = phase.frames_until_transition
+            stim = phase.stimulus
+            stim_details = phase.stimulus_details
+            transition = phase.transitions
+            auto_trigger = phase.suto_trigger
+            if phase.sounds_played:
+                sound = phase.sounds_played[0]
+                sound_duration = phase.sounds_played[1]
+                sound.seek(0.)
+                sound_started = False
+                sound_done = False
+                sound_timer = psychopy.core.CountdownTimer(sound_duration)
+            else:
+                sound = None
+            phase_done = False
+            while not phase_done:    
+                # deal with sounds
+                if sound:
+                    if not sound_started:
+                        sound.play()
+                        sound_timer.reset()
+                        sound_started = True
+                        
+                    if sound_timer.getTime() <0 and not sound_done:
+                        sound.stop()
+                        sound_done = True
+                
+                # deal with stim
+                if stim:
+                    stim.draw()
+                    phase.stimulus_update_fn(stim,stim_details)
+                station._window.flip()
+                
+                # look for responses
+                
+            
+                # update the frames
+                frames_until_transition = frames_until_transition-1
+                if frames_until_transition==0: phase_done = True
+                quit = quit or station.check_manual_quit()
+            
+        return trial_record,quit
+        
+    def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(kwargs)
         all_ports = ['L','C','R']
         request_ports = ['C']
@@ -433,66 +512,166 @@ class AFCGratings(object):
 
         return stimulus, resolution, frames_total, port_details
         
-    def choose_resolution(gratings, **kwargs):
+    def choose_resolution(self, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
-
-    def _setupPhases(gratings, **kwargs):
+    
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
-        AFCGratings:_setupPhases 
+        AFCGratings:_setup_phases 
         1. Pre-trial: gray screen. REQUEST_PORT -> 2
         2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
         3. Correct: Give reward
         4. Punish: Timeout
         5. ITI: Gray screen of duration iti, 
         """
-        (stimulus_details, resolution, frames_total, port_details) = gratings.calc_stim(kwargs)
+        (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
+        hz = resolution[2]
+        do_nothing = ()
+        
         if stimulus_details['duration']==inf:
             do_post_discrim_stim = False
-            quit_check_every_frame = True
         else:
             do_post_discrim_stim = True
-            quit_check_every_frame = False
             
         self._Phases = []
-        self._Phases.append(PhaseSpec(
-            phase_number=1,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_update_fn=Gratings.update_stimulus,
-            stimulus_details=stimulus_details,
-            transitions={port_details['request_port']: 2},
-            frames_until_transition=frames_total,
-            auto_trigger=False,
-            phase_type='pre-request',
-            phase_name='pre-request',
-            hz=hz,
-            sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-        self._Phases.append(PhaseSpec(
-            phase_number=2,
-            stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
-            stimulus_update_fn=Gratings.update_stimulus,
-            stimulus_details=stimulus_details,
-            transitions={do_nothing: 1},
-            frames_until_transition=frames_total,
-            auto_trigger=False,
-            phase_type='stimulus',
-            phase_name='stim',
-            hz=hz,
-            sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-        self._Phases.append(PhaseSpec(
-            phase_number=2,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_details=None,
-            stimulus_update_fn=Gratings.do_nothing_to_stim,
-            transitions={do_nothing: 2},
-            frames_until_transition=round(self.iti*hz),
-            auto_trigger=False,
-            phase_type='inter-trial',
-            phase_name='inter-trial',
-            hz=hz,
-            sounds_played=(station._sounds['trial_end_sound'], 0.050)))
+        
+        if do_post_discrim_stim:
+            self._Phases.append(PhaseSpec(
+                phase_number=1,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={port_details['request_port']: 2},
+                frames_until_transition=float('inf'),
+                auto_trigger=False,
+                phase_type='pre-request',
+                phase_name='pre-request',
+                hz=hz,
+                sounds_played=(station._sounds['trial_start_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=2,
+                stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
+                stimulus_update_fn=AFCGratings.update_stimulus,
+                stimulus_details=stimulus_details,
+                transitions={do_nothing: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
+                frames_until_transition=frames_total,
+                auto_trigger=False,
+                phase_type='stimulus',
+                phase_name='stim',
+                hz=hz,
+                sounds_played=(station._sounds['stim_start_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=3,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={port_details['target_port']: 4, port_details['distractor_port']: 5},
+                frames_until_transition=float('inf'),
+                auto_trigger=False,
+                phase_type='post-stimulus',
+                phase_name='post-stim',
+                hz=hz,
+                sounds_played=None))
+            self._Phases.append(PhaseSpec(
+                phase_number=4,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={do_nothing: 6},
+                frames_until_transition=None,
+                auto_trigger=False,
+                phase_type='reinforcement',
+                phase_name='reward',
+                hz=hz,
+                sounds_played=(station._sounds['reward_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=5,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={do_nothing: 6},
+                frames_until_transition=None,
+                auto_trigger=False,
+                phase_type='reinforcement',
+                phase_name='punishment',
+                hz=hz,
+                sounds_played=(station._sounds['punishment_sound'],0.25)))
+            self._Phases.append(PhaseSpec(
+                phase_number=6,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                transitions={do_nothing: 2},
+                frames_until_transition=round(self.iti*hz),
+                auto_trigger=False,
+                phase_type='inter-trial',
+                phase_name='inter-trial',
+                hz=hz,
+                sounds_played=(station._sounds['trial_end_sound'], 0.050)))
+        else:
+            self._Phases.append(PhaseSpec(
+                phase_number=1,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={port_details['request_port']: 2},
+                frames_until_transition=float('inf'),
+                auto_trigger=False,
+                phase_type='pre-request',
+                phase_name='pre-request',
+                hz=hz,
+                sounds_played=(station._sounds['trial_start_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=2,
+                stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
+                stimulus_update_fn=AFCGratings.update_stimulus,
+                stimulus_details=stimulus_details,
+                transitions={port_details['target_port']: 3, port_details['distractor_port']: 4},
+                frames_until_transition=float('inf'),
+                auto_trigger=False,
+                phase_type='stimulus',
+                phase_name='stim',
+                hz=hz,
+                sounds_played=(station._sounds['stim_start_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=3,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={do_nothing: 5},
+                frames_until_transition=None,
+                auto_trigger=False,
+                phase_type='reinforcement',
+                phase_name='reward',
+                hz=hz,
+                sounds_played=(station._sounds['reward_sound'], 0.050)))
+            self._Phases.append(PhaseSpec(
+                phase_number=4,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_details=None,
+                transitions={do_nothing: 5},
+                frames_until_transition=None,
+                auto_trigger=False,
+                phase_type='reinforcement',
+                phase_name='punishment',
+                hz=hz,
+                sounds_played=(station._sounds['punishment_sound'],0.25)))
+            self._Phases.append(PhaseSpec(
+                phase_number=5,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                transitions={do_nothing: 2},
+                frames_until_transition=round(self.iti*hz),
+                auto_trigger=False,
+                phase_type='inter-trial',
+                phase_name='inter-trial',
+                hz=hz,
+                sounds_played=(station._sounds['trial_end_sound'], 0.050)))
            
 if __name__=='__main__':
     g = Gratings_GaussianEdge('SampleGratingsGaussianEdge',
