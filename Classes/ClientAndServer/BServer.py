@@ -317,24 +317,24 @@ class BServerLocal(object):
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','ServerData','backupDBs')):
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs'))
             
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData')):
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData'))
             
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','SessionRecords')):
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords'))
         
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')):
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
     def add_subject_permanent_trial_record_store(self,subject_id):
-        if not os.path.exists(os.path.join(get_base_directory(),'BcoreData','SubjectData','SessionRecords',subject_id)):
+        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id)):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id))
     
     def create_base_compiled_record_file(self,subject_id):
-        compiled_folder_path = os.path.join(get_base_directory(),'BcoreData','SubjectData','CompiledTrialRecords')
+        compiled_folder_path = os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')
         compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
         if not compiled_file_for_subject:
             cR = {}
