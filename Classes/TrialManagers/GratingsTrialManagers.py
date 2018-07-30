@@ -56,9 +56,10 @@ class Gratings(object):
                  radii=[400], #degrees
                  iti=1, #seconds
                  itl=0.2, #inter trial luminance
+                 reinforcement_manager=NoReinforcement(),
                  **kwargs):
         self.ver = Ver('0.0.1')
-        
+        self.reinforcement_manager = reinforcement_manager        
         self.name = name
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -179,6 +180,12 @@ class Gratings(object):
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
         station._key_pressed = []
         trial_record['enter_trial_loop'] = station._clocks['trial_clock'].getTime()
+        trial_record['correct'] = None
+
+        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
+        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
+        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
+        
         for phase in self._Phases:
             frames_until_transition = phase.frames_until_transition
             phase_done = False
