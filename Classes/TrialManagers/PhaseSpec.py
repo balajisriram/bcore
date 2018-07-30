@@ -60,8 +60,86 @@ class PhaseSpec(object):
         self.pins_to_trigger = pins_to_trigger
         self.sounds_played = sounds_played
 
-    def on_enter (self):
-        pass
+    def on_enter(self,trial_record, **kwargs):
+        return trial_record
 
-    def on_exit(self):
-        pass
+    def on_exit(self,trial_record, **kwargs):
+        return trial_record
+        
+class RewardPhaseSpec(PhaseSpec):
+    def __init__(self,
+                 phase_number = 0,
+                 stimulus = 0.5,
+                 stimulus_details=None,
+                 stimulus_update_fn=None,
+                 transitions = {do_nothing: 1},
+                 frames_until_transition = float('inf'),
+                 auto_trigger = False,
+                 phase_type = '',
+                 phase_name = '',
+                 pins_to_trigger = [],
+                 hz = None,
+                 sounds_played = {},
+                 reward_valve = 'center_valve',
+                 **kwargs):
+        super(RewardPhaseSpec,self).__init__(phase_number = phase_number,
+                                             stimulus = stimulus,
+                                             stimulus_details=stimulus_details,
+                                             stimulus_update_fn=stimulus_update_fn,
+                                             transitions = transitions,
+                                             frames_until_transition = frames_until_transition,
+                                             auto_trigger = auto_trigger,
+                                             phase_type = phase_type,
+                                             phase_name = phase_name,
+                                             pins_to_trigger = pins_to_trigger,
+                                             hz = hz,
+                                             sounds_played = sounds_played,
+                                             **kwargs)
+        self.reward_valve = reward_valve
+    
+    def on_enter(self,station,trial_record,**kwargs):
+        trial_record['correct'] = True
+        trial_record['reward_duration'] = station._clocks['trial_clock'].getTime()
+        return trial_record
+    
+    def on_exit(self,station,trial_record,**kwargs):
+        station.close_valve(self.reward_valve)
+        trial_record['reward_duration'] = station._clocks['trial_clock'].getTime() - trial_record['reward_duration']
+        return trial_record
+
+class PunishmentPhaseSpec(PhaseSpec):
+    def __init__(self,
+                 phase_number = 0,
+                 stimulus = 0.5,
+                 stimulus_details=None,
+                 stimulus_update_fn=None,
+                 transitions = {do_nothing: 1},
+                 frames_until_transition = float('inf'),
+                 auto_trigger = False,
+                 phase_type = '',
+                 phase_name = '',
+                 pins_to_trigger = [],
+                 hz = None,
+                 sounds_played = {},
+                 **kwargs):
+        super(PunishmentPhaseSpec,self).__init__(phase_number = phase_number,
+                                                 stimulus = stimulus,
+                                                 stimulus_details=stimulus_details,
+                                                 stimulus_update_fn=stimulus_update_fn,
+                                                 transitions = transitions,
+                                                 frames_until_transition = frames_until_transition,
+                                                 auto_trigger = auto_trigger,
+                                                 phase_type = phase_type,
+                                                 phase_name = phase_name,
+                                                 pins_to_trigger = pins_to_trigger,
+                                                 hz = hz,
+                                                 sounds_played = sounds_played,
+                                                 **kwargs)
+    
+    def on_enter(self,trial_record,**kwargs):
+        trial_record['correct'] = False
+        return trial_record
+    
+    def on_exit(self, trial_record,**kwargs):
+        return trial_record
+    

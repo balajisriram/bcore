@@ -31,7 +31,7 @@ class Subject(object):
         self.protocol = []
         self.session_manager = []
         self.creation_date = time.time()
-        self._current_trial_num = 0
+        self.reward = 0
 
     def _clean(self):
         pass
@@ -80,11 +80,11 @@ class Subject(object):
         
         # some basic info about the subject
         trial_record['subject_id'] = self.subject_id
-        trial_record['subject_version_number'] = self.ver
+        trial_record['subject_version_number'] = self.ver.__str__()
         
         # figure out the protocol, and the trainingStep details
         trial_record['protocol_name'] = self.protocol.name
-        trial_record['protocol_version_number'] = self.protocol.ver
+        trial_record['protocol_version_number'] = self.protocol.ver.__str__()
         trial_record['current_step'] = self.protocol.current_step
         trial_record['current_step_name'] = self.protocol.step().name
         trial_record['num_steps'] = self.protocol.num_steps()

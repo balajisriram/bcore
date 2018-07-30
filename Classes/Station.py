@@ -1,4 +1,3 @@
-import time
 import os
 import psychopy
 import psychopy.event
@@ -39,7 +38,7 @@ def add_or_find_in_LUT(LUT,value):
     return idx,LUT
     
 def compile_records(compiled_record, trial_record):
-    regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate",]
+    regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate","correct"]
     lut_fields = ["station_name","station_version_number","subject_version_number","protocol_name","protocol_version_number","current_step_name","trial_manager_name","session_manager_name","criterion_name","reinforcement_manager_name","trial_manager_class","session_manager_class","criterion_class","reinforcement_manager_class","trial_manager_version_number","session_manager_version_number","criterion_version_number","reinforcement_manager_version_number",]
     LUT = compiled_record['LUT']
     for field in regular_fields:
@@ -53,7 +52,7 @@ def compile_records(compiled_record, trial_record):
     
     try:
         trial_specific_compiler = trial_record['trial_compiler']
-        compiled_record = compiler(compiled_record,trial_record)
+        compiled_record = trial_specific_compiler(compiled_record,trial_record)
     except KeyError:
         print('No trial specific compiler. Ignoring trial')
         
@@ -75,6 +74,7 @@ class Station(object):
     _key_pressed = []
     _sounds = {}
     _stims = {}
+    _clocks = {}
 
     def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
         """ Use Station as an abstract class - do not allow setting of
@@ -127,10 +127,11 @@ class Station(object):
         self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1)
 
         self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1)
+        self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1)
         
         self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
+        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
-        
         # try_again_array = numpy.random.randn(nSamples)
         # try_again_array[try_again_array>1] = 1
         # try_again_array[try_again_array<-1] = -1
@@ -142,6 +143,15 @@ class Station(object):
     def _rewind_sounds(self,time=0.):
         for sound in self._sounds:
             self._sounds[sound].seek(time)
+        
+    def decache(self):
+        """
+            Remove session specific details. ideal for pickling
+        """
+        self._key_pressed = None
+        self._sounds = None
+        self._stims = None
+        self._clocks = None
         
 
 class StandardVisionBehaviorStation(Station):
@@ -236,7 +246,11 @@ class StandardVisionBehaviorStation(Station):
             return pPort
         else:
             return None # need to write code that checks if allowable
-
+    
+    def initialize(self):
+        self.initialize_display()
+        self.initialize_sounds()
+        
     def run(self):
         self.connect_to_server()
         run_trials = False
@@ -255,20 +269,10 @@ class StandardVisionBehaviorStation(Station):
                 trial_num = self._session['trial_num']
 
     def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.window(display = display,
-                                              color = (0,0,0),
-                                              fullscr = True,
-                                              winType = 'pyglet',
-                                              allowGUI = False,
-                                              units = 'deg',
-                                              screen = 0,
-                                              viewScale = None,
-                                              waitBlanking = True,
-                                              allowStencil = True,
-                                              monitor = display,
-                                              )
+        print(display)
+        self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
-
+        
     def connect_to_server(self):
         """
             This is a somewhat complicated handshake. Initially, the
@@ -312,6 +316,9 @@ class StandardVisionBehaviorStation(Station):
     @session.setter
     def subject(self,value):
         self._session = value
+        
+    def get_ports(self):
+        return numpy.asarray(['L','C','R'])
         
     @property
     def num_ports(self):
@@ -386,40 +393,64 @@ class StandardVisionBehaviorStation(Station):
         # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
         # the previous trial, please add it to compiled records
-        cR = self.subject.load_compiled_records()
-        Quit = False
+        compiled_record = self.subject.load_compiled_records()
+        quit = False
 
         # session starts here
-        sR = []  # just a list of tRs
-        session_number = cR["session_number"][-1] + 1
-        while not Quit:
+        session_record = []  # just a list of tRs
+        session_number = compiled_record["session_number"][-1] + 1
+        
+        # setup the clocks
+        self._clocks['session_clock'] = psychopy.core.MonotonicClock()
+        self._clocks['trial_clock'] = psychopy.core.Clock()
+        session_start_time = psychopy.core.getAbsTime()
+        
+        while not quit:
             # it loops in here every trial
             trial_record = {}
             # just assign relevant details here
-            trial_record["trial_number"] = cR["trial_number"][-1] + 1
+            trial_record["session_start_time"] = session_start_time
+            trial_record["trial_number"] = compiled_record["trial_number"][-1] + 1
             trial_record["session_number"] = session_number
             trial_record["station_id"] = self.station_id
+            trial_record["station_version_number"] = self.ver.__str__()
             trial_record["station_name"]= self.station_name
             trial_record["num_ports_in_station"] = self.num_ports
-            trial_record["start_time"] = time.localtime()
-            # doTrial - only tR will be returned as its type will be changed
-            trial_record, Quit = self.subject.do_trial(station=self, trial_record=tR, compiled_record=cR, quit=Quit)
+            trial_record["trial_start_time"] = self._clocks['session_clock'].getTime()
+            # doTrial - only trial_record will be returned as its type will be changed
+            trial_record, quit = self.subject.do_trial(station=self, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
 
-            trial_record["stop_time"] = time.localtime()
+            trial_record["trial_stop_time"] = self._clocks['session_clock'].getTime()
             # update sessionRecord and compiledRecord
-            cR = compile_records(cR,tR)
+            compiled_record = compile_records(compiled_record,trial_record)
+            session_record.append(trial_record)
 
         # save session records
-        self._subject.save_session_records(sR)
+        self.subject.save_session_records(session_record)
         # save compiled records
-        self._subject.save_compiled_records(cR)
+        self.subject.save_compiled_records(compiled_record)
 
     def close_session(self, **kwargs):
         print("Closing Session")
+        
+    def close_window(self):    
+        self._window.close()
 
-class StandardKeyboardStation(Station):
+    def check_manual_quit(self):
+        key = psychopy.event.getKeys(keyList=['k','q'])
+        if key:
+            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
+        if 'k' in self._key_pressed and 'q' in self._key_pressed:
+            psychopy.event.clearEvents()
+            return True
+        else:
+            return False
+    
+
+class StandardKeyboardStation(StandardVisionBehaviorStation):
     """
-        STANDARDKEYBOARDSTATION(SKBS) defines a subclass of STATION.
+        STANDARDKEYBOARDSTATION(SKBS) defines a subclass of 
+        STANDARDVISIONBEHAVIORSTATION(SVBS).
         It defines a station with a standard display, sounds settings 
         which can only be turned on or off, three sensor pins 
         [connected to the keyboard]. Only allows stand alone running
@@ -437,167 +468,54 @@ class StandardKeyboardStation(Station):
             K+Q              :            Quit
             
     """
-    _window = None
-    _session = None
-    _server_conn = None
-
+    
     def __init__(self,
                  sound_on=False,
                  station_id= 0,
                  station_location=(0,0,0)):
         self.ver = Ver('0.0.1')
-        super(StandardKeyboardStation, self).__init__(station_location=station_location)
-        self.station_id = station_id
-        self.station_name = "Station" + str(station_id)
-        self.sound_on = sound_on
+        super(StandardKeyboardStation, self).__init__(station_location=station_location,sound_on=sound_on, station_id = station_id, parallel_port=None)
         self.display = None
-        
-    def initialize(self):
-        self.initialize_display()
-        self.initialize_sounds()
-
-    def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.Window(color = (0.5,0.5,0.5),
-                                              fullscr = True,
-                                              winType = 'pyglet',
-                                              allowGUI = False,
-                                              units = 'deg',
-                                              screen = 0,
-                                              viewScale = None,
-                                              waitBlanking = True,
-                                              allowStencil = True,
-                                              monitor = display,
-                                              size = display.getSizePix()
-                                              )
-        self._window.flip()
-        
-    def close_window(self):
-        self._window.close()
-
-    @property
-    def subject(self):
-        return self._subject
-        
-    @subject.setter
-    def subject(self,value):
-        self._subject = value
-
-    @property
-    def session(self):
-        return self._session
-    
-    @session.setter
-    def session(self,value):
-        self._session = value
         
     @property
     def num_ports(self):
         return 3
-        
-    def get_ports(self):
-        return [0,1,2]
-
-    def add_subject(self, sub):
-        self.subject = sub
-
-    def remove_subject(self,sub):
-        self.subject = None
 
     def read_ports(self):
         key = psychopy.event.getKeys(keyList=['1','2','3','k'])
         ports = numpy.asarray([False,False,False])
         if key:
             if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
-        if 'k' in keys and '1' in keys:
+        if 'k' in self._key_pressed and '1' in self._key_pressed:
             ports = numpy.bitwise_or(ports,[True,False,False])
             psychopy.event.clearEvents()
-        if 'k' in keys and '2' in keys:
+            print(self._key_pressed)
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('1')
+        if 'k' in self._key_pressed and '2' in self._key_pressed:
             ports = numpy.bitwise_or(ports,[False,True,False])
             psychopy.event.clearEvents()
-        if 'k' in keys and '3' in keys:
+            print(self._key_pressed)
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('2')
+        if 'k' in self._key_pressed and '3' in self._key_pressed:
             ports = numpy.bitwise_or(ports,[False,False,True])
             psychopy.event.clearEvents()
+            print(self._key_pressed)
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('3')
             
-        return ports
+        return self.get_ports()[ports]
     
-    def check_manual_quit(self):
-        key = psychopy.event.getKeys(keyList=['k','q'])
-        if key:
-            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
-        if 'k' in self._key_pressed and 'q' in self._key_pressed:
-            psychopy.event.clearEvents()
-            return True
-        else:
-            return False
-            
     def open_valve(self, valve):
-        pass
+        print('Opening valve',valve)
 
     def close_valve(self, valve):
-        pass
+        print('Closing valve',valve)
 
     def flush_valves(self, dur=1):
         pass
 
-    def get_display_size(self):
-        pass
-
-    def get_session(self):
-        """
-            Connect to BServer and request session details to be loaded
-        """
-        self._session = self._server_conn.client_to_server(self._server_conn.SESSION_REQUESTED)
-
-    def decache(self):
-        """
-            Remove session specific details. ideal for pickling
-        """
-        self._window = None
-        self._session = None
-        self._server_conn = None
-        self._parallelport_conn = None
-
-    def do_trials(self, **kwargs):
-        # first step in the running of trials. called directly by station
-        # or through the BServer
-        if __debug__:
-            pass
-        self.initialize()
-        # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
-        # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
-        # the previous trial, please add it to compiled records
-        compiled_record = self.subject.load_compiled_records()
-        quit = False
-
-        # session starts here
-        session_record = []  # just a list of tRs
-        session_number = compiled_record["session_number"][-1] + 1
-        while not quit:
-            # it loops in here every trial
-            trial_record = {}
-            # just assign relevant details here
-            trial_record["trial_number"] = compiled_record["trial_number"][-1] + 1
-            print("Trial number::",trial_record["trial_number"])
-            trial_record["session_number"] = session_number
-            trial_record["station_id"] = self.station_id
-            trial_record["station_version_number"] = self.ver
-            trial_record["station_name"]= self.station_name
-            trial_record["num_ports_in_station"] = self.num_ports
-            trial_record["trial_start_time"] = time.localtime()
-            # doTrial - only trial_record will be returned as its type will be changed
-            trial_record, quit = self.subject.do_trial(station=self, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
-
-            trial_record["trial_stop_time"] = time.localtime()
-            # update sessionRecord and compiledRecord
-            compiled_record = compile_records(compiled_record,trial_record)
-            session_record.append(trial_record)
-        # save session records
-        self.subject.save_session_records(session_record)
-        # save compiled records
-        self.subject.save_compiled_records(compiled_record)
-
-    def close_session(self, **kwargs):
-        print("Closing Session")
 
 def make_standard_behavior_station():
     pass

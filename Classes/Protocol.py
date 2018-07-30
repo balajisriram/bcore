@@ -1,9 +1,10 @@
 from verlib import NormalizedVersion as Ver
 from .Criteria.Criterion import RepeatIndefinitely
 from .SessionManager import NoTimeOff
-from .TrialManagers.GratingsTrialManagers import Gratings
-from .ReinforcementManager import NoReinforcement
+from .TrialManagers.GratingsTrialManagers import Gratings,AFCGratings
+from .ReinforcementManager import NoReinforcement,ConstantReinforcement
 import psychopy
+import traceback
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -22,13 +23,12 @@ class TrainingStep(object):
         And a Criterion to determine when to graduate.
     """
 
-    def __init__(self, name, trial_manager, session_manager, criterion, reinforcement_manager):
+    def __init__(self, name, trial_manager, session_manager, criterion):
         self.ver = Ver('0.0.1')
         self.name = name
         self.trial_manager = trial_manager
         self.session_manager = session_manager
         self.criterion = criterion
-        self.reinforcement_manager=reinforcement_manager
 
     def do_trial(self,subject,station, trial_record,compiled_record,quit):
         graduate = False
@@ -37,21 +37,19 @@ class TrainingStep(object):
         # called by subject.doTrial()
         if __debug__:
             pass
-
         trial_record['trial_manager_name'] = self.trial_manager.name
         trial_record['session_manager_name'] = self.session_manager.name
         trial_record['criterion_name'] = self.criterion.name
-        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
 
         trial_record['trial_manager_class'] = self.trial_manager.__class__.__name__
         trial_record['session_manager_class'] = self.session_manager.__class__.__name__
         trial_record['criterion_class'] = self.criterion.__class__.__name__
-        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
 
-        trial_record['trial_manager_version_number'] = self.trial_manager.ver
-        trial_record['session_manager_version_number'] = self.session_manager.ver
-        trial_record['criterion_version_number'] = self.criterion.ver
-        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver
+        trial_record['trial_manager_version_number'] = self.trial_manager.ver.__str__()
+        trial_record['session_manager_version_number'] = self.session_manager.ver.__str__()
+        trial_record['criterion_version_number'] = self.criterion.ver.__str__()
+        
+        trial_record['graduate'] = False
         try:
             keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
             
@@ -60,12 +58,11 @@ class TrainingStep(object):
             else:
                 psychopy.core.wait(secs_remaining_to_state_flip/2.,hogCPUperiod=0.1)
             
-            graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
+            graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record, station = station)
             if graduate:
                 trial_record['graduate'] = True
-            else:
-                trial_record['graduate'] = False
         except Exception as e:
+            traceback.print_exc()
             print("type error: " + str(e))
             station.close_session() # should this be here?
         return trial_record,quit
@@ -190,8 +187,7 @@ class DemoGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
-        trial_manager=Gratings('DemoGratingsTrialManager'), 
+        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
         session_manager=NoTimeOff(), 
-        criterion=RepeatIndefinitely(), 
-        reinforcement_manager=NoReinforcement())]
+        criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)

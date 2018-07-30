@@ -373,6 +373,12 @@ class BServerLocal(object):
             cR["reinforcement_manager_version_number"] = [];cR["reinforcement_manager_version_number"].append(None)
             cR["graduate"] = [];cR["graduate"].append(None)
             
+            # Available in TrialManager.do_trial()
+            cR["errored_out"] = [];cR["errored_out"].append(None)
+            cR["manual_quit"] = [];cR["manual_quit"].append(None)
+            cR["correct"] = [];cR["correct"].append(None)
+            
+
             cR['LUT'] = []
             cR['trial_details'] = {}
             cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
