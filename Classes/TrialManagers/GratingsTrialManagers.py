@@ -447,12 +447,18 @@ class AFCGratings(object):
         
         trial_record['errored_out'] = False
         trial_record['manual_quit'] = False
+
+
+        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
+        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
+        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
         
         trial_record['phase_data'] = []
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
             phase = self._Phases[current_phase_num]
+            print(phase.phase_name)
             
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
@@ -625,7 +631,6 @@ class AFCGratings(object):
         reward_size = numpy.round(reward_size/1000*60)
         request_reward_size = numpy.round(request_reward_size/1000*60)
         penalty_size = numpy.round(ms_penalty/1000*60)
-        
         if do_post_discrim_stim:
             self._Phases.append(PhaseSpec(
                 phase_number=1,

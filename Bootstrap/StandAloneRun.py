@@ -37,7 +37,7 @@ def load_bserver(path, subject_id):
 
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
-        sub = DefaultVirtual(subject_id=subject_id)
+        sub = DefaultVirtual(subject_id=subject_id,reward=50.,timeout=1000.)
         prot = protocol
         sub.add_protocol(prot)
         b_server.add_subject(sub)

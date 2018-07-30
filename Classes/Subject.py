@@ -31,7 +31,14 @@ class Subject(object):
         self.protocol = []
         self.session_manager = []
         self.creation_date = time.time()
-        self.reward = 0
+        if 'reward' in kwargs:
+            self.reward = kwargs['reward']
+        else:
+            self.reward = 0
+        if 'timeout' in kwargs:
+            self.timeout = kwargs['timeout']
+        else:
+            self.timeout = 0
 
     def _clean(self):
         pass
@@ -276,10 +283,10 @@ class VirtualSubject(Subject):
 
 class DefaultVirtual(VirtualSubject):
 
-    def __init__(self,subject_id='demo_virtual'):
+    def __init__(self,subject_id='demo_virtual',**kwargs):
         self.ver = Ver('0.0.1')
         
-        super(DefaultVirtual, self).__init__(subject_id)
+        super(DefaultVirtual, self).__init__(subject_id, **kwargs)
 
 
 class Human(Subject):
