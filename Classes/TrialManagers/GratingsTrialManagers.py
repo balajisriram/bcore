@@ -50,7 +50,7 @@ class Gratings(object):
                  deg_per_cycs=[10], #degrees
                  orientations=[45], #degrees
                  drift_frequencies=[0], #hz
-                 phases=[0],
+                 phases=numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8,endpoint=True),
                  contrasts=[1],
                  durations=[1], #seconds
                  radii=[400], #degrees

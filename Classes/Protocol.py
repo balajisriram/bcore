@@ -130,7 +130,7 @@ class SimpleProtocol(Protocol):
 class StartsAtOneProtocol(SimpleProtocol):
     """
         STARTSATONEPROTOCOL contains a list of training steps and
-        allows change in steps. But dstarts at step 1 beginning of each day
+        allows change in steps. But starts at step 1 beginning of each session
                 name            : stringIdentifier
                 trainingSteps   : list of tuples (stepName,
                     criterionManager,sessionManager,trialManager,
@@ -138,22 +138,14 @@ class StartsAtOneProtocol(SimpleProtocol):
     """
 
     def __init__(self, training_steps, name="DefaultSimpleProtocol"):
-        self.ver = Ver('0.0.1')  # Feb 28 2014
-        super(SimpleProtocol, self).__init__(name = name)
-        self.training_steps = training_steps
-        self.current_step = 0
+        self.ver = Ver('0.0.1')
+        super(StartsAtOneProtocol, self).__init__(training_steps=training_steps, name = name)
 
-    def change_to_step(self, step_num):
-        self.current_step = step_num
-
-    def step(self, compiled_record):
+    def step(self, compiled_record, trial_record):
+        # new session, reset current step num to 0
+        if compiled_record['session_number'][-1] < trial_record['session_number']:
+            self.current_step = 0
         return self.training_steps[self.current_step]
-
-    def num_steps(self):
-        return len(self.training_steps)
-
-    def add_step(self, step):
-        self.training_steps.append(step)
         
 
 class SequentialProtocol(SimpleProtocol):
@@ -217,7 +209,15 @@ class DemoGratingsProtocol(SimpleProtocol):
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
 #        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
-        trial_manager=Gratings(name='DemoAFCGratingsTrialManager'), 
+        trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
+                               deg_per_cycs=[0.1], #degrees
+                               orientations=[45,-45,], #degrees
+                               contrasts=[1],
+                               durations=[1], #seconds
+                               radii=[400], #degrees
+                               iti=1, #seconds
+                               itl=0.5, #inter trial luminance,
+                               ), 
         session_manager=NoTimeOff(), 
         criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
