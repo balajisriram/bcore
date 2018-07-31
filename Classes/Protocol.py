@@ -49,7 +49,7 @@ class TrainingStep(object):
         trial_record['session_manager_version_number'] = self.session_manager.ver.__str__()
         trial_record['criterion_version_number'] = self.criterion.ver.__str__()
         
-        trial_record['graduate'] = False
+        trial_record['graduate'] = False        
         try:
             keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
             
@@ -216,7 +216,8 @@ class DemoGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
-        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+#        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+        trial_manager=Gratings(name='DemoAFCGratingsTrialManager'), 
         session_manager=NoTimeOff(), 
         criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
