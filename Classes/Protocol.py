@@ -117,7 +117,7 @@ class SimpleProtocol(Protocol):
     def change_to_step(self, step_num):
         self.current_step = step_num
 
-    def step(self):
+    def step(self, **kwargs):
         return self.training_steps[self.current_step]
 
     def num_steps(self):
@@ -126,6 +126,35 @@ class SimpleProtocol(Protocol):
     def add_step(self, step):
         self.training_steps.append(step)
 
+
+class StartsAtOneProtocol(SimpleProtocol):
+    """
+        STARTSATONEPROTOCOL contains a list of training steps and
+        allows change in steps. But dstarts at step 1 beginning of each day
+                name            : stringIdentifier
+                trainingSteps   : list of tuples (stepName,
+                    criterionManager,sessionManager,trialManager,
+                    reinforcementManager)
+    """
+
+    def __init__(self, training_steps, name="DefaultSimpleProtocol"):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
+        super(SimpleProtocol, self).__init__(name = name)
+        self.training_steps = training_steps
+        self.current_step = 0
+
+    def change_to_step(self, step_num):
+        self.current_step = step_num
+
+    def step(self, compiled_record):
+        return self.training_steps[self.current_step]
+
+    def num_steps(self):
+        return len(self.training_steps)
+
+    def add_step(self, step):
+        self.training_steps.append(step)
+        
 
 class SequentialProtocol(SimpleProtocol):
     """
