@@ -1,5 +1,5 @@
 from verlib import NormalizedVersion as Ver
-from .Criteria.Criterion import RepeatIndefinitely
+from .Criterion import RepeatIndefinitely
 from .SessionManager import NoTimeOff
 from .TrialManagers.GratingsTrialManagers import Gratings,AFCGratings
 from .ReinforcementManager import NoReinforcement,ConstantReinforcement

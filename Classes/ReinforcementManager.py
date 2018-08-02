@@ -44,7 +44,7 @@ class ConstantReinforcement(ReinforcementManager):
         self.fraction_penalty_sound_is_on = fraction_penalty_sound_is_on
         self.request_mode = request_mode
 
-    def calculate_reinforcement(self, subject):
+    def calculate_reinforcement(self, subject, **kwargs):
         reward_size = subject.reward *self.reward_scalar
         request_reward_size = subject.reward*self.request_reward_scalar
         ms_penalty = subject.timeout*self.penalty_scalar

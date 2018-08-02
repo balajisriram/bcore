@@ -123,14 +123,14 @@ class Station(object):
         nSamples = int(secs * sampleRate)
         phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
         
-        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1)
+        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1,hamming=True)
 
-        self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1)
-        self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1)
+        self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
+        self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
         
-        self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
-        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
-        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1)
+        self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         # try_again_array = numpy.random.randn(nSamples)
         # try_again_array[try_again_array>1] = 1
         # try_again_array[try_again_array<-1] = -1
