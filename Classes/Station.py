@@ -1,6 +1,8 @@
 import os
 import psychopy
 import psychopy.event
+import psychopy.logging
+psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy
 
 from .Hardware.Displays import StandardDisplay
