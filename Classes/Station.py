@@ -42,12 +42,16 @@ def compile_records(compiled_record, trial_record):
     regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate","correct"]
     lut_fields = ["station_name","station_version_number","subject_version_number","protocol_name","protocol_version_number","current_step_name","trial_manager_name","session_manager_name","criterion_name","reinforcement_manager_name","trial_manager_class","session_manager_class","criterion_class","reinforcement_manager_class","trial_manager_version_number","session_manager_version_number","criterion_version_number","reinforcement_manager_version_number",]
     LUT = compiled_record['LUT']
+    num_trials = len(compiled_record['trial_number'])
     for field in regular_fields:
-        compiled_record[field].append(trial_record[field])
-        
+        value = trial_record[field]
+        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
+        compiled_record[field].append(value)
+            
     for field in lut_fields:
         value = trial_record[field]
         idx,LUT = add_or_find_in_LUT(LUT,value)
+        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(idx)
     compiled_record['LUT'] = LUT
     
