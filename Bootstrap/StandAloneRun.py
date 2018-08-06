@@ -46,7 +46,7 @@ def load_bserver(path, subject_id):
 
     if not b_server.get_station_ids():
         print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
-        stn  = StandardKeyboardStation(sound_on=False, station_id=0, station_location=(0, 0, 0))
+        stn  = StandardVisionBehaviorStation(sound_on=True, station_id=0, station_location=(0, 0, 0))
         b_server.add_station(stn)
     elif len(b_server.get_station_ids())>1:
         RuntimeError('STANDALONERUN:LOAD_BSERVER:too many stations for server')
