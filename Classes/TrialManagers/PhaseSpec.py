@@ -96,6 +96,7 @@ class RewardPhaseSpec(PhaseSpec):
                                              sounds_played = sounds_played,
                                              **kwargs)
         self.reward_valve = reward_valve
+        assert reward_valve in ['center_valve','left_valve','right_valve'], 'reward valve provided is unknown'
     
     def on_enter(self,station,trial_record,**kwargs):
         trial_record['correct'] = True
