@@ -46,13 +46,13 @@ def compile_records(compiled_record, trial_record):
     num_trials = len(compiled_record['trial_number'])
     for field in regular_fields:
         value = trial_record[field]
-        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
+        if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(value)
             
     for field in lut_fields:
         value = trial_record[field]
         idx,LUT = add_or_find_in_LUT(LUT,value)
-        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
+        if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(idx)
     compiled_record['LUT'] = LUT
     
@@ -225,9 +225,9 @@ class StandardVisionBehaviorStation(Station):
         self.display = None
         pPort = self.initialize_parallel_port()
         if pPort:
-            from .Hardware.Ports import StandardParallelPort
             self.parallel_port = pPort
             self.parallel_port_conn = psychopy.parallel.ParallelPort(address=0xD010)
+            self.close_all_valves()
             self.close_all_valves()
         else:
             self.parallel_port = None
@@ -349,27 +349,40 @@ class StandardVisionBehaviorStation(Station):
             #self.subjects = self.subjects[:idx[0]]+self.subjects[idx[0]+1:]
 
     def close_all_valves(self):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_LO)
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        for valve in self.parallel_port['valve_pins']:
+            val[valve-2] = '0'
+        self.parallel_port_conn.setData(int(''.join(val),2))
 
     def read_ports(self):
-        return self.parallel_port_conn.read_pins(
-            self.parallel_port['portPins'])
+        out = [False, False, False]
+        for i,port in enumerate(self.parallel_port['port_pins']):
+            out[i] = self.parallel_port_conn.readPin(port)
+        return out
 
     def open_valve(self, valve):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port[valve], PPORT_HI)
+        valve_pin = self.parallel_port[valve]
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[valve_pin-2] = '1'
+        self.parallel_port_conn.setData(int(''.join(val),2))
 
     def close_valve(self, valve):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port[valve], PPORT_LO)
+        valve_pin = self.parallel_port[valve]
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[valve_pin-2] = '0'
+        self.parallel_port_conn.setData(int(''.join(val),2))
 
     def flush_valves(self, dur=1):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_HI)
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        for valve in self.parallel_port['valve_pins']:
+            val[valve-2] = '1'
+        self.parallel_port_conn.setData(int(''.join(val),2))
+        
         time.sleep(dur)
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_LO)
+        
+        for valve in self.parallel_port['valve_pins']:
+            val[valve-2] = '0'
+        self.parallel_port_conn.setData(int(''.join(val),2))
 
     def get_display_size(self):
         pass
@@ -451,9 +464,10 @@ class StandardVisionBehaviorStation(Station):
         else:
             return False
 
-class StandardVisionHeadfixStation(Station):
+            
+class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
     """
-        STANDARDVISIONHEADFIXSTATION(SVHS) defines a subclass of STATION.
+        STANDARDVISIONHEADFIXSTATION(SVHS) defines a subclass of SVBS.
         It defines a station with a standard display, a parallel port for i/o
         with standard pin-out settings, sounds settings which can only be
         turned on or off, one valve pins, one sensor pins. Only allows
@@ -478,38 +492,29 @@ class StandardVisionHeadfixStation(Station):
 
         Use these defaults unless you know what you are doing
         parallel_port = {}
-        parallel_port['right_valve'] = 2
         parallel_port['center_valve'] = 3
-        parallel_port['left_valve'] = 4
-        parallel_port['valve_pins'] = (2, 3, 4)
+        parallel_port['valve_pins'] = (3)
         parallel_port['center_port'] = 10
-        parallel_port['right_port'] = 12
-        parallel_port['left_port'] = 13
-        parallel_port['port_pins'] = (12, 10, 13)
+        parallel_port['port_pins'] = (10)
         parallel_port['index_pin'] = 8
         parallel_port['frame_pin'] = 9
         parallel_port['led_0'] = 5
         parallel_port['led_1'] = 7
     """
-    _window = None
-    _session = None
-    _server_conn = None
 
     def __init__(self,
                  sound_on=False,
                  station_id= 0,
                  station_location=(0,0,0),
-                 parallel_port='standardVisionBehaviorDefault'):
+                 parallel_port=None):
         self.ver = Ver('0.0.1')
-        super(StandardVisionBehaviorStation, self).__init__(station_location=station_location)
-        self.station_id = station_id
-        self.station_name = "Station" + str(station_id)
-        self.sound_on = sound_on
+        super(StandardVisionHeadfixStation, self).__init__(station_location=station_location,
+                                                           sound_on=sound_on,
+                                                           station_id=station_id,
+                                                           parallel_port=parallel_port)
         self.parallel_port = parallel_port
-        self.display = None
         pPort = self.initialize_parallel_port()
         if pPort:
-            from .Hardware.Ports import StandardParallelPort
             self.parallel_port = pPort
             self.parallel_port_conn = psychopy.parallel.ParallelPort(address=0xD010)
             self.close_all_valves()
@@ -518,16 +523,12 @@ class StandardVisionHeadfixStation(Station):
             self.parallel_port_conn = None
 
     def initialize_parallel_port(self):
-        if self.parallel_port == 'standardVisionBehaviorDefault':
+        if self.parallel_port == 'standardHeadfixBehaviorDefault':
             pPort = {}
-            pPort['right_valve'] = 2
             pPort['center_valve'] = 3
-            pPort['left_valve'] = 4
-            pPort['valve_pins'] = (2, 3, 4)
+            pPort['valve_pins'] = (3)
             pPort['center_port'] = 10
-            pPort['right_port'] = 12
-            pPort['left_port'] = 13
-            pPort['port_pins'] = (12, 10, 13)
+            pPort['port_pins'] = (10)
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
             pPort['led_0'] = 5
@@ -535,208 +536,48 @@ class StandardVisionHeadfixStation(Station):
             return pPort
         else:
             return None # need to write code that checks if allowable
-    
-    def initialize(self):
-        self.initialize_display()
-        self.initialize_sounds()
+            
+    def initialize_sounds(self):
+        from psychopy import prefs
+        prefs.general['audioLib'] = ['sounddevice']
+        import psychopy.sound
         
-    def run(self):
-        self.connect_to_server()
-        run_trials = False
-        while True:
-            # look for data from server
-            msg = self.get_server_msg()
-            quit = False
-            if run_trials and ~quit:
-                # get info anout session
-                self.get_session()
-
-                sub = self._session['subject']
-                tR = self._session['trial_record']
-                cR = self._session['compiled_record']
-                prot = self._session['protocol']
-                trial_num = self._session['trial_num']
-
-    def initialize_display(self, display = StandardDisplay()):
-        print(display)
-        self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
-        self._window.flip()
+        sampleRate=44100
+        secs=1
+        nSamples = int(secs * sampleRate)
+        phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
         
-    def connect_to_server(self):
-        """
-            This is a somewhat complicated handshake. Initially, the
-            station acts as a server exposing its IP::port to the server.
-            Since the server knows this IP::port it can create a client
-            connection easily. Upon connection, BServer(currently client)
-            sends a connection info for a separate connection(BServer will
-            reserve the space for this connection) to the station and the
-            station will connect to the BServer now as a client. This way
-            new stations can be added to the server without any
-            station-side code modification. BServer can dynamically manage
-            its resources. Along with threaded TCP server connections on
-            the server side, this should provide scalable, TCP communications
-            with the server
-        """
-        self._server_conn = TCPServerConnection(ipaddr=self.ip_address,
-            port=self.port)
-        self._server_conn.start()
-        server_connection_details = self._server_conn.recvData()
-        # use server_connection_details to connect to the BServer as a client
-        print('Closing connection as server...')
-        self._server_conn.stop()
-        self._server_conn = BehaviorClientConnection(
-            ipaddr=server_connection_details['ipaddr'],
-            port=server_connection_details['port'])
-        print(('Starting connection as client...'))
-        self._server_conn.start()
-
-    @property
-    def subject(self):
-        return self._subject
+        f_keep_going = [300,600,1200,2400,4800,9600,19200]
+        val = numpy.full_like(phase,0.)
+        for f in f_keep_going:
+            val += numpy.sin(f*phase)
+        val = numpy.matlib.repmat(val,2,1)
+        val = val.T
+        self._sounds['keep_going_sound'] = psychopy.sound.Sound(val,hamming=True)
         
-    @subject.setter
-    def subject(self,value):
-        self._subject = value
-
-    @property
-    def session(self):
-        return self._session
-    
-    @session.setter
-    def subject(self,value):
-        self._session = value
+        f_trial_start = [200,400,800,1600,3200,6400,12800]
+        val = numpy.full_like(phase,0.)
+        for f in f_trial_start:
+            val += numpy.sin(f*phase)
+        val = numpy.matlib.repmat(val,2,1)
+        val = val.T
+        self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
         
-    def get_ports(self):
-        return numpy.asarray(['L','C','R'])
+        self._sounds['request_sound'] = self._sounds['keep_going_sound']
+        self._sounds['stim_start_sound'] = self._sounds['trial_start_sound']
         
-    @property
-    def num_ports(self):
-        if self.parallel_port:
-            return len(self.parallel_port['port_pins'])
-        else:
-            return 0
-
-    def add_subject(self, sub):
-        self.subject = sub
-            #if sub.subject_id in self.get_subjects():
-            #    RuntimeError("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT:Subject "+ sub.subject_id + " already in station. Cannot add twice")
-            #
-            #print("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT: Adding subject_id " + sub.subject_id +" to station_id " + str(self.station_id))
-            #self.subjects.append(sub)
-
-    def remove_subject(self,sub):
-        self.subject = None
-            #if sub.subject_id not in self.get_subjects():
-            #    RuntimeError("STATION:STANDARDVISIONBEHAVIORSTATION:ADD_SUBJECT:Subject "+ sub.subject_id + " not in station. Cannot remove.")
-            #print("STATION:STANDARDVISIONBEHAVIORSTATION:REMOVE_SUBJECT: Removing subject_id " + sub.subject_id +" from station_id " + str(self.station_id))
-            #idx = [i for (i,x) in enumerate(self.get_subjects()) if x==sub.subject_id]
-            #self.subjects = self.subjects[:idx[0]]+self.subjects[idx[0]+1:]
-
-    def close_all_valves(self):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_LO)
-
-    def read_ports(self):
-        return self.parallel_port_conn.read_pins(
-            self.parallel_port['portPins'])
-
-    def open_valve(self, valve):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port[valve], PPORT_HI)
-
-    def close_valve(self, valve):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port[valve], PPORT_LO)
-
-    def flush_valves(self, dur=1):
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_HI)
-        time.sleep(dur)
-        self.parallel_port_conn.write_pins(
-            self.parallel_port['valvePins'], PPORT_LO)
-
-    def get_display_size(self):
-        pass
-
-    def get_session(self):
-        """
-            Connect to BServer and request session details to be loaded
-        """
-        self._session = self._server_conn.client_to_server(self._server_conn.SESSION_REQUESTED)
-
-    def decache(self):
-        """
-            Remove session specific details. ideal for pickling
-        """
-        self._window = None
-        self._session = None
-        self._server_conn = None
-        self._parallelport_conn = None
-
-    def do_trials(self, **kwargs):
-        # first step in the running of trials. called directly by station
-        # or through the BServer
-        if __debug__:
-            pass
-        self.initialize()
-        # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
-        # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
-        # the previous trial, please add it to compiled records
-        compiled_record = self.subject.load_compiled_records()
-        quit = False
-
-        # session starts here
-        session_record = []  # just a list of tRs
-        session_number = compiled_record["session_number"][-1] + 1
+        f_correct_sound = [400,800,1600,3200,6400,12800]
+        val = numpy.full_like(phase,0.)
+        for f in f_correct_sound:
+            val += numpy.sin(f*phase)
+        val = numpy.matlib.repmat(val,2,1)
+        val = val.T
+        self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
         
-        # setup the clocks
-        self._clocks['session_clock'] = psychopy.core.MonotonicClock()
-        self._clocks['trial_clock'] = psychopy.core.Clock()
-        session_start_time = psychopy.core.getAbsTime()
-        
-        while not quit:
-            # it loops in here every trial
-            trial_record = {}
-            # just assign relevant details here
-            trial_record["session_start_time"] = session_start_time
-            trial_record["trial_number"] = compiled_record["trial_number"][-1] + 1
-            trial_record["session_number"] = session_number
-            trial_record["station_id"] = self.station_id
-            trial_record["station_version_number"] = self.ver.__str__()
-            trial_record["station_name"]= self.station_name
-            trial_record["num_ports_in_station"] = self.num_ports
-            trial_record["trial_start_time"] = self._clocks['session_clock'].getTime()
-            # doTrial - only trial_record will be returned as its type will be changed
-            trial_record, quit = self.subject.do_trial(station=self, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
-
-            trial_record["trial_stop_time"] = self._clocks['session_clock'].getTime()
-            # update sessionRecord and compiledRecord
-            compiled_record = compile_records(compiled_record,trial_record)
-            session_record.append(trial_record)
-
-        # save session records
-        self.subject.save_session_records(session_record)
-        # save compiled records
-        self.subject.save_compiled_records(compiled_record)
-
-    def close_session(self, **kwargs):
-        print("Closing Session")
-        
-    def close_window(self):    
-        self._window.close()
-
-    def check_manual_quit(self):
-        key = psychopy.event.getKeys(keyList=['k','q'])
-        if key:
-            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
-        if 'k' in self._key_pressed and 'q' in self._key_pressed:
-            psychopy.event.clearEvents()
-            return True
-        else:
-            return False
+        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
 
     
-
 class StandardKeyboardStation(StandardVisionBehaviorStation):
     """
         STANDARDKEYBOARDSTATION(SKBS) defines a subclass of 
@@ -812,8 +653,8 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
-    st = StandardKeyboardStation()
+    st = StandardVisionHeadfixStation()
     st.initialize_sounds()
     
-    st._sounds['trial_start_sound'].play()
+    st._sounds['trial_sound'].play()
     
