@@ -886,8 +886,8 @@ class GNGGratings(object):
             assert len(self.locations['N'])==num_options_N,'R locations not same length as deg_per_cycs'
             assert len(self.radii['N'])==num_options_N,'R radii not same length as deg_per_cycs'
             
-        assert numpy.all(numpy.asarray(self.durations['G'])>0) && numpy.all(numpy.asarray(self.durations['G'])<float('inf')), 'All durations should be positive and finite'
-        assert numpy.all(numpy.asarray(self.durations['N'])>0) && numpy.all(numpy.asarray(self.durations['N'])<float('inf')), 'All durations should be positive and finite'
+        assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['G'])>0), numpy.all(numpy.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
+        assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['N'])>0), numpy.all(numpy.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
     
     @staticmethod
     def update_stimulus(stimulus,details):

@@ -46,13 +46,13 @@ def compile_records(compiled_record, trial_record):
     num_trials = len(compiled_record['trial_number'])
     for field in regular_fields:
         value = trial_record[field]
-        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
+        if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(value)
             
     for field in lut_fields:
         value = trial_record[field]
         idx,LUT = add_or_find_in_LUT(LUT,value)
-        if not field in compile_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
+        if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(idx)
     compiled_record['LUT'] = LUT
     
@@ -550,7 +550,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         f_keep_going = [300,600,1200,2400,4800,9600,19200]
         val = numpy.full_like(phase,0.)
         for f in f_keep_going:
-            val+ = numpy.sin(f*phase)
+            val += numpy.sin(f*phase)
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['keep_going_sound'] = psychopy.sound.Sound(val,hamming=True)
@@ -558,7 +558,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         f_trial_start = [200,400,800,1600,3200,6400,12800]
         val = numpy.full_like(phase,0.)
         for f in f_trial_start:
-            val+ = numpy.sin(f*phase)
+            val += numpy.sin(f*phase)
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
@@ -569,7 +569,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         f_correct_sound = [400,800,1600,3200,6400,12800]
         val = numpy.full_like(phase,0.)
         for f in f_correct_sound:
-            val+ = numpy.sin(f*phase)
+            val += numpy.sin(f*phase)
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
