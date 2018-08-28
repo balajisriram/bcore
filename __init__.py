@@ -2,6 +2,8 @@ import os
 import sys
 import time
 import struct
+import uuid
+import re
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -17,7 +19,6 @@ def get_base_directory():
     base = os.path.split(base[0])
     return base[0]
 
-
 def add_paths():
     # make a list of all the directories in the os.walk of the base
     # directory and then remove the .git or .svn components
@@ -30,13 +31,12 @@ def add_paths():
     sys.path.append(baseDirTree)
     print('INFO:: added module folders to path')
 
-
 def get_ip_addr(*args):
     """
         Code from : http://code.activestate.com/recipes/439094/
     """
     import platform
-    
+
     if platform.system()=='Linux':
         import socket
         if not args:
@@ -61,7 +61,6 @@ def get_ip_addr(*args):
         ip = s.getsockname()[0]
     return ip
 
-
 def get_time_stamp(*arg):
     if len(arg) > 1:
         raise ValueError('only a single timestamp in a single run')
@@ -82,3 +81,7 @@ def get_time_stamp(*arg):
     else:
         milliseconds = '%03d' % int((t - int(t)) * 1000)
         return time.strftime('D%m%d%YT%H%M%SM', localtime) + milliseconds
+
+def get_mac_address():
+    mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+    return mac

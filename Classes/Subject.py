@@ -160,6 +160,7 @@ class Subject(object):
         with open(os.path.join(session_file_loc, sR_name), "wb") as f:
             pickle.dump(sR, f)
 
+
 class Mouse(Subject):
     """
         MOUSE has the following attributes
@@ -332,9 +333,38 @@ class DefaultHuman(Human):
 
     def __init__(self):
         self.ver = Ver('0.0.1')
-        
+
         super(DefaultHuman, self).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
                                           anonymize=False, gender='Unknown')
+
+def get_subject(in):
+    """
+        GET_SUBJECT( {'species':'Mouse',
+                      'subject_id':'demo1',
+                      'gender':'M',
+                      'birth_date':'Aug-21-2018',
+                      'strain':'C57BL/6J',
+                      'gene_bkgd':'WT',
+                      'reward': 50,
+                      'timeout': 2000,
+                      }
+    """
+    if in['species']=='Mouse':
+        OBJ = Mouse
+    elif: in['species']=='Rat':
+        OBJ = Rat
+    else:
+        NotImplementedError('get_subject() assumes you are creating a mouse or a rat')
+
+    return OBJ(subject_id = in['subject_id'],
+               gender = in['gender']
+               birth_date = in['birth_date']
+               strain = in['strain'],
+               gene_bkgd = in['gene_bkgd'],
+               reward = in['reward'],
+               timeout = in['timeout'],
+               )
+
 
 
 if __name__ == '__main__':

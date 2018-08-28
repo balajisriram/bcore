@@ -149,6 +149,8 @@ class BServer(object):
             get_base_directory(), 'BCoreData', 'StationData'))
         os.mkdir(os.path.join(
             get_base_directory(), 'BCoreData', 'SubjectData'))
+        os.mkdir(os.path.join(
+            get_base_directory(), 'BCoreData', 'ChangeParams'))
         # create 'replacedDBs' in 'ServerData'
         os.mkdir(os.path.join(
             get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs'))
@@ -319,20 +321,20 @@ class BServerLocal(object):
 
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs'))
-            
+
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData'))
-            
+
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords'))
-        
+
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
     def add_subject_permanent_trial_record_store(self,subject_id):
         if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id)):
             os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id))
-    
+
     def create_base_compiled_record_file(self,subject_id):
         compiled_folder_path = os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')
         compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
@@ -347,7 +349,7 @@ class BServerLocal(object):
             cR["num_ports_in_station"] = [];cR["num_ports_in_station"].append(None)
             cR["trial_start_time"] = [];cR["trial_start_time"].append(None)
             cR["trial_stop_time"] = [];cR["trial_stop_time"].append(None)
-            
+
             # Available in Subject.do_trial()
             cR["subject_id"] = [];cR["subject_id"].append(None)
             cR["subject_version_number"] = [];cR["subject_version_number"].append(None)
@@ -357,7 +359,7 @@ class BServerLocal(object):
             cR["current_step_name"] = [];cR["current_step_name"].append(None)
             cR["num_steps"] = [];cR["num_steps"].append(None)
             cR["criterion_met"] = [];cR["criterion_met"].append(None)
-            
+
             # Available in TrainingStep.do_trial()
             cR["trial_manager_name"] = [];cR["trial_manager_name"].append(None)
             cR["session_manager_name"] = [];cR["session_manager_name"].append(None)
@@ -372,20 +374,19 @@ class BServerLocal(object):
             cR["criterion_version_number"] = [];cR["criterion_version_number"].append(None)
             cR["reinforcement_manager_version_number"] = [];cR["reinforcement_manager_version_number"].append(None)
             cR["graduate"] = [];cR["graduate"].append(None)
-            
+
             # Available in TrialManager.do_trial()
             cR["errored_out"] = [];cR["errored_out"].append(None)
             cR["manual_quit"] = [];cR["manual_quit"].append(None)
             cR["correct"] = [];cR["correct"].append(None)
-            
+
 
             cR['LUT'] = []
             cR['trial_details'] = {}
             cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
             with open(os.path.join(compiled_folder_path, cR_file_name),'wb') as f:
                 pickle.dump(cR, f, pickle.HIGHEST_PROTOCOL)
-             
-        
+
     def initialize_server(force_delete=False):
         # setup the paths
         _setup_paths(force_delete)
@@ -407,6 +408,37 @@ class BServerLocal(object):
         self.subjects.append(new_subject)
         self.add_subject_permanent_trial_record_store(new_subject.subject_id)
         self.create_base_compiled_record_file(new_subject.subject_id)
+        self.save()
+
+    def remove_subject(self,subject_id):
+        if subject_id not in self.get_subject_ids():
+            raise ValueError('Cannot remove a subject not in server')
+        print("BSERVER:BSERVERLOCAL:REMOVE_SUBJECT:Removing subject {0}".format(subject_id))
+        temp = [x for x in self.subjects if x.subject_id != subject_id]
+        removed = [x for x in self.subjects if x.subject_id == subject_id]
+        removed = removed[0]
+        self.subjects = temp
+        print("BSERVER:BSERVERLOCAL:REMOVE_SUBJECT:Delete PermanentTrialRecords and CompiledTrialRecords manually")
+        self.save()
+
+    def change_reward(self,subject_id,val):
+        if subject_id not in self.get_subject_ids():
+            raise ValueError('Cannot remove a subject not in server')
+        print("BSERVER:BSERVERLOCAL:CHANGE_REWARD:Changing reward for subject {0} to {1} ms.".format(subject_id,val))
+        for i,subj in enumerate(self.subjects):
+            if subj.subject_id==subject_id:
+                subj.reward = val
+                self.subjects[i] = subject
+        self.save()
+
+    def change_timeout(self,subject_id,val):
+        if subject_id not in self.get_subject_ids():
+            raise ValueError('Cannot remove a subject not in server')
+        print("BSERVER:BSERVERLOCAL:CHANGE_REWARD:Changing timeout for subject {0} to {1} ms.".format(subject_id,val))
+        for i,subj in enumerate(self.subjects):
+            if subj.subject_id==subject_id:
+                subj.timeout = val
+                self.subjects[i] = subject
         self.save()
 
     def change_assignment(self, subject, new_assignment):
@@ -435,7 +467,7 @@ class BServerLocal(object):
         for subject in self.subjects:
             subject_ids.append(subject.subject_id)
         return subject_ids
-    
+
     @staticmethod
     def get_standard_server_path():
         return os.path.join(get_base_directory(),'BCoreData','ServerData','dB.BServer')
