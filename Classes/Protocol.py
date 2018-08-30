@@ -208,16 +208,52 @@ class DemoGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1", 
-#        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
-        trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
-                               deg_per_cycs=[0.1], #degrees
-                               orientations=[45,-45,], #degrees
-                               contrasts=[1],
-                               durations=[1], #seconds
-                               radii=[400], #degrees
-                               iti=1, #seconds
-                               itl=0.5, #inter trial luminance,
-                               ), 
+        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+        # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
+                               # deg_per_cycs=[0.1], #degrees
+                               # orientations=[45,-45,], #degrees
+                               # contrasts=[1],
+                               # durations=[1], #seconds
+                               # radii=[400], #degrees
+                               # iti=1, #seconds
+                               # itl=0.5, #inter trial luminance,
+                               # ), 
         session_manager=NoTimeOff(), 
         criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
+
+
+class DemoAFCGratingsProtocol(SimpleProtocol):
+    """
+        DEMOAFCGRATINGSPROTOCOL shows a simple Gratings stimulus
+    """
+
+    def __init__(self):
+        self.ver = Ver('0.0.1')  # Feb 28 2014
+        name = "DemoGratingsProtocol"
+        training_steps = [TrainingStep(
+        name="DemoGratingStepNum1", 
+        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+        # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
+                               # deg_per_cycs=[0.1], #degrees
+                               # orientations=[45,-45,], #degrees
+                               # contrasts=[1],
+                               # durations=[1], #seconds
+                               # radii=[400], #degrees
+                               # iti=1, #seconds
+                               # itl=0.5, #inter trial luminance,
+                               # ), 
+        session_manager=NoTimeOff(), 
+        criterion=RepeatIndefinitely())]
+        super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
+
+        
+class DemoNoStimulusProtocol(SimpleProtocol):
+    """
+        DEMONOSTIMULUSPROTOCOL runs a simple RandomSpurtsOfWater stimulus
+    """
+    
+    def __init__(self):
+        self.ver = Ver('0.0.1')
+        name = 'DemoNoStimulusProtocol'
+        

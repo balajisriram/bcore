@@ -1,5 +1,5 @@
 from verlib import NormalizedVersion as Ver
-from .PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
+from .PhaseSpec import PhaseSpec,StimPhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
 from ..ReinforcementManager import ConstantReinforcement,NoReinforcement
 from ..Station import StandardKeyboardStation
 import psychopy
@@ -44,7 +44,7 @@ class Gratings(object):
     """
     _Phases = None
     _Cached_Stimuli = None
-    
+
     def __init__(self,
                  name,
                  deg_per_cycs=[10], #degrees
@@ -59,7 +59,7 @@ class Gratings(object):
                  reinforcement_manager=NoReinforcement(),
                  **kwargs):
         self.ver = Ver('0.0.1')
-        self.reinforcement_manager = reinforcement_manager        
+        self.reinforcement_manager = reinforcement_manager
         self.name = name
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -70,7 +70,7 @@ class Gratings(object):
         self.radii = radii
 
         self.iti = iti # inter trial interval (s)
-        
+
         if numpy.isscalar(itl):
             self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
@@ -82,7 +82,7 @@ class Gratings(object):
         resolution = (H,W,Hz)
         target_ports = None
         distractor_ports = station.get_ports()
-        
+
         # select from values
         stimulus = dict()
         stimulus['deg_per_cyc'] = random.choice(self.deg_per_cycs)
@@ -95,11 +95,11 @@ class Gratings(object):
         stimulus['H'] = H
         stimulus['W'] = W
         stimulus['Hz'] = Hz
-        
+
         trial_record['chosen_stim'] = stimulus
 
         frames_total = round(Hz*stimulus['duration'])
-        
+
         port_details = {}
         port_details['target_ports'] = None
         port_details['distractor_ports'] = station.get_ports()
@@ -124,7 +124,7 @@ class Gratings(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
             stimulus_update_fn=Gratings.update_stimulus,
@@ -150,7 +150,7 @@ class Gratings(object):
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050),
             is_last_phase=True))
-        
+
     def _simulate(self):
         station = StandardKeyboardStation()
         station.initialize()
@@ -162,27 +162,27 @@ class Gratings(object):
 
     def decache(self):
         self._Phases = dict()
-        
+
     @staticmethod
     def update_stimulus(stimulus,details):
         if details['drift_frequency'] !=0:
             stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
-            
+
     @staticmethod
     def do_nothing_to_stim(stimulus,details):
         pass
-    
+
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
-        
+
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
             return trial_record,quit
-            
+
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
         station._key_pressed = []
@@ -192,7 +192,7 @@ class Gratings(object):
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
-        
+
         for phase in self._Phases:
             frames_until_transition = phase.frames_until_transition
             phase_done = False
@@ -208,37 +208,37 @@ class Gratings(object):
                 sound_timer = psychopy.core.CountdownTimer(sound_duration)
             else:
                 sound = None
-            
-            while not phase_done:    
+
+            while not phase_done:
                 # deal with sounds
                 if sound:
                     if not sound_started:
                         sound.play()
                         sound_timer.reset()
                         sound_started = True
-                        
+
                     if sound_timer.getTime() <0 and not sound_done:
                         sound.stop()
                         sound_done = True
-                
+
                 # deal with stim
                 if stim:
                     stim.draw()
                     phase.stimulus_update_fn(stim,stim_details)
                 station._window.flip()
-            
+
                 # update the frames
                 frames_until_transition = frames_until_transition-1
                 if frames_until_transition==0: phase_done = True
                 quit = quit or station.check_manual_quit()
-            
+
         return trial_record,quit
-    
+
     @staticmethod
     def trial_compiler(compiled_record,trial_record):
         print('at Gratings trial_compiler')
-    
-    @staticmethod    
+
+    @staticmethod
     def station_ok_for_tm(station):
         if station.__class__.__name__ in ['StandardVisionBehaviorStation','StandardVisionHeadfixStation','StandardKeyboardStation']:
             return True
@@ -295,7 +295,7 @@ class Gratings_GaussianEdge(Gratings):
             phase_name='inter-trial',
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
 class Gratings_HardEdge(Gratings):
     """
         GRATINGS_HARDEDGE defines a standard gratings trial manager
@@ -305,7 +305,7 @@ class Gratings_HardEdge(Gratings):
     def __init__(self, name, **kwargs):
         self.ver = Ver('0.0.1')
         super(Gratings_HardEdge, self).__init__(name, **kwargs)
-    
+
     def _setup_phases(self, trial_record, station, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
@@ -342,14 +342,14 @@ class Gratings_HardEdge(Gratings):
             phase_name='inter-trial',
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
 ##########################################################################################
 ##########################################################################################
 ####################### AFC GRATINGS TRIAL MANAGERS - SHOWS ##############################
 ############################# ONE GRATING AT A TIME ######################################
 ##########################################################################################
 ##########################################################################################
- 
+
 class AFCGratings(object):
     """
         AFCGRATINGS defines a standard gratings trial manager
@@ -382,7 +382,7 @@ class AFCGratings(object):
         self.ver = Ver('0.0.1')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
-        
+
         self.do_combos = do_combos
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -394,12 +394,12 @@ class AFCGratings(object):
         self.radii = radii
 
         self.iti = iti # inter trial interval (s)
-        
+
         if numpy.isscalar(itl):
             self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
             self.itl = numpy.asarray(itl) #itl as color
-        
+
         n_afc = len(deg_per_cycs)
         assert len(self.orientations)==n_afc,'orientations not same length as %r' % n_afc
         assert len(self.drift_frequencies)==n_afc,'drift_frequencies not same length as %r' % n_afc
@@ -408,7 +408,7 @@ class AFCGratings(object):
         assert len(self.durations)==n_afc,'durations not same length as %r' % n_afc
         assert len(self.locations)==n_afc,'locations not same length as %r' % n_afc
         assert len(self.radii)==n_afc,'radii not same length as %r' % n_afc
-        
+
         if do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
@@ -421,7 +421,7 @@ class AFCGratings(object):
             assert len(self.durations['L'])==num_options_L,'L durations not same length as deg_per_cycs'
             assert len(self.locations['L'])==num_options_L,'L locations not same length as deg_per_cycs'
             assert len(self.radii['L'])==num_options_L,'L radii not same length as deg_per_cycs'
-            
+
             num_options_R = len(self.deg_per_cycs['R'])
             assert len(self.orientations['R'])==num_options_R,'R orientations not same length as deg_per_cycs'
             assert len(self.drift_frequencies['R'])==num_options_R,'R drift_frequencies not same length as deg_per_cycs'
@@ -430,51 +430,51 @@ class AFCGratings(object):
             assert len(self.durations['R'])==num_options_R,'R durations not same length as deg_per_cycs'
             assert len(self.locations['R'])==num_options_R,'R locations not same length as deg_per_cycs'
             assert len(self.radii['R'])==num_options_R,'R radii not same length as deg_per_cycs'
-            
+
     @property
     def n_afc():
         return len(self.deg_per_cycs)
-    
+
     @staticmethod
     def update_stimulus(stimulus,details):
         if details['drift_frequency'] !=0:
             stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
-            
+
     @staticmethod
     def do_nothing_to_stim(stimulus,details):
         pass
-        
+
     def choose_ports(self, trial_record, station, ):
         pass
 
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
-        
+
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
             return trial_record,quit
-            
-            
+
+
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
         station._key_pressed = []
-        
+
         current_phase_num = 0
-        
+
         # was on will be used to check for new responses
         was_on = {'L':False, 'C': False, 'R':False}
-        
+
         # Zero out the trial clock
         trial_clock = station._clocks['trial_clock']
         trial_clock.reset()
-        
+
         trial_done = False
         error_out = False
-        
+
         trial_record['errored_out'] = False
         trial_record['manual_quit'] = False
 
@@ -482,13 +482,13 @@ class AFCGratings(object):
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
-        
+
         trial_record['phase_data'] = []
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
             phase = self._Phases[current_phase_num]
-            
+
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
             stim = phase.stimulus
@@ -508,7 +508,7 @@ class AFCGratings(object):
                 sound_timer = psychopy.core.CountdownTimer(sound_duration)
             else:
                 sound = None
-            
+
             # save relevant data into phase_data
             phase_data = {}
             phase_data['phase_name'] = phase.phase_name
@@ -516,7 +516,7 @@ class AFCGratings(object):
             phase_data['enter_time'] = trial_clock.getTime()
             phase_data['response'] = []
             phase_data['response_time'] = []
-            
+
             # loop into phase
             phase_done = False
             trial_record = phase.on_enter(trial_record=trial_record, station=station)
@@ -527,11 +527,11 @@ class AFCGratings(object):
                         sound.play()
                         sound_timer.reset()
                         sound_started = True
-                        
+
                     if sound_timer.getTime() <0 and not sound_done:
                         sound.stop()
                         sound_done = True
-                
+
                 # deal with stim
                 if stim:
                     stim.draw()
@@ -539,7 +539,7 @@ class AFCGratings(object):
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
                 station._window.flip()
-                
+
                 # look for responses
                 response_led_to_transition = False
                 response = station.read_ports()
@@ -563,7 +563,7 @@ class AFCGratings(object):
                     was_on[response] = True # flip was on to true after we used it to check for new events
                 else:
                     pass
-                    
+
                 # update the frames_until_transition and check if the phase is done
                 # phase is done when there are no more frames in the phase or is we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
@@ -573,8 +573,8 @@ class AFCGratings(object):
                     frames_led_to_transition = True
                     if transition: current_phase_num = transition[None] - 1
                     else: current_phase_num = None # the last phase has no
-                    
-                if frames_led_to_transition or response_led_to_transition: 
+
+                if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
@@ -583,12 +583,12 @@ class AFCGratings(object):
                 quit = quit or manual_quit
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)
-            
+
             # when do we quit the trial? trial_done only when last phjase
             # but we can exit if manual_quit or errored out
             if is_last_phase: trial_done = True
         return trial_record,quit
-        
+
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
@@ -597,7 +597,7 @@ class AFCGratings(object):
         response_ports = tuple(numpy.setdiff1d(all_ports,request_port))
         target_port = numpy.random.choice(response_ports)
         distractor_port = tuple(numpy.setdiff1d(response_ports,target_port))
-        
+
         distractor_port = distractor_port[0]
         # select from values
         stimulus = dict()
@@ -612,32 +612,32 @@ class AFCGratings(object):
         stimulus['H'] = H
         stimulus['W'] = W
         stimulus['Hz'] = Hz
-        
+
         trial_record['chosen_stim'] = stimulus
 
         frames_total = round(Hz*stimulus['duration'])
-        
+
         port_details = {}
         port_details['request_port'] = request_port
         port_details['target_port'] = target_port
         port_details['distractor_port'] = distractor_port
 
         return stimulus, resolution, frames_total, port_details
-        
+
     def choose_resolution(self, station, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
-    
+
     def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
-        AFCGratings:_setup_phases 
+        AFCGratings:_setup_phases
         1. Pre-trial: gray screen. REQUEST_PORT -> 2
         2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
         3. Correct: Give reward
         4. Punish: Timeout
-        5. ITI: Gray screen of duration iti, 
+        5. ITI: Gray screen of duration iti,
         """
         (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
@@ -647,14 +647,14 @@ class AFCGratings(object):
             reward_valve = 'right_valve'
         elif port_details['target_port'] == 'C':
             reward_valve = 'center_valve'
-        
+
         if stimulus_details['duration']==float('inf'):
             do_post_discrim_stim = False
         else:
             do_post_discrim_stim = True
-            
+
         self._Phases = []
-        
+
         reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
         reward_size = numpy.round(reward_size/1000*60)
         request_reward_size = numpy.round(request_reward_size/1000*60)
@@ -795,7 +795,7 @@ class AFCGratings(object):
                 phase_name='inter-trial',
                 hz=hz,
                 sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
     @staticmethod
     def station_ok_for_tm(station):
         if station.__class__.__name__ in ['StandardVisionBehaviorStation','StandardKeyboardStation']:
@@ -803,7 +803,7 @@ class AFCGratings(object):
         else:
             return False
 
-    
+
 ##########################################################################################
 ##########################################################################################
 ####################### GNG GRATINGS TRIAL MANAGERS - SHOWS ##############################
@@ -822,7 +822,7 @@ class GNGGratings(object):
             durations
             radii # in units of "Scale"
             locations
-            
+
             do_combos
             reinforcement_manager
     """
@@ -846,7 +846,7 @@ class GNGGratings(object):
         self.ver = Ver('0.0.1')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
-        
+
         self.do_combos = do_combos
         self.deg_per_cycs = deg_per_cycs
         self.orientations = orientations
@@ -858,12 +858,12 @@ class GNGGratings(object):
         self.radii = radii
 
         self.iti = iti # inter trial interval (s)
-        
+
         if numpy.isscalar(itl):
             self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
             self.itl = numpy.asarray(itl) #itl as color
-        
+
         if do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
@@ -876,7 +876,7 @@ class GNGGratings(object):
             assert len(self.durations['G'])==num_options_G,'L durations not same length as deg_per_cycs'
             assert len(self.locations['G'])==num_options_G,'L locations not same length as deg_per_cycs'
             assert len(self.radii['G'])==num_options_G,'L radii not same length as deg_per_cycs'
-            
+
             num_options_N = len(self.deg_per_cycs['N'])
             assert len(self.orientations['N'])==num_options_N,'R orientations not same length as deg_per_cycs'
             assert len(self.drift_frequencies['N'])==num_options_N,'R drift_frequencies not same length as deg_per_cycs'
@@ -885,15 +885,15 @@ class GNGGratings(object):
             assert len(self.durations['N'])==num_options_N,'R durations not same length as deg_per_cycs'
             assert len(self.locations['N'])==num_options_N,'R locations not same length as deg_per_cycs'
             assert len(self.radii['N'])==num_options_N,'R radii not same length as deg_per_cycs'
-            
+
         assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['G'])>0), numpy.all(numpy.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
         assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['N'])>0), numpy.all(numpy.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
-    
+
     @staticmethod
     def update_stimulus(stimulus,details):
         if details['drift_frequency'] !=0:
             stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
-            
+
     @staticmethod
     def do_nothing_to_stim(stimulus,details):
         pass
@@ -901,31 +901,31 @@ class GNGGratings(object):
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
-        
+
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
             return trial_record,quit
-            
-            
+
+
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
         station._key_pressed = []
-        
+
         current_phase_num = 0
-        
+
         # was on will be used to check for new responses
         was_on = {'C': False}
-        
+
         # Zero out the trial clock
         trial_clock = station._clocks['trial_clock']
         trial_clock.reset()
-        
+
         trial_done = False
         error_out = False
-        
+
         trial_record['errored_out'] = False
         trial_record['manual_quit'] = False
 
@@ -933,13 +933,13 @@ class GNGGratings(object):
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
-        
+
         trial_record['phase_data'] = []
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
             phase = self._Phases[current_phase_num]
-            
+
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
             stim = phase.stimulus
@@ -959,7 +959,7 @@ class GNGGratings(object):
                 sound_timer = psychopy.core.CountdownTimer(sound_duration)
             else:
                 sound = None
-            
+
             # save relevant data into phase_data
             phase_data = {}
             phase_data['phase_name'] = phase.phase_name
@@ -967,7 +967,7 @@ class GNGGratings(object):
             phase_data['enter_time'] = trial_clock.getTime()
             phase_data['response'] = []
             phase_data['response_time'] = []
-            
+
             # loop into phase
             phase_done = False
             trial_record = phase.on_enter(trial_record=trial_record, station=station)
@@ -978,11 +978,11 @@ class GNGGratings(object):
                         sound.play()
                         sound_timer.reset()
                         sound_started = True
-                        
+
                     if sound_timer.getTime() <0 and not sound_done:
                         sound.stop()
                         sound_done = True
-                
+
                 # deal with stim
                 if stim:
                     stim.draw()
@@ -990,7 +990,7 @@ class GNGGratings(object):
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
                 station._window.flip()
-                
+
                 # look for responses
                 response_led_to_transition = False
                 response = station.read_ports()
@@ -1014,7 +1014,7 @@ class GNGGratings(object):
                     was_on[response] = True # flip was on to true after we used it to check for new events
                 else:
                     pass
-                    
+
                 # update the frames_until_transition and check if the phase is done
                 # phase is done when there are no more frames in the phase or is we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
@@ -1024,8 +1024,8 @@ class GNGGratings(object):
                     frames_led_to_transition = True
                     if transition: current_phase_num = transition[None] - 1
                     else: current_phase_num = None # the last phase has no
-                    
-                if frames_led_to_transition or response_led_to_transition: 
+
+                if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
@@ -1034,12 +1034,12 @@ class GNGGratings(object):
                 quit = quit or manual_quit
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)
-            
+
             # when do we quit the trial? trial_done only when last phjase
             # but we can exit if manual_quit or errored out
             if is_last_phase: trial_done = True
         return trial_record,quit
-        
+
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
@@ -1048,7 +1048,7 @@ class GNGGratings(object):
         response_ports = tuple(numpy.setdiff1d(all_ports,request_port))
         target_port = numpy.random.choice(response_ports)
         distractor_port = tuple(numpy.setdiff1d(response_ports,target_port))
-        
+
         distractor_port = distractor_port[0]
         # select from values
         stimulus = dict()
@@ -1063,32 +1063,32 @@ class GNGGratings(object):
         stimulus['H'] = H
         stimulus['W'] = W
         stimulus['Hz'] = Hz
-        
+
         trial_record['chosen_stim'] = stimulus
 
         frames_total = round(Hz*stimulus['duration'])
-        
+
         port_details = {}
         port_details['request_port'] = request_port
         port_details['target_port'] = target_port
         port_details['distractor_port'] = distractor_port
 
         return stimulus, resolution, frames_total, port_details
-        
+
     def choose_resolution(self, station, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
-    
+
     def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
-        AFCGratings:_setup_phases 
+        AFCGratings:_setup_phases
         1. Pre-trial: gray screen. REQUEST_PORT -> 2
         2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
         3. Correct: Give reward
         4. Punish: Timeout
-        5. ITI: Gray screen of duration iti, 
+        5. ITI: Gray screen of duration iti,
         """
         (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
@@ -1098,14 +1098,14 @@ class GNGGratings(object):
             reward_valve = 'right_valve'
         elif port_details['target_port'] == 'C':
             reward_valve = 'center_valve'
-        
+
         if stimulus_details['duration']==float('inf'):
             do_post_discrim_stim = False
         else:
             do_post_discrim_stim = True
-            
+
         self._Phases = []
-        
+
         reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
         reward_size = numpy.round(reward_size/1000*60)
         request_reward_size = numpy.round(request_reward_size/1000*60)
@@ -1246,7 +1246,7 @@ class GNGGratings(object):
                 phase_name='inter-trial',
                 hz=hz,
                 sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
     @staticmethod
     def station_ok_for_tm(station):
         if station.__class__.__name__ in ['StandardVisionBehaviorStation','StandardKeyboardStation']:
@@ -1254,8 +1254,8 @@ class GNGGratings(object):
         else:
             return False
 
-            
-            
+
+
 if __name__=='__main__':
     g = Gratings_GaussianEdge('SampleGratingsGaussianEdge',
                  deg_per_cycs=[0.01,0.1,1], #cpd?
@@ -1268,5 +1268,5 @@ if __name__=='__main__':
                  iti=1, #seconds
                  itl=0.5, #inter trial luminance
                  )
-    
+
     g._simulate()

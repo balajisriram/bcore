@@ -34,11 +34,11 @@ def add_or_find_in_LUT(LUT,value):
         except TypeError:
             pass
             # cannot compare error
-    if not found: 
+    if not found:
          idx=n
          LUT.append(value)
     return idx,LUT
-    
+
 def compile_records(compiled_record, trial_record):
     regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate","correct"]
     lut_fields = ["station_name","station_version_number","subject_version_number","protocol_name","protocol_version_number","current_step_name","trial_manager_name","session_manager_name","criterion_name","reinforcement_manager_name","trial_manager_class","session_manager_class","criterion_class","reinforcement_manager_class","trial_manager_version_number","session_manager_version_number","criterion_version_number","reinforcement_manager_version_number",]
@@ -48,24 +48,24 @@ def compile_records(compiled_record, trial_record):
         value = trial_record[field]
         if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(value)
-            
+
     for field in lut_fields:
         value = trial_record[field]
         idx,LUT = add_or_find_in_LUT(LUT,value)
         if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(idx)
     compiled_record['LUT'] = LUT
-    
+
     try:
         trial_specific_compiler = trial_record['trial_compiler']
         compiled_record = trial_specific_compiler(compiled_record,trial_record)
     except KeyError:
         print('No trial specific compiler. Ignoring trial')
-        
+
     return compiled_record
-    
-    
-    
+
+
+
 class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
@@ -119,22 +119,22 @@ class Station(object):
 
     def do_trials(self, **kwargs):
         raise NotImplementedError('Run doTrials() on a subclass')
-        
+
     def initialize_sounds(self):
         from psychopy import prefs
         prefs.general['audioLib'] = ['sounddevice']
         import psychopy.sound
-        
+
         sampleRate=44100
         secs=0.1
         nSamples = int(secs * sampleRate)
         phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
-        
+
         self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1,hamming=True)
 
         self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
         self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
-        
+
         self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
@@ -143,13 +143,13 @@ class Station(object):
         # try_again_array[try_again_array<-1] = -1
         # print(try_again_array.min())
         # print(try_again_array.max())
-        
+
         # self._sounds['try_again_sound'] = psychopy.sound.Sound(try_again_array,stereo=0,secs=secs)
-        
+
     def _rewind_sounds(self,time=0.):
         for sound in self._sounds:
             self._sounds[sound].seek(time)
-        
+
     def decache(self):
         """
             Remove session specific details. ideal for pickling
@@ -158,7 +158,7 @@ class Station(object):
         self._sounds = None
         self._stims = None
         self._clocks = None
-        
+
 
 class StandardVisionBehaviorStation(Station):
     """
@@ -246,16 +246,17 @@ class StandardVisionBehaviorStation(Station):
             pPort['port_pins'] = (12, 10, 13)
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
+            pPort['stim_pin'] = 6
             pPort['led_0'] = 5
             pPort['led_1'] = 7
             return pPort
         else:
             return None # need to write code that checks if allowable
-    
+
     def initialize(self):
         self.initialize_display()
         self.initialize_sounds()
-        
+
     def run(self):
         self.connect_to_server()
         run_trials = False
@@ -277,7 +278,7 @@ class StandardVisionBehaviorStation(Station):
         print(display)
         self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
-        
+
     def connect_to_server(self):
         """
             This is a somewhat complicated handshake. Initially, the
@@ -309,7 +310,7 @@ class StandardVisionBehaviorStation(Station):
     @property
     def subject(self):
         return self._subject
-        
+
     @subject.setter
     def subject(self,value):
         self._subject = value
@@ -317,14 +318,14 @@ class StandardVisionBehaviorStation(Station):
     @property
     def session(self):
         return self._session
-    
+
     @session.setter
     def subject(self,value):
         self._session = value
-        
+
     def get_ports(self):
         return numpy.asarray(['L','C','R'])
-        
+
     @property
     def num_ports(self):
         if self.parallel_port:
@@ -377,11 +378,23 @@ class StandardVisionBehaviorStation(Station):
         for valve in self.parallel_port['valve_pins']:
             val[valve-2] = '1'
         self.parallel_port_conn.setData(int(''.join(val),2))
-        
+
         time.sleep(dur)
-        
+
         for valve in self.parallel_port['valve_pins']:
             val[valve-2] = '0'
+        self.parallel_port_conn.setData(int(''.join(val),2))
+
+    def set_stim_pin_on(self):
+        stim_pin = self.parallel_port['stim_pin']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[stim_pin-2] = '1'
+        self.parallel_port_conn.setData(int(''.join(val),2))
+
+    def set_stim_pin_off(self):
+        stim_pin = self.parallel_port['stim_pin']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[stim_pin-2] = '0'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def get_display_size(self):
@@ -417,12 +430,12 @@ class StandardVisionBehaviorStation(Station):
         # session starts here
         session_record = []  # just a list of tRs
         session_number = compiled_record["session_number"][-1] + 1
-        
+
         # setup the clocks
         self._clocks['session_clock'] = psychopy.core.MonotonicClock()
         self._clocks['trial_clock'] = psychopy.core.Clock()
         session_start_time = psychopy.core.getAbsTime()
-        
+
         while not quit:
             # it loops in here every trial
             trial_record = {}
@@ -450,8 +463,8 @@ class StandardVisionBehaviorStation(Station):
 
     def close_session(self, **kwargs):
         print("Closing Session")
-        
-    def close_window(self):    
+
+    def close_window(self):
         self._window.close()
 
     def check_manual_quit(self):
@@ -464,7 +477,7 @@ class StandardVisionBehaviorStation(Station):
         else:
             return False
 
-            
+
 class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
     """
         STANDARDVISIONHEADFIXSTATION(SVHS) defines a subclass of SVBS.
@@ -531,22 +544,23 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
             pPort['port_pins'] = (10)
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
+            pPort['stim_pin'] = 6
             pPort['led_0'] = 5
             pPort['led_1'] = 7
             return pPort
         else:
             return None # need to write code that checks if allowable
-            
+
     def initialize_sounds(self):
         from psychopy import prefs
         prefs.general['audioLib'] = ['sounddevice']
         import psychopy.sound
-        
+
         sampleRate=44100
         secs=1
         nSamples = int(secs * sampleRate)
         phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
-        
+
         f_keep_going = [300,600,1200,2400,4800,9600,19200]
         val = numpy.full_like(phase,0.)
         for f in f_keep_going:
@@ -554,7 +568,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['keep_going_sound'] = psychopy.sound.Sound(val,hamming=True)
-        
+
         f_trial_start = [200,400,800,1600,3200,6400,12800]
         val = numpy.full_like(phase,0.)
         for f in f_trial_start:
@@ -562,10 +576,10 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
-        
+
         self._sounds['request_sound'] = self._sounds['keep_going_sound']
         self._sounds['stim_start_sound'] = self._sounds['trial_start_sound']
-        
+
         f_correct_sound = [400,800,1600,3200,6400,12800]
         val = numpy.full_like(phase,0.)
         for f in f_correct_sound:
@@ -573,17 +587,17 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = numpy.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
-        
+
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
 
-    
+
 class StandardKeyboardStation(StandardVisionBehaviorStation):
     """
-        STANDARDKEYBOARDSTATION(SKBS) defines a subclass of 
+        STANDARDKEYBOARDSTATION(SKBS) defines a subclass of
         STANDARDVISIONBEHAVIORSTATION(SVBS).
-        It defines a station with a standard display, sounds settings 
-        which can only be turned on or off, three sensor pins 
+        It defines a station with a standard display, sounds settings
+        which can only be turned on or off, three sensor pins
         [connected to the keyboard]. Only allows stand alone running
         Attributes allowed are:
             station_id       : numeric ID to be sent to STATION
@@ -597,9 +611,9 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
             K+2              :            Center Sensor
             K+3              :            Right Sensor
             K+Q              :            Quit
-            
+
     """
-    
+
     def __init__(self,
                  sound_on=False,
                  station_id= 0,
@@ -607,7 +621,7 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
         self.ver = Ver('0.0.1')
         super(StandardKeyboardStation, self).__init__(station_location=station_location,sound_on=sound_on, station_id = station_id, parallel_port=None)
         self.display = None
-        
+
     @property
     def num_ports(self):
         return 3
@@ -635,9 +649,9 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
             print(self._key_pressed)
             self._key_pressed.remove('k')
             self._key_pressed.remove('3')
-            
+
         return self.get_ports()[ports]
-    
+
     def open_valve(self, valve):
         print('Opening valve',valve)
 
@@ -655,6 +669,5 @@ def make_standard_behavior_station():
 if __name__ == '__main__':
     st = StandardVisionHeadfixStation()
     st.initialize_sounds()
-    
+
     st._sounds['trial_sound'].play()
-    
