@@ -5,15 +5,18 @@ STANDALONERUN is the usual entry point into BCore psychophysics functionality.
 StandAloneRun
      -s, --subject    subject_id
      --server-path    server path to BServer
-     -p, --protocol   protocol object. See ../User folder for example protocols
+     -p, --protocol   protocol name. See ../User folder for example protocols
 """
 import sys
 import os
 from BCore import get_base_directory, get_ip_addr
-from ..Classes.ClientAndServer.BServer import BServerLocal
-from ..Classes.Protocol import DemoGratingsProtocol
-from ..Classes.Subject import DefaultVirtual
-from ..Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation
+from BCore.Classes.ClientAndServer.BServer import BServerLocal
+from BCore.Classes.Protocol import Protocol, DemoGratingsProtocol
+from BCore.Classes.Subject import DefaultVirtual
+from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation
+
+# User specific protocols
+from BCore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -24,6 +27,12 @@ __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 SERVER_PORT = 12345
+
+def get_protocol_from_name(name):
+    if name in ['orientation_tuning_biogen_08292018','short_duration_biogen_08292018']:
+        return get_phys_protocol_biogen(name)
+    else:
+        raise ValueError('unknown protocol name')
 
 
 def load_bserver(path, subject_id):
@@ -38,8 +47,6 @@ def load_bserver(path, subject_id):
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
         sub = DefaultVirtual(subject_id=subject_id,reward=50.,timeout=1000.)
-        prot = protocol
-        sub.add_protocol(prot)
         b_server.add_subject(sub)
     else:
         print("STANDALONERUN:LOAD_BSERVER:Subject {0} was found in server\n".format(subject_id))
@@ -56,7 +63,7 @@ def load_bserver(path, subject_id):
     return b_server
 
 
-def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGratingsProtocol()):
+def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
     # look for local server and collect information about the Subject being run
     if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
 
@@ -73,10 +80,28 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = DemoGr
             sub = b_server.subjects[i]
             break
     
+    # deal with subject protocol
+    if not sub.protocol:
+        # if i gave a protocol name, add that
+        if protocol:
+            protocol_name_requested = protocol
+            protocol_requested = get_protocol_from_name(protocol_name_requested) # requested protocol
+            sub.add_protocol(protocol_requested)
+        # else add the demo protocol
+        else:
+            sub.add_protocol(DemoGratingsProtocol())
+    else:
+        if protocol:
+            protocol_name_requested = protocol
+            protocol_requested = get_protocol_from_name(protocol_name_requested) # requested protocol
+            if sub.protocol.name==protocol_requested.name:
+                pass
+            else:
+                sub.replace_protocol(protocol_requested)
     stn._stand_alone = True
     stn.add_subject(sub)
     
-    # find protocol and and training step num of subject being run.
+
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
     # run do_trials on station
     stn.do_trials()
@@ -90,7 +115,7 @@ if __name__ == '__main__':
 
     subject_id = 'demo1'
     bserver_path = None
-    protocol = DemoGratingsProtocol()
+    protocol = None
 
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time
@@ -114,6 +139,6 @@ if __name__ == '__main__':
         if added:
             print('added ::',which_added)
             added = False
-    print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol.name))
+    print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol))
     stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)
 
