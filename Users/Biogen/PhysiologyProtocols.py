@@ -23,7 +23,7 @@ def get_orientation_tuning_protocol():
                            durations=[2.],
                            radii=[400],
                            drift_frequencies=[2.],
-                           iti=1., itl=0.5)
+                           iti=1., itl=0.5),
     session_manager=NoTimeOff(),
     criterion=RepeatIndefinitely(),
     )]
@@ -38,9 +38,9 @@ def get_short_duration_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
-                                              iti=1., itl=0.5)
+                                              iti=1., itl=0.5),
                         session_manager=NoTimeOff(),
-                        criterion=NumTrialsDoneCriterion(200))
+                        criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
     ts2 = TrainingStep(name='short_duration_pm45deg_8phases',
                        trial_manager=Gratings(name='phys_or_tuning_trial_manager',
                                               deg_per_cycs=[0.1],
@@ -48,14 +48,14 @@ def get_short_duration_protocol():
                                               contrasts=[1.,0.15],
                                               durations=[0.05,0.1,0.15,0.2],
                                               radii=[400],
-                                              iti=1., itl=0.5)
+                                              iti=1., itl=0.5),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())
     training_steps = [ts1,ts2]
     return StartsAtOneProtocol(training_steps=training_steps, name='short_duration_protocol_biogen_08292018')
 
-def get_phys_protocol_biogen(name='orientation_tuning'):
-    if name=='orientation_tuning':
+def get_phys_protocol_biogen(name='orientation_tuning_biogen_08292018'):
+    if name=='orientation_tuning_biogen_08292018':
         return get_orientation_tuning_protocol()
-    elif name=='short_duration':
+    elif name=='short_duration_biogen_08292018':
         return get_short_duration_protocol()

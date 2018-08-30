@@ -146,6 +146,16 @@ class StartsAtOneProtocol(SimpleProtocol):
         if compiled_record['session_number'][-1] < trial_record['session_number']:
             self.current_step = 0
         return self.training_steps[self.current_step]
+
+    def graduate(self, safe=False):
+        self.current_step += 1
+        if safe and self.current_step == self.num_steps():
+            self.current_step -= 1
+
+    def fallback(self, safe=False):
+        self.current_step -= 1
+        if safe and self.current_step < 0:
+            self.current_step -= 0
         
 
 class SequentialProtocol(SimpleProtocol):
@@ -245,7 +255,7 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
                                # ), 
         session_manager=NoTimeOff(), 
         criterion=RepeatIndefinitely())]
-        super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
+        super(DemoAFCGratingsProtocol,self).__init__(training_steps, name=name)
 
         
 class DemoNoStimulusProtocol(SimpleProtocol):
@@ -257,3 +267,10 @@ class DemoNoStimulusProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')
         name = 'DemoNoStimulusProtocol'
         
+
+if __name__=='__main__':
+    p1 = DemoAFCGratingsProtocol()
+    if isinstance(p1,Protocol):
+        print('is instance')
+    else:
+        print('not instance')

@@ -93,10 +93,10 @@ class Subject(object):
         trial_record['protocol_name'] = self.protocol.name
         trial_record['protocol_version_number'] = self.protocol.ver.__str__()
         trial_record['current_step'] = self.protocol.current_step
-        trial_record['current_step_name'] = self.protocol.step().name
+        trial_record['current_step_name'] = self.protocol.step(compiled_record=compiled_record,trial_record=trial_record).name
         trial_record['num_steps'] = self.protocol.num_steps()
 
-        current_step = self.protocol.step()
+        current_step = self.protocol.step(compiled_record=compiled_record,trial_record=trial_record)
         trial_record,quit = current_step.do_trial(subject=self, station=station, trial_record=trial_record, compiled_record=compiled_record,quit = quit)
         if trial_record['graduate']:
             trial_record['criterion_met'] = True
@@ -337,7 +337,7 @@ class DefaultHuman(Human):
         super(DefaultHuman, self).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
                                           anonymize=False, gender='Unknown')
 
-def get_subject(in):
+def get_subject(inp):
     """
         GET_SUBJECT( {'species':'Mouse',
                       'subject_id':'demo1',
@@ -349,20 +349,20 @@ def get_subject(in):
                       'timeout': 2000,
                       }
     """
-    if in['species']=='Mouse':
+    if inp['species']=='Mouse':
         OBJ = Mouse
-    elif: in['species']=='Rat':
+    elif inp['species']=='Rat':
         OBJ = Rat
     else:
         NotImplementedError('get_subject() assumes you are creating a mouse or a rat')
 
-    return OBJ(subject_id = in['subject_id'],
-               gender = in['gender']
-               birth_date = in['birth_date']
-               strain = in['strain'],
-               gene_bkgd = in['gene_bkgd'],
-               reward = in['reward'],
-               timeout = in['timeout'],
+    return OBJ(subject_id = inp['subject_id'],
+               gender = inp['gender'],
+               birth_date = inp['birth_date'],
+               strain = inp['strain'],
+               gene_bkgd = inp['gene_bkgd'],
+               reward = inp['reward'],
+               timeout = inp['timeout'],
                )
 
 

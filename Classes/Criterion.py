@@ -29,17 +29,19 @@ class NumTrialsDoneCriterion(Criterion):
         self.num_trials_mode = num_trials_mode
 
     def check_criterion(self, compiled_record, **kwargs):
+        trial_number = numpy.asarray(compiled_record['trial_number'])
         current_step = numpy.asarray(compiled_record['current_step'])
         protocol_name = numpy.asarray(compiled_record['protocol_name'])
         protocol_ver = numpy.asarray(compiled_record['protocol_version_number'])
-        
         # filter out trial_numbers for current protocol_name and protocol_ver
-        current_step = current_step[protocol_name==protocol_name[-1] & protocol_ver==protocol_ver[-1]]
-        
+        current_step = current_step[numpy.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
+        trial_number = trial_number[numpy.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
         if self.num_trials_mode == 'consecutive':
-            temp = numpy.where(current_step==current_step[-1])
-            temp = temp[0][-1]+1
-            nT = numpy.size(current_step[temp:])
+            jumps = numpy.where(numpy.diff(trial_number)!=1) # jumps in trial number
+            if not jumps:
+                nT = 0
+            else:
+                nT = numpy.size(trial_number[jumps[0][-1]:]) -1
         else:  # 'global'
             nT = numpy.sum(current_step==current_step[-1])
         if nT > self.num_trials:
