@@ -226,8 +226,7 @@ class StandardVisionBehaviorStation(Station):
         pPort = self.initialize_parallel_port()
         if pPort:
             self.parallel_port = pPort
-            self.parallel_port_conn = psychopy.parallel.ParallelPort(address=0xD010)
-            self.close_all_valves()
+            self.parallel_port_conn = psychopy.parallel.ParallelPort(address='/dev/parport0')
             self.close_all_valves()
         else:
             self.parallel_port = None
@@ -239,11 +238,23 @@ class StandardVisionBehaviorStation(Station):
             pPort['right_valve'] = 2
             pPort['center_valve'] = 3
             pPort['left_valve'] = 4
-            pPort['valve_pins'] = (2, 3, 4)
+            pPort['valve_pins'] = [2, 3, 4]
             pPort['center_port'] = 10
             pPort['right_port'] = 12
             pPort['left_port'] = 13
-            pPort['port_pins'] = (12, 10, 13)
+            pPort['port_pins'] = [12, 10, 13]
+            pPort['index_pin'] = 8
+            pPort['frame_pin'] = 9
+            pPort['stim_pin'] = 6
+            pPort['led_0'] = 5
+            pPort['led_1'] = 7
+            return pPort
+        elif self.parallel_port == 'standardHeadfixBehaviorDefault':
+            pPort = {}
+            pPort['center_valve'] = 3
+            pPort['valve_pins'] = [3,]
+            pPort['center_port'] = 10
+            pPort['port_pins'] = [10,]
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
             pPort['stim_pin'] = 6
@@ -256,6 +267,7 @@ class StandardVisionBehaviorStation(Station):
     def initialize(self):
         self.initialize_display()
         self.initialize_sounds()
+        self.close_all_valves()
 
     def run(self):
         self.connect_to_server()
@@ -388,13 +400,37 @@ class StandardVisionBehaviorStation(Station):
     def set_stim_pin_on(self):
         stim_pin = self.parallel_port['stim_pin']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-2] = '1'
-        self.parallel_port_conn.setData(int(''.join(val),2))
+        val[stim_pin-3] = '1'
+        x = int(''.join(val),2)
+        print(x)
+        self.parallel_port_conn.setData(x)
 
     def set_stim_pin_off(self):
         stim_pin = self.parallel_port['stim_pin']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-2] = '0'
+        val[stim_pin-3] = '0'
+        x = int(''.join(val),2)
+        print(x)
+        self.parallel_port_conn.setData(x)
+
+    def set_pin_on(self,pin):
+        if pin<2 or pin>9:
+            ValueError('Cannot deal with this')
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        print('pre_on::',val)
+        val[1-pin] = '1'
+        print('post_on::',val)
+        # print(val)
+        self.parallel_port_conn.setData(int(''.join(val),2))
+
+    def set_pin_off(self,pin):
+        if pin<2 or pin>9:
+            ValueError('Cannot deal with this')
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        print('pre_off::',val)
+        val[1-pin] = '0'
+        print('post_off::',val)
+        #print(''.join(val))
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def get_display_size(self):
@@ -519,37 +555,12 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
                  sound_on=False,
                  station_id= 0,
                  station_location=(0,0,0),
-                 parallel_port=None):
+                 parallel_port='standardHeadfixBehaviorDefault'):
         self.ver = Ver('0.0.1')
         super(StandardVisionHeadfixStation, self).__init__(station_location=station_location,
                                                            sound_on=sound_on,
                                                            station_id=station_id,
                                                            parallel_port=parallel_port)
-        self.parallel_port = parallel_port
-        pPort = self.initialize_parallel_port()
-        if pPort:
-            self.parallel_port = pPort
-            self.parallel_port_conn = psychopy.parallel.ParallelPort(address=0xD010)
-            self.close_all_valves()
-        else:
-            self.parallel_port = None
-            self.parallel_port_conn = None
-
-    def initialize_parallel_port(self):
-        if self.parallel_port == 'standardHeadfixBehaviorDefault':
-            pPort = {}
-            pPort['center_valve'] = 3
-            pPort['valve_pins'] = (3)
-            pPort['center_port'] = 10
-            pPort['port_pins'] = (10)
-            pPort['index_pin'] = 8
-            pPort['frame_pin'] = 9
-            pPort['stim_pin'] = 6
-            pPort['led_0'] = 5
-            pPort['led_1'] = 7
-            return pPort
-        else:
-            return None # need to write code that checks if allowable
 
     def initialize_sounds(self):
         from psychopy import prefs
@@ -590,6 +601,38 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
 
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+
+    def read_port(self):
+        out = self.parallel_port_conn.readPin(self.parallel_port['center_port'])
+        return out
+
+    def open_valve(self):
+        valve_pin = self.parallel_port['center_valve']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[valve_pin-2] = '1'
+        self.parallel_port_conn.setData(int(''.join(val),2))
+
+    def close_valve(self, valve):
+        valve_pin = self.parallel_port['center_valve']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[valve_pin-2] = '0'
+        self.parallel_port_conn.setData(int(''.join(val),2))
+
+    def set_stim_pin_on(self):
+        stim_pin = self.parallel_port['stim_pin']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[stim_pin-2] = '1'
+        x = int(''.join(val),2)
+        print(x)
+        self.parallel_port_conn.setData(x)
+
+    def set_stim_pin_off(self):
+        stim_pin = self.parallel_port['stim_pin']
+        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
+        val[stim_pin-2] = '0'
+        x = int(''.join(val),2)
+        print(x)
+        self.parallel_port_conn.setData(x)
 
 
 class StandardKeyboardStation(StandardVisionBehaviorStation):
@@ -667,7 +710,11 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
-    st = StandardVisionHeadfixStation()
-    st.initialize_sounds()
-
-    st._sounds['trial_sound'].play()
+    st = StandardVisionBehaviorStation()
+    import time
+    for i in range(1,100):
+        print(i)
+        st.set_pin_on(3)
+        time.sleep(1.)
+        st.set_pin_off(3)
+        time.sleep(1.)
