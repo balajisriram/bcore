@@ -17,6 +17,7 @@ from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboard
 
 # User specific protocols
 from BCore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
+from BCore.Users.Biogen.BehaviorProtocols import get_behavior_protocol_biogen
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -31,6 +32,8 @@ SERVER_PORT = 12345
 def get_protocol_from_name(name):
     if name in ['orientation_tuning_biogen_08292018','short_duration_biogen_08292018']:
         return get_phys_protocol_biogen(name)
+    elif name in ['lick_for_reward_biogen_09142018']:
+        return get_behavior_protocol_biogen(name)
     else:
         raise ValueError('unknown protocol name')
 
@@ -68,10 +71,10 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
     if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
 
     b_server = load_bserver(bserver_path, subject_id)
-    
+
     # add subject to station
     stn = b_server.stations[0]
-    
+
     subjects = b_server.get_subject_ids()
     found = False
     for i,subj in enumerate(subjects):
@@ -79,7 +82,7 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
             found = True
             sub = b_server.subjects[i]
             break
-    
+
     # deal with subject protocol
     if not sub.protocol:
         # if i gave a protocol name, add that
@@ -100,7 +103,7 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
                 sub.replace_protocol(protocol_requested)
     stn._stand_alone = True
     stn.add_subject(sub)
-    
+
 
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
     # run do_trials on station
@@ -141,4 +144,3 @@ if __name__ == '__main__':
             added = False
     print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol))
     stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)
-
