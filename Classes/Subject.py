@@ -16,8 +16,13 @@ __status__ = "Production"
 class Subject(object):
     """
         SUBJECT contains all relevant details about the subject.
-                subjectID               : string identifier
+                subject_id              : string identifier
                 protocol                : protocol object
+                session_manager         : session manager
+                creation_time           : time
+                iacuc_protocol_id      : string Identifier
+        Changes::
+            Ver 0.0.2 - Added iacuc_protocol_id to the object
     """
     def __init__(self, subject_id, **kwargs):
         """
@@ -26,11 +31,12 @@ class Subject(object):
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        self.ver = Ver('0.0.1')
+        self.ver = Ver('0.0.2')
         self.subject_id = subject_id
         self.protocol = []
         self.session_manager = []
         self.creation_date = time.time()
+        self.iacuc_protocol_id = ''
         if 'reward' in kwargs:
             self.reward = kwargs['reward']
         else:
@@ -39,6 +45,8 @@ class Subject(object):
             self.timeout = kwargs['timeout']
         else:
             self.timeout = 0
+        if 'iacuc_protocol_id' in kwargs:
+            self.iacuc_protocol_id = kwargs['iacuc_protocol_id']
 
     def _clean(self):
         pass
@@ -84,11 +92,11 @@ class Subject(object):
 
         # new consideration in  protocol and training step
         graduate = False
-        
+
         # some basic info about the subject
         trial_record['subject_id'] = self.subject_id
         trial_record['subject_version_number'] = self.ver.__str__()
-        
+
         # figure out the protocol, and the trainingStep details
         trial_record['protocol_name'] = self.protocol.name
         trial_record['protocol_version_number'] = self.protocol.ver.__str__()
@@ -103,7 +111,7 @@ class Subject(object):
             self.protocol.graduate()
         else:
             trial_record['criterion_met'] = False
-            
+
         return trial_record, quit
 
     def load_compiled_records(self):
@@ -175,7 +183,7 @@ class Mouse(Subject):
 
     def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         self.ver = Ver('0.0.1')
-        
+
         super(Mouse, self).__init__(subject_id , **kwargs)
         self.gender = gender
         self.birth_date = birth_date
@@ -221,7 +229,7 @@ class Rat(Subject):
 
     def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
         self.ver = Ver('0.0.1')
-        
+
         super(Rat, self).__init__(subject_id, **kwargs)
         self.gender = gender
         self.birth_date = birth_date
@@ -249,7 +257,7 @@ class DefaultRat(Rat):
 
     def __init__(self,subject_id='demoRat'):
         self.ver = Ver('0.0.1')
-        
+
         super(DefaultRat, self).__init__(subject_id=subject_id,gender='Unknown',
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
@@ -263,7 +271,7 @@ class VirtualSubject(Subject):
 
     def __init__(self, subject_id, **kwargs):
         self.ver = Ver('0.0.1')
-        
+
         super(VirtualSubject, self).__init__(subject_id, **kwargs)
 
     def __eq__(self, other):
@@ -286,7 +294,7 @@ class DefaultVirtual(VirtualSubject):
 
     def __init__(self,subject_id='demo_virtual',**kwargs):
         self.ver = Ver('0.0.1')
-        
+
         super(DefaultVirtual, self).__init__(subject_id, **kwargs)
 
 
@@ -304,7 +312,7 @@ class Human(Subject):
 
     def __init__(self, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
         self.ver = Ver('0.0.1')
-        
+
         super(Human, self).__init__(subject_id, **kwargs)
         self.gender = gender
         self.birth_date = birth_date

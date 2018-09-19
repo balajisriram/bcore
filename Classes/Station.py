@@ -8,7 +8,7 @@ import numpy
 
 from .Hardware.Displays import StandardDisplay
 from .. import get_base_directory, get_ip_addr
-from uuid import getnode
+from BCore import get_mac_address
 from verlib import NormalizedVersion as Ver
 
 __author__ = "Balaji Sriram"
@@ -93,7 +93,7 @@ class Station(object):
         self.station_location = station_location
 
         self._setup_paths()
-        self.mac_address = getnode()
+        self.mac_address = get_mac_address()
         self.ip_address = get_ip_addr()
         self.port = 5005  # standard for all stations.
 
@@ -364,7 +364,7 @@ class StandardVisionBehaviorStation(Station):
     def close_all_valves(self):
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
         for valve in self.parallel_port['valve_pins']:
-            val[valve-2] = '0'
+            val[1-valve] = '0'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def read_ports(self):
@@ -375,62 +375,44 @@ class StandardVisionBehaviorStation(Station):
 
     def open_valve(self, valve):
         valve_pin = self.parallel_port[valve]
-        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[valve_pin-2] = '1'
-        self.parallel_port_conn.setData(int(''.join(val),2))
+        self.set_pin_on(valve_pin)
 
     def close_valve(self, valve):
         valve_pin = self.parallel_port[valve]
-        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[valve_pin-2] = '0'
-        self.parallel_port_conn.setData(int(''.join(val),2))
+        self.set_pin_off(valve_pin)
 
     def flush_valves(self, dur=1):
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
         for valve in self.parallel_port['valve_pins']:
-            val[valve-2] = '1'
+            val[1-valve] = '1'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
         time.sleep(dur)
 
         for valve in self.parallel_port['valve_pins']:
-            val[valve-2] = '0'
+            val[1-valve] = '0'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def set_stim_pin_on(self):
         stim_pin = self.parallel_port['stim_pin']
-        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-3] = '1'
-        x = int(''.join(val),2)
-        print(x)
-        self.parallel_port_conn.setData(x)
+        self.set_pin_on(stim_pin)
 
     def set_stim_pin_off(self):
         stim_pin = self.parallel_port['stim_pin']
-        val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-3] = '0'
-        x = int(''.join(val),2)
-        print(x)
-        self.parallel_port_conn.setData(x)
+        self.set_pin_off(stim_pin)
 
     def set_pin_on(self,pin):
         if pin<2 or pin>9:
             ValueError('Cannot deal with this')
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        print('pre_on::',val)
         val[1-pin] = '1'
-        print('post_on::',val)
-        # print(val)
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def set_pin_off(self,pin):
         if pin<2 or pin>9:
             ValueError('Cannot deal with this')
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        print('pre_off::',val)
         val[1-pin] = '0'
-        print('post_off::',val)
-        #print(''.join(val))
         self.parallel_port_conn.setData(int(''.join(val),2))
 
     def get_display_size(self):

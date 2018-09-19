@@ -45,7 +45,8 @@ def load_bserver(path, subject_id):
         b_server._setup_paths()
         b_server.save()
     else:
-        b_server = BServerLocal.load_server(bserver_path)  # load the server from path
+        b_server = BServerLocal.load_server(path)  # load the server from path
+
 
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
@@ -56,7 +57,7 @@ def load_bserver(path, subject_id):
 
     if not b_server.get_station_ids():
         print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
-        stn  = StandardVisionBehaviorStation(sound_on=True, station_id=0, station_location=(0, 0, 0))
+        stn  = StandardVisionHeadfixStation(sound_on=True, station_id=0, station_location=(0, 0, 0))
         b_server.add_station(stn)
     elif len(b_server.get_station_ids())>1:
         RuntimeError('STANDALONERUN:LOAD_BSERVER:too many stations for server')
@@ -64,6 +65,7 @@ def load_bserver(path, subject_id):
         print("STANDALONERUN:LOAD_BSERVER:Will run on station %r" % b_server.get_station_ids())
 
     return b_server
+
 
 
 def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
