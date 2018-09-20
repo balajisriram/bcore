@@ -432,6 +432,7 @@ class StandardVisionBehaviorStation(Station):
         self._session = None
         self._server_conn = None
         self._parallelport_conn = None
+        self._clocks = None
 
     def do_trials(self, **kwargs):
         # first step in the running of trials. called directly by station

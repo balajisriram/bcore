@@ -267,19 +267,43 @@ class LickForReward(object):
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
         station._key_pressed = []
-        trial_record['enter_trial_loop'] = station._clocks['trial_clock'].getTime()
         trial_record['correct'] = None
+
+        current_phase_num = 0
+
+        # was on will be used to check for new responses
+        was_on = {'L':False, 'C': False, 'R':False}
+
+        trial_clock = station._clocks['trial_clock']
+        trial_clock.reset()
+
+        trial_done = False
+        error_out = False
+
+        trial_record['errored_out'] = False
+        trial_record['manual_quit'] = False
+
 
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
 
-        for phase in self._Phases:
+        trial_record['phase_data'] = []
+        ### loop into trial phases
+        while not trial_done and not error_out and not quit:
+            # current_phase_num determines the phase
+            phase = self._Phases[current_phase_num]
+
+            # collect details about the phase
             frames_until_transition = phase.frames_until_transition
-            phase_done = False
-            sound = phase.sounds_played
             stim = phase.stimulus
             stim_details = phase.stimulus_details
+            transition = phase.transitions
+            if not transition:
+                is_last_phase = True
+            else:
+                is_last_phase = False
+            auto_trigger = phase.auto_trigger
             if phase.sounds_played:
                 sound = phase.sounds_played[0]
                 sound_duration = phase.sounds_played[1]
@@ -290,7 +314,18 @@ class LickForReward(object):
             else:
                 sound = None
 
-            while not phase_done:
+            # save relevant data into phase_data
+            phase_data = {}
+            phase_data['phase_name'] = phase.phase_name
+            phase_data['phase_number'] = phase.phase_number
+            phase_data['enter_time'] = trial_clock.getTime()
+            phase_data['response'] = []
+            phase_data['response_time'] = []
+
+            # loop into phase
+            phase_done = False
+            trial_record = phase.on_enter(trial_record=trial_record, station=station)
+            while not phase_done and not error_out and not quit:
                 # deal with sounds
                 if sound:
                     if not sound_started:
@@ -308,20 +343,62 @@ class LickForReward(object):
                     phase.stimulus_update_fn(stim,stim_details)
                 station._window.flip()
 
-                # update the frames
-                frames_until_transition = frames_until_transition-1
-                if frames_until_transition==0: phase_done = True
-                quit = quit or station.check_manual_quit()
+                # look for responses
+                response_led_to_transition = False
+                response = station.read_ports()
+                if len(response)>1:
+                    error_out = True
+                    trial_record['errored_out'] = True
+                elif len(response)==1:
+                    response = response[0]
+                    try:
+                        current_phase_num = transition[response] - 1
+                        response_led_to_transition = True
+                    except KeyError:
+                        response_led_to_transition = False # that phase did not have a transition for that response
+                    except TypeError:
+                        assert is_last_phase, 'No reason why it should come here otherwise'
+                    finally:
+                        # logit but only if was_on wasnt already on
+                        if not was_on[response]:
+                            phase_data['response'].append(response)
+                            phase_data['response_time'].append(trial_clock.getTime())
+                    was_on[response] = True # flip was on to true after we used it to check for new events
+                else:
+                    pass
 
+                # update the frames_until_transition and check if the phase is done
+                # phase is done when there are no more frames in the phase or is we flipped due to transition
+                # however we can stop playing the phase because we manual_quit or because we errored out
+                frames_until_transition = frames_until_transition-1
+                frames_led_to_transition = False
+                if frames_until_transition==0:
+                    frames_led_to_transition = True
+                    if transition: current_phase_num = transition[None] - 1
+                    else: current_phase_num = None # the last phase has no
+
+                if frames_led_to_transition or response_led_to_transition:
+                    phase_done = True
+                manual_quit = station.check_manual_quit()
+                if manual_quit:
+                    trial_record['manual_quit'] = True
+                    trial_record['correct'] = None
+                quit = quit or manual_quit
+            trial_record = phase.on_exit(trial_record=trial_record, station=station)
+            trial_record['phase_data'].append(phase_data)
+
+            # when do we quit the trial? trial_done only when last phjase
+            # but we can exit if manual_quit or errored out
+            if is_last_phase: trial_done = True
         return trial_record,quit
 
     @staticmethod
     def trial_compiler(compiled_record,trial_record):
-        print('at Gratings trial_compiler')
+        print('at LickForReward trial_compiler')
 
     @staticmethod
     def station_ok_for_tm(station):
-        if station.__class__.__name__ in ['StandardVisionBehaviorStation','StandardVisionHeadfixStation','StandardKeyboardStation']:
+        if station.__class__.__name__ in ['StandardVisionHeadfixStation','StandardKeyboardStation']:
             return True
         else:
             return False
