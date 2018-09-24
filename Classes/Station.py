@@ -136,6 +136,7 @@ class Station(object):
         self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
 
         self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+        self._sounds['reward_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         # try_again_array = numpy.random.randn(nSamples)
@@ -686,6 +687,9 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
 
     def flush_valves(self, dur=1):
         pass
+
+    def close_all_valves(self):
+        print('Closing all valves')
 
 
 def make_standard_behavior_station():

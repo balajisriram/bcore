@@ -1,7 +1,8 @@
 from verlib import NormalizedVersion as Ver
-from .PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
-from ..ReinforcementManager import ConstantReinforcement,NoReinforcement
-from ..Station import StandardKeyboardStation
+from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
+from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
+from BCore.Classes.Station import StandardKeyboardStation
+from BCore.Classes.Subject import DefaultVirtual
 import psychopy
 import random
 import numpy
@@ -74,10 +75,10 @@ class LickForReward(object):
             ValueError('LickForReward::input values are bad')
 
     def verify_params_ok(self):
-        assert is_boolean(self.trial_start_sound_on),'trial_start_sound_on needs to be boolean'
-        assert is_boolean(self.punish_delay_response),'punish_delay_response needs to be boolean'
-        assert is_boolean(self.auto_reward),'auto_reward needs to be boolean'
-        assert is_boolean(self.punish_misses),'punish_misses needs to be boolean'
+        assert isinstance(self.trial_start_sound_on,bool),'trial_start_sound_on needs to be boolean'
+        assert isinstance(self.punish_delay_response,bool),'punish_delay_response needs to be boolean'
+        assert isinstance(self.auto_reward,bool),'auto_reward needs to be boolean'
+        assert isinstance(self.punish_misses,bool),'punish_misses needs to be boolean'
 
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distributoin are you using?'
 
@@ -110,26 +111,28 @@ class LickForReward(object):
         Hz = 60
         return (H,W,Hz)
 
-    def calc_stim(self, trial_records, station, **kwargs):
+    def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
+        port_details = {}
         port_details['target_ports'] = 'center_port'
         port_details['distractor_ports'] = None
 
         delay_frame_num = numpy.round(self.sample_delay()*Hz)
         response_frame_num = numpy.round(self.response_duration)
 
-        stimulus['delay_distribution'] = delay_distribution
+        stimulus = {}
+        stimulus['delay_distribution'] = self.delay_distribution
         stimulus['delay_frame_num'] = delay_frame_num
         stimulus['response_frame_num'] = response_frame_num
-        stimulus['trial_start_sound_on'] = trial_start_sound_on
-        stimulus['punish_delay_response'] = punish_delay_response
-        stimulus['auto_reward'] = auto_reward
-        stimulus['punish_misses'] = punish_misses
+        stimulus['trial_start_sound_on'] = self.trial_start_sound_on
+        stimulus['punish_delay_response'] = self.punish_delay_response
+        stimulus['auto_reward'] = self.auto_reward
+        stimulus['punish_misses'] = self.punish_misses
 
         return stimulus,resolution,port_details,delay_frame_num,response_frame_num
 
-    def _setup_phases(self, trial_record, station, **kwargs):
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
         LickForReward:_setupPhases follows:
             1. Delay Phase with duration sampled from delay_distribution [trial start sound dependent on trial_start_sound_on; punishment dependent on punish_delay_response]
@@ -212,38 +215,43 @@ class LickForReward(object):
             phase_number=3,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=RandomSpurtsOfWater.do_nothing_to_stim,
+            stimulus_update_fn=LickForReward.do_nothing_to_stim,
             transitions=None,
             frames_until_transition=reward_size,
             auto_trigger=False,
             phase_type='inter-trial',
             phase_name='delay_phase',
             hz=hz,
-            sounds_played=(station._sounds['reward_sound'], ms_reward_sound/1000.)),
-            reward_valve='center_valve')
+            sounds_played=(station._sounds['reward_sound'], ms_reward_sound/1000.),
+            reward_valve='center_valve'))
 
         # punishment phase spec
         self._Phases.append(PunishmentPhaseSpec(
             phase_number=4,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=RandomSpurtsOfWater.do_nothing_to_stim,
+            stimulus_update_fn=LickForReward.do_nothing_to_stim,
             transitions=None,
             frames_until_transition=ms_penalty,
             auto_trigger=False,
             phase_type='inter-trial',
             phase_name='delay_phase',
             hz=hz,
-            sounds_played=(station._sounds['punishment_sound'], ms_penalty_sound/1000.)),
-            reward_valve='center_valve')
+            sounds_played=(station._sounds['punishment_sound'], ms_penalty_sound/1000.),
+            reward_valve='center_valve'))
 
     def _simulate(self):
         station = StandardKeyboardStation()
         station.initialize()
+        station._clocks = {}
+        station._clocks['trial_clock'] = psychopy.core.Clock()
         trial_record = {}
+        trial_record['trial_number'] = 0
         quit = False
-        while not Quit:
-            trial_record,quit = self.do_trial(trial_record=trial_record,station=station,subject=None,compiled_record=None)
+        subject = DefaultVirtual()
+        while not quit:
+            station._clocks['trial_clock'].reset()
+            trial_record,quit = self.do_trial(trial_record=trial_record,station=station,subject=subject,compiled_record=None,quit=quit)
         station.close_window()
 
     def decache(self):
@@ -256,7 +264,7 @@ class LickForReward(object):
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
-
+        did_nothing = ()
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
             quit = True
@@ -265,7 +273,7 @@ class LickForReward(object):
             return trial_record,quit
 
         ## _setup_phases
-        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
+        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record,subject=subject)
         station._key_pressed = []
         trial_record['correct'] = None
 
@@ -374,7 +382,7 @@ class LickForReward(object):
                 frames_led_to_transition = False
                 if frames_until_transition==0:
                     frames_led_to_transition = True
-                    if transition: current_phase_num = transition[None] - 1
+                    if transition: current_phase_num = transition[did_nothing] - 1
                     else: current_phase_num = None # the last phase has no
 
                 if frames_led_to_transition or response_led_to_transition:
