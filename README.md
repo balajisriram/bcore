@@ -6,7 +6,7 @@ BCore is a Behavior training library built originally for training rodents but i
 ## Starting with BCore
  * add BCore to modules and add modules to PYTHONPATH
 
-## Package requirements
+## Package requirements (THIS LIST IS DEPRECATED)
 For specific requirements please look at package.requirements
 requires :
  - pyopengl
