@@ -24,7 +24,7 @@ def get_lick_for_reward_protocol():
                                                  punish_delay_response = False,
                                                  response_duration = 1.,
                                                  auto_reward = True,
-                                                 punish_misses = False,)
+                                                 punish_misses = False,),
                                     session_manager=NoTimeOff(),
                                     criterion=NumTrialsDoneCriterion(num_trials=100, num_trials_mode='consecutive',)),
                       TrainingStep(name='lick_for_reward_no_delay_penalty_no_autoreward_no_miss_penalty',
@@ -35,7 +35,7 @@ def get_lick_for_reward_protocol():
                                                  punish_delay_response = False,
                                                  response_duration = 1.,
                                                  auto_reward = False,
-                                                 punish_misses = False,)
+                                                 punish_misses = False,),
                                     session_manager=NoTimeOff(),
                                     criterion=NumTrialsDoneCriterion(num_trials=500, num_trials_mode='consecutive',)),
                       TrainingStep(name='lick_for_reward_with_delay_penalty',
@@ -46,7 +46,7 @@ def get_lick_for_reward_protocol():
                                                  punish_delay_response = True,
                                                  response_duration = 1.,
                                                  auto_reward = False,
-                                                 punish_misses = False,)
+                                                 punish_misses = False,),
                                     session_manager=NoTimeOff(),
                                     criterion=PerformanceCriterion(num_trials_mode='consecutive',num_trials=200,pct_correct=0.8)),]
 

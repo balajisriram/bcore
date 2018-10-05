@@ -13,7 +13,7 @@ from BCore import get_base_directory, get_ip_addr
 from BCore.Classes.ClientAndServer.BServer import BServerLocal
 from BCore.Classes.Protocol import Protocol, DemoGratingsProtocol
 from BCore.Classes.Subject import DefaultVirtual
-from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation
+from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation,StandardVisionHeadfixStation
 
 # User specific protocols
 from BCore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
