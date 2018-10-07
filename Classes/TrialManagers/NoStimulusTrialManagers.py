@@ -411,6 +411,68 @@ class LickForReward(object):
         else:
             return False
 
+class RunForReward(object):
+    """
+        RUNFORREWARD defines a trial manager where rewards are provided for running
+        above a specified running speed for a specified duration. Requires:
+            reinforcement_manager: should define reward on a per-trial basis
+            run_duration_distribution: This is the duration to go-signal
+                                ('Constant',val)
+                                ('Uniform',[lo,hi])
+                                ('Gaussian',[mu,sd])
+                                ('FlatHazard',[pctile,val,fixed,max])
+            min_run_speed: integer between 0-255 sets the run speed on arduino
+    """
+    _ino_loaded = False
+
+    def __init__(self,
+                 name,
+                 reinforcement_manager=ConstantReinforcement(),
+                 min_run_speed = 50, # sets_trigger on arduino
+                 run_duration_distribution = 2., # seconds
+                 **kwargs):
+        self.ver = Ver('0.0.1')
+        self.reinforcement_manager = reinforcement_manager
+        self.name = name
+        self.run_speed = run_speed
+        self.run_duration_distribution = delay_distribution
+
+        self.itl = (0.5, 0.5, 0.5,)
+
+        if not self.verify_params_ok():
+            ValueError('RunForReward::input values are bad')
+
+    def verify_params_ok(self):
+        assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distribution are you using?'
+
+    def load_ino(self):
+        if not self._ino_loaded:
+            ino = self.create_ino()
+            val = system(ino)
+        if val:self._ino_loaded = True
+
+    def sample_delay(self):
+        if self.delay_distribution[0]=='Constant':
+            return self.delay_distribution[1]
+        elif self.delay_distribution[0]=='Uniform':
+            lo = self.delay_distribution[1][0]
+            hi = self.delay_distribution[1][1]
+            return numpy.abs(numpy.random.uniform(low=lo,high=hi))
+        elif self.delay_distribution[0]=='Gaussian':
+            mu = self.delay_distribution[1][0]
+            sd = self.delay_distribution[1][1]
+            return numpy.abs(numpy.random.normal(loc=mu,scale=sd)) # returning absolute values
+        elif self.delay_distribution[0]=='FlatHazard':
+            pctile = self.delay_distribution[1][0]
+            val = self.delay_distribution[1][1]
+            fixed = self.delay_distribution[1][2]
+            max = self.delay_distribution[1][3]
+            p = -val/numpy.log(1-pctile)
+            delay = fixed+numpy.random.exponential(p)
+            if delay>max: delay=max
+            return delay
+
+
 if __name__=='__main__':
     LFR = LickForReward('DefaultLFR')
     LFR._simulate()
