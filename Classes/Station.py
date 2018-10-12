@@ -246,19 +246,20 @@ class StandardVisionBehaviorStation(Station):
             pPort['port_pins'] = [12, 10, 13]
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
-            pPort['stim_pin'] = 6
+            pPort['trial_pin'] = 6
             pPort['led_0'] = 5
             pPort['led_1'] = 7
             return pPort
         elif self.parallel_port == 'standardHeadfixBehaviorDefault':
             pPort = {}
-            pPort['center_valve'] = 3
+            pPort['reward_valve'] = 3
             pPort['valve_pins'] = [3,]
-            pPort['center_port'] = 10
+            pPort['response_port'] = 10
+            pPort['running_port'] = 13
             pPort['port_pins'] = [10,]
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
-            pPort['stim_pin'] = 6
+            pPort['trial_pin'] = 6
             pPort['led_0'] = 5
             pPort['led_1'] = 7
             return pPort
