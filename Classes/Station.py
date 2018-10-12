@@ -3,6 +3,7 @@ import psychopy
 import psychopy.event
 import psychopy.logging
 import psychopy.parallel
+import psychopy.visual
 psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy
 
@@ -235,6 +236,7 @@ class StandardVisionBehaviorStation(Station):
 
     def initialize_parallel_port(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
+            print('STANDARDVISIONBEHAVIORSTATION:INITIALIZE_PARALLEL_PORT::setting parallelport to standardVisionBehaviorDefault')
             pPort = {}
             pPort['right_valve'] = 2
             pPort['center_valve'] = 3
@@ -251,6 +253,7 @@ class StandardVisionBehaviorStation(Station):
             pPort['led_1'] = 7
             return pPort
         elif self.parallel_port == 'standardHeadfixBehaviorDefault':
+            print('STANDARDVISIONBEHAVIORSTATION:INITIALIZE_PARALLEL_PORT::setting parallelport to standardVisionHeadfixDefault')
             pPort = {}
             pPort['reward_valve'] = 3
             pPort['valve_pins'] = [3,]
@@ -289,7 +292,6 @@ class StandardVisionBehaviorStation(Station):
                 trial_num = self._session['trial_num']
 
     def initialize_display(self, display = StandardDisplay()):
-        print(display)
         self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
 
@@ -313,12 +315,12 @@ class StandardVisionBehaviorStation(Station):
         self._server_conn.start()
         server_connection_details = self._server_conn.recvData()
         # use server_connection_details to connect to the BServer as a client
-        print('Closing connection as server...')
+        print('STANDARDVISIONBEHAVIORSTATION:CONNECT_TO_SERVER::Closing connection as server...')
         self._server_conn.stop()
         self._server_conn = BehaviorClientConnection(
             ipaddr=server_connection_details['ipaddr'],
             port=server_connection_details['port'])
-        print(('Starting connection as client...'))
+        print('STANDARDVISIONBEHAVIORSTATION:CONNECT_TO_SERVER::Starting connection as client...')
         self._server_conn.start()
 
     @property
@@ -395,13 +397,13 @@ class StandardVisionBehaviorStation(Station):
             val[1-valve] = '0'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
-    def set_stim_pin_on(self):
-        stim_pin = self.parallel_port['stim_pin']
-        self.set_pin_on(stim_pin)
+    def set_index_pin_on(self):
+        index = self.parallel_port['index_pin']
+        self.set_pin_on(index_pin)
 
-    def set_stim_pin_off(self):
-        stim_pin = self.parallel_port['stim_pin']
-        self.set_pin_off(stim_pin)
+    def set_index_pin_off(self):
+        index_pin = self.parallel_port['index_pin']
+        self.set_pin_off(index_pin)
 
     def set_pin_on(self,pin):
         if pin<2 or pin>9:
@@ -441,6 +443,9 @@ class StandardVisionBehaviorStation(Station):
         # or through the BServer
         if __debug__:
             pass
+        print(self.parallel_port_conn)
+        print(self.parallel_port)
+        print(self.parallel_port_conn.readData())
         self.initialize()
         # get the compiled_records for the animal. Compiled records will contain all the information that will be used in
         # the course of running the experiment. If some stimulus parameter for a given trial is dependent on something in
@@ -483,7 +488,7 @@ class StandardVisionBehaviorStation(Station):
         self.subject.save_compiled_records(compiled_record)
 
     def close_session(self, **kwargs):
-        print("Closing Session")
+        print("STANDARDVISIONBEHAVIORSTATION:CLOSE_SESSION::Closing Session")
 
     def close_window(self):
         self._window.close()
@@ -592,32 +597,33 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         return out
 
     def open_valve(self):
-        valve_pin = self.parallel_port['center_valve']
+        valve_pin = self.parallel_port['reward_valve']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
         val[valve_pin-2] = '1'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
-    def close_valve(self, valve):
-        valve_pin = self.parallel_port['center_valve']
+    def close_valve(self):
+        valve_pin = self.parallel_port['reward_valve']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
         val[valve_pin-2] = '0'
         self.parallel_port_conn.setData(int(''.join(val),2))
 
-    def set_stim_pin_on(self):
-        stim_pin = self.parallel_port['stim_pin']
+    def set_index_pin_on(self):
+        index_pin = self.parallel_port['index_pin']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-2] = '1'
+        val[index_pin-2] = '1'
         x = int(''.join(val),2)
-        print(x)
         self.parallel_port_conn.setData(x)
 
-    def set_stim_pin_off(self):
-        stim_pin = self.parallel_port['stim_pin']
+    def set_index_pin_off(self):
+        index_pin = self.parallel_port['index_pin']
         val = list('{0:08b}'.format(self.parallel_port_conn.readData()))
-        val[stim_pin-2] = '0'
+        val[index_pin-2] = '0'
         x = int(''.join(val),2)
-        print(x)
         self.parallel_port_conn.setData(x)
+
+    def close_all_valves(self):
+        self.close_valve()
 
 
 class StandardKeyboardStation(StandardVisionBehaviorStation):
@@ -698,11 +704,13 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
-    st = StandardVisionBehaviorStation()
+    st = StandardVisionHeadfixStation()
+    st.initialize()
     import time
-    for i in range(1,100):
+    for i in range(1,10):
         print(i)
         st.set_pin_on(3)
         time.sleep(1.)
         st.set_pin_off(3)
         time.sleep(1.)
+    st.close_window()
