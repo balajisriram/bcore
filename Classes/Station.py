@@ -293,7 +293,7 @@ class StandardVisionBehaviorStation(Station):
         self._window.flip()
 
     def initialize_parallel_port(self):
-        self._parallel_port_conn = psychopy.parallel.Parallel(addess=self.parallel_port_address)
+        self._parallel_port_conn = psychopy.parallel.ParallelPort(address=self.parallel_port_address)
         self.close_all_valves()
 
     def connect_to_server(self):
