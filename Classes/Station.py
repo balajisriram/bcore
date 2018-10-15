@@ -7,8 +7,8 @@ import psychopy.visual
 psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy
 
-from .Hardware.Displays import StandardDisplay
-from .. import get_base_directory, get_ip_addr
+from BCore.Classes.Hardware.Displays import StandardDisplay
+from BCore import get_base_directory, get_ip_addr
 from BCore import get_mac_address
 from verlib import NormalizedVersion as Ver
 

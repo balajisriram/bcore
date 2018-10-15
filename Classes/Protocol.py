@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-from .Criterion import RepeatIndefinitely
-from .SessionManager import NoTimeOff
-from .TrialManagers.GratingsTrialManagers import Gratings,AFCGratings
-from .ReinforcementManager import NoReinforcement,ConstantReinforcement
+from BCore.Classes.Criterion import RepeatIndefinitely
+from BCore.Classes.SessionManager import NoTimeOff
+from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings,AFCGratings
+from BCore.Classes.ReinforcementManager import NoReinforcement,ConstantReinforcement
 import psychopy
 import traceback
 
@@ -48,16 +48,16 @@ class TrainingStep(object):
         trial_record['trial_manager_version_number'] = self.trial_manager.ver.__str__()
         trial_record['session_manager_version_number'] = self.session_manager.ver.__str__()
         trial_record['criterion_version_number'] = self.criterion.ver.__str__()
-        
-        trial_record['graduate'] = False        
+
+        trial_record['graduate'] = False
         try:
             keep_doing_trials, secs_remaining_to_state_flip = self.session_manager.check_schedule(subject=subject, trial_record=trial_record, compiled_record=compiled_record)
-            
+
             if keep_doing_trials:
                 trial_record,quit = self.trial_manager.do_trial(station=station,subject=subject,trial_record=trial_record,compiled_record=compiled_record,quit=quit)
             else:
                 psychopy.core.wait(secs_remaining_to_state_flip/2.,hogCPUperiod=0.1)
-            
+
             graduate = self.criterion.check_criterion(subject=subject, trial_record=trial_record, compiled_record=compiled_record, station = station)
             if graduate:
                 trial_record['graduate'] = True
@@ -66,7 +66,7 @@ class TrainingStep(object):
             print("type error: " + str(e))
             station.close_session() # should this be here?
         return trial_record,quit
-        
+
 ###########################################################################
 # PROTOCOLS
 ###########################################################################
@@ -156,7 +156,7 @@ class StartsAtOneProtocol(SimpleProtocol):
         self.current_step -= 1
         if safe and self.current_step < 0:
             self.current_step -= 0
-        
+
 
 class SequentialProtocol(SimpleProtocol):
     """
@@ -217,8 +217,8 @@ class DemoGratingsProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')  # Feb 28 2014
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
-        name="DemoGratingStepNum1", 
-        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+        name="DemoGratingStepNum1",
+        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees
@@ -227,8 +227,8 @@ class DemoGratingsProtocol(SimpleProtocol):
                                # radii=[400], #degrees
                                # iti=1, #seconds
                                # itl=0.5, #inter trial luminance,
-                               # ), 
-        session_manager=NoTimeOff(), 
+                               # ),
+        session_manager=NoTimeOff(),
         criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
 
@@ -242,8 +242,8 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')  # Feb 28 2014
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
-        name="DemoGratingStepNum1", 
-        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()), 
+        name="DemoGratingStepNum1",
+        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees
@@ -252,21 +252,21 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
                                # radii=[400], #degrees
                                # iti=1, #seconds
                                # itl=0.5, #inter trial luminance,
-                               # ), 
-        session_manager=NoTimeOff(), 
+                               # ),
+        session_manager=NoTimeOff(),
         criterion=RepeatIndefinitely())]
         super(DemoAFCGratingsProtocol,self).__init__(training_steps, name=name)
 
-        
+
 class DemoNoStimulusProtocol(SimpleProtocol):
     """
         DEMONOSTIMULUSPROTOCOL runs a simple RandomSpurtsOfWater stimulus
     """
-    
+
     def __init__(self):
         self.ver = Ver('0.0.1')
         name = 'DemoNoStimulusProtocol'
-        
+
 
 if __name__=='__main__':
     p1 = DemoAFCGratingsProtocol()

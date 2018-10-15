@@ -1,7 +1,7 @@
 from verlib import NormalizedVersion as Ver
-from .PhaseSpec import PhaseSpec,StimPhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
-from ..ReinforcementManager import ConstantReinforcement,NoReinforcement
-from ..Station import StandardKeyboardStation
+from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,StimPhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
+from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
+from BCore.Classes.Station import StandardKeyboardStation
 import psychopy
 import random
 import numpy
