@@ -5,7 +5,7 @@ from BCore.Classes.Station import StandardKeyboardStation
 from BCore.Classes.Subject import DefaultVirtual
 import psychopy
 import random
-import numpy
+import numpy as np
 import psychopy.visual,psychopy.core
 import pdb
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
@@ -90,18 +90,18 @@ class LickForReward(object):
         elif self.delay_distribution[0]=='Uniform':
             lo = self.delay_distribution[1][0]
             hi = self.delay_distribution[1][1]
-            return numpy.abs(numpy.random.uniform(low=lo,high=hi))
+            return np.abs(np.random.uniform(low=lo,high=hi))
         elif self.delay_distribution[0]=='Gaussian':
             mu = self.delay_distribution[1][0]
             sd = self.delay_distribution[1][1]
-            return numpy.abs(numpy.random.normal(loc=mu,scale=sd)) # returning absolute values
+            return np.abs(np.random.normal(loc=mu,scale=sd)) # returning absolute values
         elif self.delay_distribution[0]=='FlatHazard':
             pctile = self.delay_distribution[1][0]
             val = self.delay_distribution[1][1]
             fixed = self.delay_distribution[1][2]
             max = self.delay_distribution[1][3]
-            p = -val/numpy.log(1-pctile)
-            delay = fixed+numpy.random.exponential(p)
+            p = -val/np.log(1-pctile)
+            delay = fixed+np.random.exponential(p)
             if delay>max: delay=max
             return delay
 
@@ -118,8 +118,8 @@ class LickForReward(object):
         port_details['target_ports'] = 'center_port'
         port_details['distractor_ports'] = None
 
-        delay_frame_num = numpy.round(self.sample_delay()*Hz)
-        response_frame_num = numpy.round(self.response_duration)
+        delay_frame_num = np.round(self.sample_delay()*Hz)
+        response_frame_num = np.round(self.response_duration)
 
         stimulus = {}
         stimulus['delay_distribution'] = self.delay_distribution
@@ -143,8 +143,8 @@ class LickForReward(object):
         hz = resolution[2]
 
         reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
-        reward_size = numpy.round(reward_size/1000*hz)
-        ms_penalty = numpy.round(ms_penalty/1000*hz)
+        reward_size = np.round(reward_size/1000*hz)
+        ms_penalty = np.round(ms_penalty/1000*hz)
 
         self._Phases = []
         # Just display stim
@@ -457,18 +457,18 @@ class RunForReward(object):
         elif self.delay_distribution[0]=='Uniform':
             lo = self.delay_distribution[1][0]
             hi = self.delay_distribution[1][1]
-            return numpy.abs(numpy.random.uniform(low=lo,high=hi))
+            return np.abs(np.random.uniform(low=lo,high=hi))
         elif self.delay_distribution[0]=='Gaussian':
             mu = self.delay_distribution[1][0]
             sd = self.delay_distribution[1][1]
-            return numpy.abs(numpy.random.normal(loc=mu,scale=sd)) # returning absolute values
+            return np.abs(np.random.normal(loc=mu,scale=sd)) # returning absolute values
         elif self.delay_distribution[0]=='FlatHazard':
             pctile = self.delay_distribution[1][0]
             val = self.delay_distribution[1][1]
             fixed = self.delay_distribution[1][2]
             max = self.delay_distribution[1][3]
-            p = -val/numpy.log(1-pctile)
-            delay = fixed+numpy.random.exponential(p)
+            p = -val/np.log(1-pctile)
+            delay = fixed+np.random.exponential(p)
             if delay>max: delay=max
             return delay
 

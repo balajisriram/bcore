@@ -4,7 +4,7 @@ from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforce
 from BCore.Classes.Station import StandardKeyboardStation
 import psychopy
 import random
-import numpy
+import numpy as np
 import psychopy.visual,psychopy.core
 import pdb
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
@@ -50,7 +50,7 @@ class Gratings(object):
                  deg_per_cycs=[10], #degrees
                  orientations=[45], #degrees
                  drift_frequencies=[0], #hz
-                 phases=numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8,endpoint=True),
+                 phases=np.linspace(start=-np.pi,stop=np.pi,num=8,endpoint=True),
                  contrasts=[1],
                  durations=[1], #seconds
                  radii=[400], #degrees
@@ -71,10 +71,10 @@ class Gratings(object):
 
         self.iti = iti # inter trial interval (s)
 
-        if numpy.isscalar(itl):
-            self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
+        if np.isscalar(itl):
+            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
-            self.itl = numpy.asarray(itl) #itl as color
+            self.itl = np.asarray(itl) #itl as color
 
     def calc_stim(self, trial_record, station, **kwargs):
 
@@ -367,9 +367,9 @@ class AFCGratings(object):
     def __init__(self,
                  name = 'DemoAFCGratingsTrialManager',
                  deg_per_cycs = {'L':[10],'R':[10]},
-                 orientations = {'L':[-numpy.pi / 4], 'R':[numpy.pi / 4]},
+                 orientations = {'L':[-np.pi / 4], 'R':[np.pi / 4]},
                  drift_frequencies = {'L':[0],'R':[0]},
-                 phases = {'L':numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8,endpoint=True),'R':numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8, endpoint=True)},
+                 phases = {'L':np.linspace(start=-np.pi,stop=np.pi,num=8,endpoint=True),'R':np.linspace(start=-np.pi,stop=np.pi,num=8, endpoint=True)},
                  contrasts = {'L':[1],'R':[1]},
                  durations = {'L':[float('Inf')],'R':[float('Inf')]},
                  locations = {'L':[(0.5,0.5)],'R':[(0.5,0.5)]},
@@ -395,10 +395,10 @@ class AFCGratings(object):
 
         self.iti = iti # inter trial interval (s)
 
-        if numpy.isscalar(itl):
-            self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
+        if np.isscalar(itl):
+            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
-            self.itl = numpy.asarray(itl) #itl as color
+            self.itl = np.asarray(itl) #itl as color
 
         n_afc = len(deg_per_cycs)
         assert len(self.orientations)==n_afc,'orientations not same length as %r' % n_afc
@@ -594,9 +594,9 @@ class AFCGratings(object):
         resolution = (H,W,Hz)
         all_ports = ('L','C','R')
         request_port = 'C'
-        response_ports = tuple(numpy.setdiff1d(all_ports,request_port))
-        target_port = numpy.random.choice(response_ports)
-        distractor_port = tuple(numpy.setdiff1d(response_ports,target_port))
+        response_ports = tuple(np.setdiff1d(all_ports,request_port))
+        target_port = np.random.choice(response_ports)
+        distractor_port = tuple(np.setdiff1d(response_ports,target_port))
 
         distractor_port = distractor_port[0]
         # select from values
@@ -656,9 +656,9 @@ class AFCGratings(object):
         self._Phases = []
 
         reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
-        reward_size = numpy.round(reward_size/1000*60)
-        request_reward_size = numpy.round(request_reward_size/1000*60)
-        penalty_size = numpy.round(ms_penalty/1000*60)
+        reward_size = np.round(reward_size/1000*60)
+        request_reward_size = np.round(request_reward_size/1000*60)
+        penalty_size = np.round(ms_penalty/1000*60)
         if do_post_discrim_stim:
             self._Phases.append(PhaseSpec(
                 phase_number=1,
@@ -831,9 +831,9 @@ class GNGGratings(object):
     def __init__(self,
                  name = 'DemoAFCGratingsTrialManager',
                  deg_per_cycs = {'G':[10],'N':[10]},
-                 orientations = {'G':[-numpy.pi / 4], 'N':[numpy.pi / 4]},
+                 orientations = {'G':[-np.pi / 4], 'N':[np.pi / 4]},
                  drift_frequencies = {'G':[0],'N':[0]},
-                 phases = {'G':numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8,endpoint=True),'N':numpy.linspace(start=-numpy.pi,stop=numpy.pi,num=8, endpoint=True)},
+                 phases = {'G':np.linspace(start=-np.pi,stop=np.pi,num=8,endpoint=True),'N':np.linspace(start=-np.pi,stop=np.pi,num=8, endpoint=True)},
                  contrasts = {'G':[1],'N':[1]},
                  durations = {'G':[1.],'N':[1.]},
                  locations = {'G':[(0.5,0.5)],'N':[(0.5,0.5)]},
@@ -859,10 +859,10 @@ class GNGGratings(object):
 
         self.iti = iti # inter trial interval (s)
 
-        if numpy.isscalar(itl):
-            self.itl = itl*numpy.asarray([1,1,1]) # inter trial luminance as gray scale
+        if np.isscalar(itl):
+            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
-            self.itl = numpy.asarray(itl) #itl as color
+            self.itl = np.asarray(itl) #itl as color
 
         if do_combos:
             # if do_combos, don't have to worry about the lengths of each values
@@ -886,8 +886,8 @@ class GNGGratings(object):
             assert len(self.locations['N'])==num_options_N,'R locations not same length as deg_per_cycs'
             assert len(self.radii['N'])==num_options_N,'R radii not same length as deg_per_cycs'
 
-        assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['G'])>0), numpy.all(numpy.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
-        assert numpy.logical_and(numpy.all(numpy.asarray(self.durations['N'])>0), numpy.all(numpy.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
+        assert np.logical_and(np.all(np.asarray(self.durations['G'])>0), np.all(np.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
+        assert np.logical_and(np.all(np.asarray(self.durations['N'])>0), np.all(np.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
 
     @staticmethod
     def update_stimulus(stimulus,details):
@@ -1045,9 +1045,9 @@ class GNGGratings(object):
         resolution = (H,W,Hz)
         all_ports = ('L','C','R')
         request_port = 'C'
-        response_ports = tuple(numpy.setdiff1d(all_ports,request_port))
-        target_port = numpy.random.choice(response_ports)
-        distractor_port = tuple(numpy.setdiff1d(response_ports,target_port))
+        response_ports = tuple(np.setdiff1d(all_ports,request_port))
+        target_port = np.random.choice(response_ports)
+        distractor_port = tuple(np.setdiff1d(response_ports,target_port))
 
         distractor_port = distractor_port[0]
         # select from values
@@ -1107,9 +1107,9 @@ class GNGGratings(object):
         self._Phases = []
 
         reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
-        reward_size = numpy.round(reward_size/1000*60)
-        request_reward_size = numpy.round(request_reward_size/1000*60)
-        penalty_size = numpy.round(ms_penalty/1000*60)
+        reward_size = np.round(reward_size/1000*60)
+        request_reward_size = np.round(request_reward_size/1000*60)
+        penalty_size = np.round(ms_penalty/1000*60)
         if do_post_discrim_stim:
             self._Phases.append(PhaseSpec(
                 phase_number=1,

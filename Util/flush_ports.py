@@ -2,7 +2,7 @@ import psychopy
 from psychopy import parallel
 from datetime import datetime
 import time
-import numpy
+import numpy as np
 
 port = parallel.ParallelPort(address='/dev/parport0')
 

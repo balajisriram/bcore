@@ -5,7 +5,7 @@ import psychopy.logging
 import psychopy.parallel
 import psychopy.visual
 psychopy.logging.console.setLevel(psychopy.logging.WARNING)
-import numpy
+import numpy as np
 
 from BCore.Classes.Hardware.Displays import StandardDisplay
 from BCore import get_base_directory, get_ip_addr
@@ -130,7 +130,7 @@ class Station(object):
         sampleRate=44100
         secs=0.1
         nSamples = int(secs * sampleRate)
-        phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
+        phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
 
         self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1,hamming=True)
 
@@ -141,7 +141,7 @@ class Station(object):
         self._sounds['reward_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        # try_again_array = numpy.random.randn(nSamples)
+        # try_again_array = np.random.randn(nSamples)
         # try_again_array[try_again_array>1] = 1
         # try_again_array[try_again_array<-1] = -1
         # print(try_again_array.min())
@@ -341,7 +341,7 @@ class StandardVisionBehaviorStation(Station):
         self._session = value
 
     def get_ports(self):
-        return numpy.asarray(['left_port','center_port','rightt_port'])
+        return np.asarray(['left_port','center_port','rightt_port'])
 
     @property
     def num_ports(self):
@@ -560,21 +560,21 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         sampleRate=44100
         secs=1
         nSamples = int(secs * sampleRate)
-        phase = 2*numpy.pi*numpy.linspace(0.0, 1.0, nSamples)
+        phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
 
         f_keep_going = [300,600,1200,2400,4800,9600,19200]
-        val = numpy.full_like(phase,0.)
+        val = np.full_like(phase,0.)
         for f in f_keep_going:
-            val += numpy.sin(f*phase)
-        val = numpy.matlib.repmat(val,2,1)
+            val += np.sin(f*phase)
+        val = np.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['keep_going_sound'] = psychopy.sound.Sound(val,hamming=True)
 
         f_trial_start = [200,400,800,1600,3200,6400,12800]
-        val = numpy.full_like(phase,0.)
+        val = np.full_like(phase,0.)
         for f in f_trial_start:
-            val += numpy.sin(f*phase)
-        val = numpy.matlib.repmat(val,2,1)
+            val += np.sin(f*phase)
+        val = np.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
 
@@ -582,10 +582,10 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         self._sounds['stim_start_sound'] = self._sounds['trial_start_sound']
 
         f_correct_sound = [400,800,1600,3200,6400,12800]
-        val = numpy.full_like(phase,0.)
+        val = np.full_like(phase,0.)
         for f in f_correct_sound:
-            val += numpy.sin(f*phase)
-        val = numpy.matlib.repmat(val,2,1)
+            val += np.sin(f*phase)
+        val = np.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
 
@@ -662,23 +662,23 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
 
     def read_ports(self):
         key = psychopy.event.getKeys(keyList=['1','2','3','k'])
-        ports = numpy.asarray([False,False,False])
+        ports = np.asarray([False,False,False])
         if key:
             if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
         if 'k' in self._key_pressed and '1' in self._key_pressed:
-            ports = numpy.bitwise_or(ports,[True,False,False])
+            ports = np.bitwise_or(ports,[True,False,False])
             psychopy.event.clearEvents()
             print(self._key_pressed)
             self._key_pressed.remove('k')
             self._key_pressed.remove('1')
         if 'k' in self._key_pressed and '2' in self._key_pressed:
-            ports = numpy.bitwise_or(ports,[False,True,False])
+            ports = np.bitwise_or(ports,[False,True,False])
             psychopy.event.clearEvents()
             print(self._key_pressed)
             self._key_pressed.remove('k')
             self._key_pressed.remove('2')
         if 'k' in self._key_pressed and '3' in self._key_pressed:
-            ports = numpy.bitwise_or(ports,[False,False,True])
+            ports = np.bitwise_or(ports,[False,False,True])
             psychopy.event.clearEvents()
             print(self._key_pressed)
             self._key_pressed.remove('k')

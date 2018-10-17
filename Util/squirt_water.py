@@ -2,7 +2,7 @@ import psychopy
 from psychopy import parallel
 from datetime import datetime
 import time
-import numpy
+import numpy as np
 
 port = parallel.ParallelPort(address='/dev/parport0')
 
@@ -14,6 +14,6 @@ for i in range(300):
     print(i)
     m = 9
     sd = 5
-    time.sleep(numpy.abs(numpy.random.normal(loc=m,scale=sd)))
+    time.sleep(np.abs(np.random.normal(loc=m,scale=sd)))
 
 print(time.time()-start_time)
