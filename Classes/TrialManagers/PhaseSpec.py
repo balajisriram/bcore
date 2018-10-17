@@ -112,7 +112,7 @@ class StimPhaseSpec(PhaseSpec):
         return trial_record
 
     def on_exit(self,station,trial_record,**kwargs):
-        station.set_stim_pin_off()
+        station.set_index_pin_off()
         trial_record['stim_off_time'] = station._clocks['trial_clock'].getTime()
         return trial_record
 
