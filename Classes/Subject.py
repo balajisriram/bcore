@@ -48,6 +48,9 @@ class Subject(object):
         if 'iacuc_protocol_id' in kwargs:
             self.iacuc_protocol_id = kwargs['iacuc_protocol_id']
 
+    def __repr__(self):
+        return "Subject with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
+
     def _clean(self):
         pass
 
@@ -102,7 +105,7 @@ class Subject(object):
         trial_record['protocol_version_number'] = self.protocol.ver.__str__()
         trial_record['current_step'] = self.protocol.current_step
         trial_record['current_step_name'] = self.protocol.step(compiled_record=compiled_record,trial_record=trial_record).name
-        trial_record['num_steps'] = self.protocol.num_steps()
+        trial_record['num_steps'] = self.protocol.num_steps
 
         current_step = self.protocol.step(compiled_record=compiled_record,trial_record=trial_record)
         trial_record,quit = current_step.do_trial(subject=self, station=station, trial_record=trial_record, compiled_record=compiled_record,quit = quit)
@@ -191,6 +194,9 @@ class Mouse(Subject):
         self.gene_bkgd = gene_bkgd
         self.manipulation = []
 
+    def __repr__(self):
+        return "Mouse with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
+
     def __eq__(self, other):
         if isinstance(other, Mouse) and (self.subject_id == other.subject_id):
             return True
@@ -214,6 +220,10 @@ class DefaultMouse(Mouse):
         super(DefaultMouse, self).__init__(subject_id='demoMouse',gender='Unknown',
                                           birth_date='',strain='C57BL/6J',gene_bkgd='WT')
 
+    def __repr__(self):
+        return "DefaultMouse with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
+
+
 
 class Rat(Subject):
     """
@@ -236,6 +246,9 @@ class Rat(Subject):
         self.strain = strain
         self.gene_bkgd = gene_bkgd
         self.manipulation = []
+
+    def __repr__(self):
+        return "Rat with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
 
     def __eq__(self, other):
         if isinstance(other, Rat) and (self.subject_id == other.subject_id):
@@ -261,6 +274,9 @@ class DefaultRat(Rat):
         super(DefaultRat, self).__init__(subject_id=subject_id,gender='Unknown',
                                           birth_date='',strain='Long-Evans',gene_bkgd='WT')
 
+    def __repr__(self):
+        return "DefaultRat with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
+
 
 class VirtualSubject(Subject):
     """
@@ -273,6 +289,9 @@ class VirtualSubject(Subject):
         self.ver = Ver('0.0.1')
 
         super(VirtualSubject, self).__init__(subject_id, **kwargs)
+
+    def __repr__(self):
+        return "VirtualSubject with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
 
     def __eq__(self, other):
         if isinstance(other, VirtualSubject) and (self.subject_id == other.subject_id):
@@ -297,6 +316,9 @@ class DefaultVirtual(VirtualSubject):
 
         super(DefaultVirtual, self).__init__(subject_id, **kwargs)
 
+    def __repr__(self):
+        return "DefaultVirtual with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
+
 
 class Human(Subject):
     """
@@ -320,6 +342,9 @@ class Human(Subject):
         self.last_name = last_name
         self.initials = self.first_name[0] + '.' + self.last_name[0] + '.'
         self.anonymize = anonymize
+
+    def __repr__(self):
+        return "Human (%s), rewarded at %s ms and punishment at %s ms" % (self.initials, self.reward, self.timeout)
 
     def __eq__(self, other):
         if isinstance(other, Human) and (self.subject_id == other.subject_id):
@@ -372,7 +397,6 @@ def get_subject(inp):
                reward = inp['reward'],
                timeout = inp['timeout'],
                )
-
 
 
 if __name__ == '__main__':

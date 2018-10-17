@@ -99,6 +99,9 @@ class Station(object):
         self.ip_address = get_ip_addr()
         self.port = 5005  # standard for all stations.
 
+    def __repr__(self):
+        return "Station object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
+
     def register(self):
         #
         pass
@@ -229,6 +232,10 @@ class StandardVisionBehaviorStation(Station):
         self.parallel_port_address = parallel_port_address
         self.display = None
         self.parallel_port = self.get_parport_mappings()
+
+    def __repr__(self):
+        return "StandardVisionBehaviorStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
+
 
     def get_parport_mappings(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
@@ -552,6 +559,9 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
                                                            station_id=station_id,
                                                            parallel_port=parallel_port)
 
+    def __repr__(self):
+        return "StandardVisionHeadfixStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
+
     def initialize_sounds(self):
         from psychopy import prefs
         prefs.general['audioLib'] = ['sounddevice']
@@ -655,6 +665,10 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
         self.ver = Ver('0.0.1')
         super(StandardKeyboardStation, self).__init__(station_location=station_location,sound_on=sound_on, station_id = station_id, parallel_port=None)
         self.display = None
+
+    def __repr__(self):
+        return "StandardKeyboardStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
+
 
     @property
     def num_ports(self):

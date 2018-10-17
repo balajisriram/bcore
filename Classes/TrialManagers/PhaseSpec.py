@@ -60,6 +60,9 @@ class PhaseSpec(object):
         self.pins_to_trigger = pins_to_trigger
         self.sounds_played = sounds_played
 
+    def __repr__(self):
+        return "PhaseSpec object"
+
     def on_enter(self,trial_record, **kwargs):
         return trial_record
 
@@ -99,6 +102,9 @@ class StimPhaseSpec(PhaseSpec):
                                              hz = hz,
                                              sounds_played = sounds_played,
                                              **kwargs)
+
+    def __repr__(self):
+        return "StimPhaseSpec object"
 
     def on_enter(self,station,trial_record,**kwargs):
         station.set_index_pin_on()
@@ -143,6 +149,9 @@ class RewardPhaseSpec(PhaseSpec):
         self.reward_valve = reward_valve
         assert reward_valve in ['center_valve','left_valve','right_valve'], 'reward valve provided is unknown'
 
+    def __repr__(self):
+        return "RewardPhaseSpec object"
+
     def on_enter(self,station,trial_record,**kwargs):
         trial_record['correct'] = True
         trial_record['reward_duration'] = station._clocks['trial_clock'].getTime()
@@ -181,6 +190,9 @@ class PunishmentPhaseSpec(PhaseSpec):
                                                  hz = hz,
                                                  sounds_played = sounds_played,
                                                  **kwargs)
+
+    def __repr__(self):
+        return "PunishmentPhaseSpec object"
 
     def on_enter(self,trial_record,**kwargs):
         trial_record['correct'] = False

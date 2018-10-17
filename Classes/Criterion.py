@@ -16,6 +16,9 @@ class Criterion(object):
         self.name = name
         self.ver = Ver('0.0.1')
 
+    def __repr__(self):
+        return "Criterion object"
+
     def check_criterion(self, **kwargs):
         return False
 
@@ -27,6 +30,9 @@ class NumTrialsDoneCriterion(Criterion):
         self.ver = Ver('0.0.1')
         self.num_trials = num_trials
         self.num_trials_mode = num_trials_mode
+
+    def __repr__(self):
+        return "NumTrialsDoneCriterion object, n:%d mode:%s", (self.num_trials, self.num_trials_mode)
 
     def check_criterion(self, compiled_record, **kwargs):
         trial_number = np.asarray(compiled_record['trial_number'])
@@ -60,6 +66,10 @@ class PerformanceCriterion(Criterion):
         self.pct_correct = pct_correct
         self.num_trials = num_trials
         self.num_trials_mode = num_trials_mode
+
+    def __repr__(self):
+        return "PerformanceCriterion object, (%s in %s trials, mode:%s)", (self.pct_correct, self.num_trials, self.num_trials_mode)
+
 
     def check_criterion(self, compiled_record, **kwargs):
         trial_number = np.asarray(compiled_record['trial_number'])
@@ -105,6 +115,9 @@ class RateCriterion(Criterion):
         self.trials_per_minute = trials_per_minute
         self.consecutive_minutes = consecutive_minutes
 
+    def __repr__(self):
+        return "RateCriterion object, (%s trials/minute for %s minutes)", (self.trials_per_minute, self.consecutive_minutes)
+
     def check_criterion(self, compiled_record, station, **kwargs):
         Graduate = False
         raise NotImplementedError()
@@ -116,6 +129,9 @@ class RepeatIndefinitely(Criterion):
     def __init__(self, name='Unknown'):
         self.ver = Ver('0.0.1')
         super(RepeatIndefinitely, self).__init__(name)
+
+    def __repr__(self):
+        return "RepeatIndefinitely object"
 
     def check_criterion(self, **kwargs):
         return False

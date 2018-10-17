@@ -26,7 +26,7 @@ class BServer(object):
             serverName          : string identifier
             serverDataPath      : allowed data storage location
             serverIP            : IPV4 value
-            creationTime        : time.time()
+            creation_time       : time.time()
             stations            : list of stations
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
@@ -54,6 +54,9 @@ class BServer(object):
             self.server_connection = []
             self.station_connections = {}
             self.save_server()
+
+    def __repr__(self):
+        return "BServer with id:%s, name:%s, created on:%s)" % (self.server_id, self.server_name, time.strftime("%b-%d-%Y", self.creation_time))
 
     def run(server, **kwargs):
         # should expose the ZMQ context. and allow connections
@@ -224,6 +227,9 @@ class BServerLocal(object):
         self.assignments = {}
 
         print("BSERVER:BSERVERLOCAL:__INIT__:Initialized new BServerLocal object")
+
+    def __repr__(self):
+        return "BServerLocal with id:%s, name:%s, created on:%s)" % (self.server_id, self.server_name, time.strftime("%b-%d-%Y", self.creation_time))
 
     @staticmethod
     def load():

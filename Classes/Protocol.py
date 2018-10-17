@@ -30,6 +30,9 @@ class TrainingStep(object):
         self.session_manager = session_manager
         self.criterion = criterion
 
+    def __repr__(self):
+        return "TrainingStep object, name:%s" % self.name
+
     def do_trial(self,subject,station, trial_record,compiled_record,quit):
         graduate = False
         manual_ts_change = False
@@ -76,6 +79,9 @@ class Protocol(object):
         self.ver = Ver('0.0.1')  # Feb 28 2014
         self.name = name
 
+    def __repr__(self):
+        return "Protocol object, name:%s" % self.name
+
     @staticmethod
     def protocol_ok_for_session_manager(self, **kwargs):
         return False
@@ -114,12 +120,16 @@ class SimpleProtocol(Protocol):
         self.training_steps = training_steps
         self.current_step = 0
 
+    def __repr__(self):
+        return "SimpleProtocol object, currently at %s of %s steps" % (self.current_step+1,self.num_steps)
+
     def change_to_step(self, step_num):
         self.current_step = step_num
 
     def step(self, **kwargs):
         return self.training_steps[self.current_step]
 
+    @property
     def num_steps(self):
         return len(self.training_steps)
 
@@ -141,6 +151,9 @@ class StartsAtOneProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')
         super(StartsAtOneProtocol, self).__init__(training_steps=training_steps, name = name)
 
+    def __repr__(self):
+        return "StartsAtOneProtocol object, currently at %s of %s steps" % (self.current_step+1,self.num_steps)
+
     def step(self, compiled_record, trial_record):
         # new session, reset current step num to 0
         if compiled_record['session_number'][-1] < trial_record['session_number']:
@@ -149,7 +162,7 @@ class StartsAtOneProtocol(SimpleProtocol):
 
     def graduate(self, safe=False):
         self.current_step += 1
-        if safe and self.current_step == self.num_steps():
+        if safe and self.current_step == self.num_steps:
             self.current_step -= 1
 
     def fallback(self, safe=False):
@@ -168,9 +181,12 @@ class SequentialProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')
         super(SequentialProtocol, self).__init__(**kwargs)
 
+    def __repr__(self):
+        return "SequentialProtocol object, currently at %s of %s steps" % (self.current_step+1,self.num_steps)
+
     def graduate(self, safe=False):
         self.current_step += 1
-        if safe and self.current_step == self.num_steps():
+        if safe and self.current_step == self.num_steps:
             self.current_step -= 1
 
     def fallback(self, safe=False):
@@ -192,6 +208,9 @@ class RandomizedProtocol(SimpleProtocol):
         self.ver = Ver('0.0.1')  # Feb 28 2014
         super(RandomizedProtocol, self).__init__(**kwargs)
 
+    def __repr__(self):
+        return "RandomizedProtocol object, currently at %s of %s steps" % (self.current_step+1,self.num_steps)
+
     def change_to_step(self, step_num):
         raise NotImplementedError('RandomizedProtocol does not allow arbitrary\
         step changes. Use graduate() only')
@@ -199,12 +218,12 @@ class RandomizedProtocol(SimpleProtocol):
     def graduate(self, ensure_different=False):
         import random
         if not ensure_different:
-            self.current_step = random.randint(0, self.num_steps() - 1)
+            self.current_step = random.randint(0, self.num_steps - 1)
         else:
             current_step = self.current_step
             new_step = current_step
             while current_step == new_step:
-                new_step = random.randint(0, self.num_steps() - 1)
+                new_step = random.randint(0, self.num_steps - 1)
             self.current_step = new_step
 
 
@@ -232,6 +251,9 @@ class DemoGratingsProtocol(SimpleProtocol):
         criterion=RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
 
+    def __repr__(self):
+        return "DemoGratingsProtocol object"
+
 
 class DemoAFCGratingsProtocol(SimpleProtocol):
     """
@@ -257,6 +279,9 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
         criterion=RepeatIndefinitely())]
         super(DemoAFCGratingsProtocol,self).__init__(training_steps, name=name)
 
+    def __repr__(self):
+        return "DemoAFCGratingsProtocol object"
+
 
 class DemoNoStimulusProtocol(SimpleProtocol):
     """
@@ -266,6 +291,9 @@ class DemoNoStimulusProtocol(SimpleProtocol):
     def __init__(self):
         self.ver = Ver('0.0.1')
         name = 'DemoNoStimulusProtocol'
+
+    def __repr__(self):
+        return "DemoNoStimulusProtocol object"
 
 
 if __name__=='__main__':

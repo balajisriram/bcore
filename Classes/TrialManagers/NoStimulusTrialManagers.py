@@ -74,6 +74,9 @@ class LickForReward(object):
         if not self.verify_params_ok():
             ValueError('LickForReward::input values are bad')
 
+    def __repr__(self):
+        return "LickForReward trial manager"
+
     def verify_params_ok(self):
         assert isinstance(self.trial_start_sound_on,bool),'trial_start_sound_on needs to be boolean'
         assert isinstance(self.punish_delay_response,bool),'punish_delay_response needs to be boolean'
@@ -441,6 +444,9 @@ class RunForReward(object):
 
         if not self.verify_params_ok():
             ValueError('RunForReward::input values are bad')
+
+    def __repr__(self):
+        return "RunForReward trial manager"
 
     def verify_params_ok(self):
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distribution are you using?'

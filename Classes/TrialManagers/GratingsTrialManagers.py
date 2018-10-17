@@ -76,6 +76,9 @@ class Gratings(object):
         else:
             self.itl = np.asarray(itl) #itl as color
 
+    def __repr__(self):
+        return "Gratings object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
+
     def calc_stim(self, trial_record, station, **kwargs):
 
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
@@ -259,6 +262,9 @@ class Gratings_GaussianEdge(Gratings):
         self.ver = Ver('0.0.1')
         super(Gratings_GaussianEdge, self).__init__(name, **kwargs)
 
+    def __repr__(self):
+        return "Gratings_GaussianEdge object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
+
     def _setup_phases(self, trial_record, station, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
@@ -305,6 +311,9 @@ class Gratings_HardEdge(Gratings):
     def __init__(self, name, **kwargs):
         self.ver = Ver('0.0.1')
         super(Gratings_HardEdge, self).__init__(name, **kwargs)
+
+    def __repr__(self):
+        return "Gratings_HardEdge object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
 
     def _setup_phases(self, trial_record, station, **kwargs):
         """
@@ -430,6 +439,9 @@ class AFCGratings(object):
             assert len(self.durations['R'])==num_options_R,'R durations not same length as deg_per_cycs'
             assert len(self.locations['R'])==num_options_R,'R locations not same length as deg_per_cycs'
             assert len(self.radii['R'])==num_options_R,'R radii not same length as deg_per_cycs'
+
+    def __repr__(self):
+        return "AFCGratings object nafc:%s)" % self.n_afc
 
     @property
     def n_afc():
@@ -888,6 +900,9 @@ class GNGGratings(object):
 
         assert np.logical_and(np.all(np.asarray(self.durations['G'])>0), np.all(np.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
         assert np.logical_and(np.all(np.asarray(self.durations['N'])>0), np.all(np.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
+
+    def __repr__(self):
+        return "GNGGratings object"
 
     @staticmethod
     def update_stimulus(stimulus,details):
