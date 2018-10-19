@@ -211,7 +211,7 @@ class Gratings(object):
                 sound_timer = psychopy.core.CountdownTimer(sound_duration)
             else:
                 sound = None
-
+            trial_record = phase.on_enter(station=station,trial_record=trial_record)
             while not phase_done:
                 # deal with sounds
                 if sound:
@@ -234,6 +234,7 @@ class Gratings(object):
                 frames_until_transition = frames_until_transition-1
                 if frames_until_transition==0: phase_done = True
                 quit = quit or station.check_manual_quit()
+            trial_record = phase.on_exit(station=station,trial_record=trial_record)
 
         return trial_record,quit
 
@@ -277,7 +278,7 @@ class Gratings_GaussianEdge(Gratings):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='gauss',autoLog=False),
             stimulus_update_fn=Gratings.update_stimulus,
@@ -327,7 +328,7 @@ class Gratings_HardEdge(Gratings):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='circle',autoLog=False),
             stimulus_update_fn=Gratings.update_stimulus,

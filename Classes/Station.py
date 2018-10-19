@@ -406,7 +406,7 @@ class StandardVisionBehaviorStation(Station):
         self._parallel_port_conn.setData(int(''.join(val),2))
 
     def set_index_pin_on(self):
-        index = self.parallel_port['index_pin']
+        index_pin = self.parallel_port['index_pin']
         self.set_pin_on(index_pin)
 
     def set_index_pin_off(self):
@@ -617,20 +617,6 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = list('{0:08b}'.format(self._parallel_port_conn.readData()))
         val[valve_pin-2] = '0'
         self._parallel_port_conn.setData(int(''.join(val),2))
-
-    def set_index_pin_on(self):
-        index_pin = self.parallel_port['index_pin']
-        val = list('{0:08b}'.format(self._parallel_port_conn.readData()))
-        val[index_pin-2] = '1'
-        x = int(''.join(val),2)
-        self._parallel_port_conn.setData(x)
-
-    def set_index_pin_off(self):
-        index_pin = self.parallel_port['index_pin']
-        val = list('{0:08b}'.format(self._parallel_port_conn.readData()))
-        val[index_pin-2] = '0'
-        x = int(''.join(val),2)
-        self._parallel_port_conn.setData(x)
 
     def close_all_valves(self):
         self.close_valve()
