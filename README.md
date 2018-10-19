@@ -15,7 +15,7 @@ BCore is a Behavior training library built originally for training rodents but i
 5. _python -m BCore.Bootstrap.StandAloneRun_. See StandAloneRun for details on how to call the function.
 
 ## TODO:
-[ ] Plot compiled_record. Filter last 10000 trials.
-[ ] RunForReward trials
-[ ] Flip trial_pin on trial_start in do_trials
-[ ] 
+ - [ ] Plot compiled_record. Filter last 10000 trials.
+ - [ ] RunForReward trials
+ - [ ] Flip trial_pin on trial_start in do_trials
+ - [ ] ZMQ output
