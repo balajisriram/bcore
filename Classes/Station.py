@@ -8,8 +8,7 @@ psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy as np
 
 from BCore.Classes.Hardware.Displays import StandardDisplay
-from BCore import get_base_directory, get_ip_addr
-from BCore import get_mac_address
+from BCore import get_base_directory, get_ip_addr, get_mac_address
 from verlib import NormalizedVersion as Ver
 
 __author__ = "Balaji Sriram"
@@ -230,12 +229,14 @@ class StandardVisionBehaviorStation(Station):
         self.sound_on = sound_on
         self.parallel_port = parallel_port
         self.parallel_port_address = parallel_port_address
-        self.display = None
+        self.display = self.get_display()
         self.parallel_port = self.get_parport_mappings()
 
     def __repr__(self):
         return "StandardVisionBehaviorStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
 
+    def get_display(self):
+        return StandardDisplay()
 
     def get_parport_mappings(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
@@ -273,7 +274,7 @@ class StandardVisionBehaviorStation(Station):
             return None # need to write code that checks if allowable
 
     def initialize(self):
-        self.initialize_display()
+        self.initialize_display(display=self.display)
         self.initialize_sounds()
         self.initialize_parallel_port()
         self.close_all_valves()
