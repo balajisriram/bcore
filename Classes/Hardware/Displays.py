@@ -24,8 +24,8 @@ def ViewSonic_V3D231():
 
     mon = psychopy.monitors.Monitor(name,
                                     width = 50.98,
-                                    distance = distance_to_subject/10, # in cm?
-                                    gamma = 1.4)
+                                    distance = distance_to_subject/10,
+                                    gamma = 1.2)
     mon.setSizePix((x_pixels,y_pixels))
     return mon
 
