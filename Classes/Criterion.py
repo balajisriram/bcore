@@ -24,6 +24,11 @@ class Criterion(object):
 
 
 class NumTrialsDoneCriterion(Criterion):
+    """
+        NUMTRIALDONECRITERION - graduate after 'n' trials are done. Note: because it works on compiled_record and because
+        compiled_records are created after checking for graduation, current trial's data will not be available before
+        checking for graduation.
+    """
 
     def __init__(self, num_trials=100, num_trials_mode='global', name='Unknown'):
         super(NumTrialsDoneCriterion, self).__init__(name)
@@ -34,7 +39,12 @@ class NumTrialsDoneCriterion(Criterion):
     def __repr__(self):
         return "NumTrialsDoneCriterion object, n:%d mode:%s", (self.num_trials, self.num_trials_mode)
 
-    def check_criterion(self, compiled_record, **kwargs):
+    def check_criterion(self, compiled_record, trial_record, **kwargs):
+        print()
+        # trial_number = np.append(np.asarray(compiled_record['trial_number']),np.asarray(trial_record['trial_number']))
+        # current_step = np.append(np.asarray(compiled_record['current_step']),np.asarray(trial_record['current_step']))
+        # protocol_name = np.append(np.asarray(compiled_record['protocol_name']),np.asarray(trial_record['protocol_name']))
+        # protocol_ver = np.append(np.asarray(compiled_record['protocol_version_number']),np.asarray(trial_record['protocol_version_number']))
         trial_number = np.asarray(compiled_record['trial_number'])
         current_step = np.asarray(compiled_record['current_step'])
         protocol_name = np.asarray(compiled_record['protocol_name'])
@@ -42,18 +52,33 @@ class NumTrialsDoneCriterion(Criterion):
         # filter out trial_numbers for current protocol_name and protocol_ver
         current_step = current_step[np.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
         trial_number = trial_number[np.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
-        temp = np.append(np.asarray([-1]),trial_number)
+
+        # print('current_step:',current_step)
+        # print('current_step[-1]:',trial_record['current_step'])
+        # print('current_step==current_step[-1]',current_step==trial_record['current_step'])
+
+        # filter out trial_numbers where step==current_step
+        # print('trial_number::',trial_number)
+        temp = trial_number[current_step==trial_record['current_step']]
+        # print('temp_pre:',temp)
+        # print(np.asarray([-1]))
+        # print(np.asarray([trial_record['trial_number']]))
+        temp = np.append(np.append(np.asarray([-1]),temp),np.asarray([trial_record['trial_number']]))
+        # print('temp::',temp)
         if self.num_trials_mode == 'consecutive':
             jumps = np.array(np.where(np.diff(temp)!=1)) # jumps in trial number
-            print('ndims',jumps[0,-1])
-            nT = np.size(trial_number[jumps[0,-1]:]) -1
+            try:
+                nT = np.size(trial_number[jumps[0,-1]:])
+            except IndexError:
+                nT = 0
         else:  # 'global'
             nT = np.sum(current_step==current_step[-1])
-        if nT > self.num_trials:
+        # print('nT::',nT)
+        if nT >= self.num_trials:
             graduate = True
         else:
             graduate = False
-
+        print("NUMTRIALSDONECRITERION:CHECK_CRITERION::graduate=%s" % graduate)
         return graduate
 
 
@@ -70,7 +95,7 @@ class PerformanceCriterion(Criterion):
         return "PerformanceCriterion object, (%s in %s trials, mode:%s)", (self.pct_correct, self.num_trials, self.num_trials_mode)
 
 
-    def check_criterion(self, compiled_record, **kwargs):
+    def check_criterion(self, compiled_record, trial_record, **kwargs):
         trial_number = np.asarray(compiled_record['trial_number'])
         current_step = np.asarray(compiled_record['current_step'])
         correct = np.asarray(compiled_record['correct'])
@@ -117,7 +142,7 @@ class RateCriterion(Criterion):
     def __repr__(self):
         return "RateCriterion object, (%s trials/minute for %s minutes)", (self.trials_per_minute, self.consecutive_minutes)
 
-    def check_criterion(self, compiled_record, station, **kwargs):
+    def check_criterion(self, compiled_record, trial_record, station, **kwargs):
         Graduate = False
         raise NotImplementedError()
         return graduate
