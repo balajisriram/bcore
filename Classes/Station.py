@@ -414,6 +414,14 @@ class StandardVisionBehaviorStation(Station):
         index_pin = self.parallel_port['index_pin']
         self.set_pin_off(index_pin)
 
+    def set_trial_pin_on(self):
+        trial_pin = self.parallel_port['trial_pin']
+        self.set_pin_on(trial_pin)
+
+    def set_trial_pin_off(self):
+        trial_pin = self.parallel_port['trial_pin']
+        self.set_pin_off(trial_pin)
+
     def set_pin_on(self,pin):
         if pin<2 or pin>9:
             ValueError('Cannot deal with this')
