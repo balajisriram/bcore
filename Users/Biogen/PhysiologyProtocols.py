@@ -23,7 +23,7 @@ def get_orientation_tuning_protocol():
                            durations=[2.],
                            radii=[400],
                            drift_frequencies=[2.],
-                           iti=1., itl=0.5),
+                           iti=1., itl=0.),
     session_manager=NoTimeOff(),
     criterion=RepeatIndefinitely(),
     )]
@@ -38,7 +38,7 @@ def get_short_duration_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
-                                              iti=1., itl=0.5),
+                                              iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
     ts2 = TrainingStep(name='short_duration_pm45deg_8phases',
@@ -48,7 +48,7 @@ def get_short_duration_protocol():
                                               contrasts=[1.,0.15],
                                               durations=[0.05,0.1,0.15,0.2],
                                               radii=[400],
-                                              iti=1., itl=0.5),
+                                              iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())
     training_steps = [ts1,ts2]

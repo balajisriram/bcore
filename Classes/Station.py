@@ -297,7 +297,7 @@ class StandardVisionBehaviorStation(Station):
                 trial_num = self._session['trial_num']
 
     def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
+        self._window = psychopy.visual.Window(color=(0.,0.,0.), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
 
     def initialize_parallel_port(self):
@@ -705,13 +705,17 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
+    import time
     st = StandardVisionHeadfixStation()
     st.initialize()
-    import time
-    for i in range(1,10):
-        print(i)
-        st.set_pin_on(3)
-        time.sleep(1.)
-        st.set_pin_off(3)
-        time.sleep(1.)
+    rect = psychopy.visual.Rect(st._window, lineColor=None,fillColor=(0.,0.,0.), width=0.5, height=0.5, units='norm')
+
+    for i in range(256):
+        rect.fillColor=((2*i-255)/255., (2*i-255)/255., (2*i-255)/255.)
+        rect.draw()
+        st.set_pin_on(9)
+        st._window.flip()
+        st.set_pin_off(9)
+
+
     st.close_window()

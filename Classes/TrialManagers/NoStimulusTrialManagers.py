@@ -69,7 +69,7 @@ class LickForReward(object):
         self.auto_reward = auto_reward
         self.punish_misses = punish_misses
 
-        self.itl = (0.5, 0.5, 0.5,)
+        self.itl = (0., 0., 0.,)
 
         if not self.verify_params_ok():
             ValueError('LickForReward::input values are bad')
@@ -440,7 +440,7 @@ class RunForReward(object):
         self.run_speed = run_speed
         self.run_duration_distribution = delay_distribution
 
-        self.itl = (0.5, 0.5, 0.5,)
+        self.itl = (0., 0., 0.,)
 
         if not self.verify_params_ok():
             ValueError('RunForReward::input values are bad')

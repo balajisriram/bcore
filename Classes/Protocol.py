@@ -245,7 +245,7 @@ class DemoGratingsProtocol(SimpleProtocol):
                                # durations=[1], #seconds
                                # radii=[400], #degrees
                                # iti=1, #seconds
-                               # itl=0.5, #inter trial luminance,
+                               # itl=0., #inter trial luminance,
                                # ),
         session_manager=NoTimeOff(),
         criterion=RepeatIndefinitely())]
@@ -273,7 +273,7 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
                                # durations=[1], #seconds
                                # radii=[400], #degrees
                                # iti=1, #seconds
-                               # itl=0.5, #inter trial luminance,
+                               # itl=0., #inter trial luminance,
                                # ),
         session_manager=NoTimeOff(),
         criterion=RepeatIndefinitely())]
