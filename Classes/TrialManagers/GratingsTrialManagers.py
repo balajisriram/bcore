@@ -195,7 +195,7 @@ class Gratings(object):
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
-
+        station.set_trial_pin_on()
         for phase in self._Phases:
             frames_until_transition = phase.frames_until_transition
             phase_done = False
@@ -235,7 +235,7 @@ class Gratings(object):
                 if frames_until_transition==0: phase_done = True
                 quit = quit or station.check_manual_quit()
             trial_record = phase.on_exit(station=station,trial_record=trial_record)
-
+        station.set_trial_pin_off()
         return trial_record,quit
 
     @staticmethod
@@ -497,6 +497,8 @@ class AFCGratings(object):
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
 
         trial_record['phase_data'] = []
+
+        station.set_trial_pin_on()
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
@@ -600,6 +602,7 @@ class AFCGratings(object):
             # when do we quit the trial? trial_done only when last phjase
             # but we can exit if manual_quit or errored out
             if is_last_phase: trial_done = True
+        station.set_trial_pin_off()
         return trial_record,quit
 
     def calc_stim(self, trial_record, station, **kwargs):
@@ -951,6 +954,7 @@ class GNGGratings(object):
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
 
         trial_record['phase_data'] = []
+        station.set_trial_pin_on()
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
@@ -1054,6 +1058,7 @@ class GNGGratings(object):
             # when do we quit the trial? trial_done only when last phjase
             # but we can exit if manual_quit or errored out
             if is_last_phase: trial_done = True
+        station.set_trial_pin_off()
         return trial_record,quit
 
     def calc_stim(self, trial_record, station, **kwargs):
