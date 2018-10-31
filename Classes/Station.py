@@ -412,6 +412,14 @@ class StandardVisionBehaviorStation(Station):
     def set_index_pin_off(self):
         index_pin = self.parallel_port['index_pin']
         self.set_pin_off(index_pin)
+        
+    def set_frame_pin_on(self):
+        frame_pin = self.parallel_port['frame_pin']
+        self.set_pin_on(frame_pin)
+
+    def set_frame_pin_off(self):
+        frame_pin = self.parallel_port['frame_pin']
+        self.set_pin_off(frame_pin)
 
     def set_pin_on(self,pin):
         if pin<2 or pin>9:

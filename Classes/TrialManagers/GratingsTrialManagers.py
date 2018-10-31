@@ -228,7 +228,7 @@ class Gratings(object):
                 if stim:
                     stim.draw()
                     phase.stimulus_update_fn(stim,stim_details)
-                station._window.flip()
+                phase.on_frame(station=station,trial_record=trial_record)
 
                 # update the frames
                 frames_until_transition = frames_until_transition-1
@@ -551,7 +551,7 @@ class AFCGratings(object):
                     if phase.phase_name=='stim':
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
-                station._window.flip()
+                phase.on_frame(station=station,trial_record=trial_record)
 
                 # look for responses
                 response_led_to_transition = False
@@ -1005,7 +1005,7 @@ class GNGGratings(object):
                     if phase.phase_name=='stim':
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
-                station._window.flip()
+                phase.on_frame(station=station,trial_record=trial_record)
 
                 # look for responses
                 response_led_to_transition = False
