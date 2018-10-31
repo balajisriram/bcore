@@ -8,8 +8,7 @@ psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy as np
 
 from BCore.Classes.Hardware.Displays import StandardDisplay
-from BCore import get_base_directory, get_ip_addr
-from BCore import get_mac_address
+from BCore import get_base_directory, get_ip_addr, get_mac_address
 from verlib import NormalizedVersion as Ver
 
 __author__ = "Balaji Sriram"
@@ -230,12 +229,14 @@ class StandardVisionBehaviorStation(Station):
         self.sound_on = sound_on
         self.parallel_port = parallel_port
         self.parallel_port_address = parallel_port_address
-        self.display = None
+        self.display = self.get_display()
         self.parallel_port = self.get_parport_mappings()
 
     def __repr__(self):
         return "StandardVisionBehaviorStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
 
+    def get_display(self):
+        return StandardDisplay()
 
     def get_parport_mappings(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
@@ -273,7 +274,7 @@ class StandardVisionBehaviorStation(Station):
             return None # need to write code that checks if allowable
 
     def initialize(self):
-        self.initialize_display()
+        self.initialize_display(display=self.display)
         self.initialize_sounds()
         self.initialize_parallel_port()
         self.close_all_valves()
@@ -296,7 +297,7 @@ class StandardVisionBehaviorStation(Station):
                 trial_num = self._session['trial_num']
 
     def initialize_display(self, display = StandardDisplay()):
-        self._window = psychopy.visual.Window(color=(0.5,0.5,0.5), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
+        self._window = psychopy.visual.Window(color=(0.,0.,0.), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
 
     def initialize_parallel_port(self):
@@ -712,13 +713,17 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
+    import time
     st = StandardVisionHeadfixStation()
     st.initialize()
-    import time
-    for i in range(1,10):
-        print(i)
-        st.set_pin_on(3)
-        time.sleep(1.)
-        st.set_pin_off(3)
-        time.sleep(1.)
+    rect = psychopy.visual.Rect(st._window, lineColor=None,fillColor=(0.,0.,0.), width=0.5, height=0.5, units='norm')
+
+    for i in range(256):
+        rect.fillColor=((2*i-255)/255., (2*i-255)/255., (2*i-255)/255.)
+        rect.draw()
+        st.set_pin_on(9)
+        st._window.flip()
+        st.set_pin_off(9)
+
+
     st.close_window()

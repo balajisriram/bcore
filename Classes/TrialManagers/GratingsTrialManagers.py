@@ -55,7 +55,7 @@ class Gratings(object):
                  durations=[1], #seconds
                  radii=[400], #degrees
                  iti=1, #seconds
-                 itl=0.2, #inter trial luminance
+                 itl=0., #inter trial luminance
                  reinforcement_manager=NoReinforcement(),
                  **kwargs):
         self.ver = Ver('0.0.1')
@@ -385,7 +385,7 @@ class AFCGratings(object):
                  locations = {'L':[(0.5,0.5)],'R':[(0.5,0.5)]},
                  radii = {'L':[40],'R':[40]},
                  iti = 1,
-                 itl = 0.5,
+                 itl = 0.,
                  do_combos = True,
                  reinforcement_manager = NoReinforcement(),
                  **kwargs):
@@ -852,7 +852,7 @@ class GNGGratings(object):
                  locations = {'G':[(0.5,0.5)],'N':[(0.5,0.5)]},
                  radii = {'G':[40],'N':[40]},
                  iti = 1,
-                 itl = 0.5,
+                 itl = 0.,
                  do_combos = True,
                  reinforcement_manager = ConstantReinforcement(),
                  **kwargs):
@@ -1282,7 +1282,7 @@ if __name__=='__main__':
                  durations=[1], #seconds
                  radii=[200], #degrees
                  iti=1, #seconds
-                 itl=0.5, #inter trial luminance
+                 itl=0., #inter trial luminance
                  )
 
     g._simulate()

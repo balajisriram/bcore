@@ -42,12 +42,11 @@ class NumTrialsDoneCriterion(Criterion):
         # filter out trial_numbers for current protocol_name and protocol_ver
         current_step = current_step[np.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
         trial_number = trial_number[np.bitwise_and(protocol_name==protocol_name[-1],protocol_ver==protocol_ver[-1])]
+        temp = np.append(np.asarray([-1]),trial_number)
         if self.num_trials_mode == 'consecutive':
-            jumps = np.where(np.diff(trial_number)!=1) # jumps in trial number
-            if not jumps[0]:
-                nT = 0
-            else:
-                nT = np.size(trial_number[jumps[0][-1]:]) -1
+            jumps = np.array(np.where(np.diff(temp)!=1)) # jumps in trial number
+            print('ndims',jumps[0,-1])
+            nT = np.size(trial_number[jumps[0,-1]:]) -1
         else:  # 'global'
             nT = np.sum(current_step==current_step[-1])
         if nT > self.num_trials:
@@ -103,7 +102,7 @@ class PerformanceCriterion(Criterion):
                 graduate = True
             else:
                 graduate = False
-            
+
         return graduate
 
 
