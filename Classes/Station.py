@@ -95,7 +95,7 @@ def compile_records(compiled_record, trial_record):
     try:
         trial_specific_compiler = trial_record['trial_compiler']
         compiled_record = trial_specific_compiler(compiled_record,trial_record)
-    except KeyError:
+    except KeyError as e:
         print('No trial specific compiler. Ignoring trial')
 
     return compiled_record
@@ -449,7 +449,7 @@ class StandardVisionBehaviorStation(Station):
     def set_index_pin_off(self):
         index_pin = self.parallel_port['index_pin']
         self.set_pin_off(index_pin)
-        
+
     def set_frame_pin_on(self):
         frame_pin = self.parallel_port['frame_pin']
         self.set_pin_on(frame_pin)

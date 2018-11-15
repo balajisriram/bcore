@@ -10,6 +10,8 @@ import pdb
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
                                 NOT_STARTED, FOREVER)
 
+import traceback
+
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
 __copyright__ = "Copyright 2018"
@@ -44,6 +46,7 @@ class Gratings(object):
     """
     _Phases = None
     _Cached_Stimuli = None
+    _compiler = None
 
     def __init__(self,
                  name,
@@ -154,6 +157,8 @@ class Gratings(object):
             sounds_played=(station._sounds['trial_end_sound'], 0.050),
             is_last_phase=True))
 
+        self._compiler = Gratings.trial_compiler
+
     def _simulate(self):
         station = StandardKeyboardStation()
         station.initialize()
@@ -235,13 +240,20 @@ class Gratings(object):
                 if frames_until_transition==0: phase_done = True
                 quit = quit or station.check_manual_quit()
             trial_record = phase.on_exit(station=station,trial_record=trial_record)
-
+        trial_record['trial_compiler'] = Gratings.trial_compiler
         return trial_record,quit
 
-    def trial_compiler(self, compiled_record, trial_record):
+    @staticmethod
+    def trial_compiler(compiled_record, trial_record):
+        print('GRATINGS:TRIAL_COMPILER::compiling trial')
+
         try:
+            import pprint
+            ppr = pprint.PrettyPrinter(indent=4).pprint
+            ppr(compiled_record)
             compiled_details = compiled_record['compiled_details']['Gratings']
-        except KeyError:
+        except KeyError as e:
+            traceback.print_stack()
             compiled_details = {}
             compiled_details['trial_number'] = []
             compiled_details['deg_per_cyc'] = []
@@ -251,7 +263,7 @@ class Gratings(object):
             compiled_details['contrast'] = []
             compiled_details['duration'] = []
             compiled_details['radius'] = []
-            compiled_details['radius_type'] = []
+            # compiled_details['radius_type'] = []
             compiled_details['location'] = []
             compiled_details['H'] = []
             compiled_details['W'] = []
@@ -267,27 +279,23 @@ class Gratings(object):
         compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
         compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
         compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
-        compiled_details['radius_type'].append(self.get_radius_type())
+        # compiled_details['radius_type'].append('None')
         compiled_details['location'].append(trial_record['chosen_stim']['location'])
         compiled_details['H'].append(trial_record['chosen_stim']['H'])
         compiled_details['W'].append(trial_record['chosen_stim']['W'])
         compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
-        
+
         compiled_record['compiled_details'] = compiled_details
-        
+
         return compiled_details
-        
+
     @staticmethod
     def station_ok_for_tm(station):
         if station.__class__.__name__ in ['StandardVisionBehaviorStation','StandardVisionHeadfixStation','StandardKeyboardStation']:
             return True
         else:
             return False
-    
-    @staticmethod
-    def get_radius_type():
-        return 'None'
-        
+
 
 class Gratings_GaussianEdge(Gratings):
     """
@@ -342,11 +350,49 @@ class Gratings_GaussianEdge(Gratings):
             phase_name='inter-trial',
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
+        self._compiler = Gratings_GaussianEdge.trial_compiler
+
     @staticmethod
-    def get_radius_type():
-        return 'Gaussian'
-        
+    def trial_compiler(compiled_record, trial_record):
+        try:
+            compiled_details = compiled_record['compiled_details']['Gratings']
+        except KeyError:
+            compiled_details = {}
+            compiled_details['trial_number'] = []
+            compiled_details['deg_per_cyc'] = []
+            compiled_details['orientation'] = []
+            compiled_details['drift_frequency'] = []
+            compiled_details['phase'] = []
+            compiled_details['contrast'] = []
+            compiled_details['duration'] = []
+            compiled_details['radius'] = []
+            compiled_details['radius_type'] = []
+            compiled_details['location'] = []
+            compiled_details['H'] = []
+            compiled_details['W'] = []
+            compiled_details['Hz'] = []
+            # put an empty compiled_details in the compiled_records
+            compiled_record['compiled_details']['Gratings'] = compiled_details
+
+        compiled_details['trial_number'].append(trial_record['trial_number'])
+        compiled_details['deg_per_cyc'].append(trial_record['chosen_stim']['deg_per_cyc'])
+        compiled_details['orientation'].append(trial_record['chosen_stim']['orientation'])
+        compiled_details['drift_frequency'].append(trial_record['chosen_stim']['drift_frequency'])
+        compiled_details['phase'].append(trial_record['chosen_stim']['phase'])
+        compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
+        compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
+        compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
+        compiled_details['radius_type'].append('Gaussian')
+        compiled_details['location'].append(trial_record['chosen_stim']['location'])
+        compiled_details['H'].append(trial_record['chosen_stim']['H'])
+        compiled_details['W'].append(trial_record['chosen_stim']['W'])
+        compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
+
+        compiled_record['compiled_details'] = compiled_details
+
+        return compiled_details
+
 
 class Gratings_HardEdge(Gratings):
     """
@@ -397,10 +443,48 @@ class Gratings_HardEdge(Gratings):
             phase_name='inter-trial',
             hz=hz,
             sounds_played=(station._sounds['trial_end_sound'], 0.050)))
-    
+
+        self._compiler = Gratings_HardEdge.trial_compiler
+
     @staticmethod
-    def get_radius_type():
-        return 'Circular'
+    def trial_compiler(compiled_record, trial_record):
+        try:
+            compiled_details = compiled_record['compiled_details']['Gratings']
+        except KeyError:
+            compiled_details = {}
+            compiled_details['trial_number'] = []
+            compiled_details['deg_per_cyc'] = []
+            compiled_details['orientation'] = []
+            compiled_details['drift_frequency'] = []
+            compiled_details['phase'] = []
+            compiled_details['contrast'] = []
+            compiled_details['duration'] = []
+            compiled_details['radius'] = []
+            compiled_details['radius_type'] = []
+            compiled_details['location'] = []
+            compiled_details['H'] = []
+            compiled_details['W'] = []
+            compiled_details['Hz'] = []
+            # put an empty compiled_details in the compiled_records
+            compiled_record['compiled_details']['Gratings'] = compiled_details
+
+        compiled_details['trial_number'].append(trial_record['trial_number'])
+        compiled_details['deg_per_cyc'].append(trial_record['chosen_stim']['deg_per_cyc'])
+        compiled_details['orientation'].append(trial_record['chosen_stim']['orientation'])
+        compiled_details['drift_frequency'].append(trial_record['chosen_stim']['drift_frequency'])
+        compiled_details['phase'].append(trial_record['chosen_stim']['phase'])
+        compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
+        compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
+        compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
+        compiled_details['radius_type'].append('Circular')
+        compiled_details['location'].append(trial_record['chosen_stim']['location'])
+        compiled_details['H'].append(trial_record['chosen_stim']['H'])
+        compiled_details['W'].append(trial_record['chosen_stim']['W'])
+        compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
+
+        compiled_record['compiled_details'] = compiled_details
+
+        return compiled_details
 ##########################################################################################
 ##########################################################################################
 ####################### AFC GRATINGS TRIAL MANAGERS - SHOWS ##############################
@@ -451,7 +535,7 @@ class AFCGratings(object):
         self.durations = durations
         self.locations = locations
         self.radii = radii
-        
+
         self.radius_type = radius_type
 
         self.iti = iti # inter trial interval (s)
@@ -491,7 +575,7 @@ class AFCGratings(object):
             assert len(self.durations['R'])==num_options_R,'AFCGRATINGS::INIT::R durations not same length as deg_per_cycs'
             assert len(self.locations['R'])==num_options_R,'AFCGRATINGS::INIT::R locations not same length as deg_per_cycs'
             assert len(self.radii['R'])==num_options_R,'AFCGRATINGS::INIT::R radii not same length as deg_per_cycs'
-            
+
         assert radius_type in ['Circular','Gaussian'], 'AFCGRATINGS::INIT::Unrecognized radius_type:%s' % radius_type
 
     def __repr__(self):
@@ -738,7 +822,7 @@ class AFCGratings(object):
                 phase_type='pre-request',
                 phase_name='pre-request',
                 hz=hz,
-                sounds_played=(station._sounds['trial_start_sound'], 0.050))) 
+                sounds_played=(station._sounds['trial_start_sound'], 0.050)))
             if self.radius_type=='Gaussian':
                 self._Phases.append(PhaseSpec(
                     phase_number=2,
@@ -752,7 +836,7 @@ class AFCGratings(object):
                     phase_name='stim',
                     hz=hz,
                     sounds_played=(station._sounds['stim_start_sound'], 0.050)))
-            else: 
+            else:
                 self._Phases.append(PhaseSpec(
                     phase_number=2,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
@@ -937,7 +1021,7 @@ class AFCGratings(object):
         compiled_details['H'].append(trial_record['chosen_stim']['H'])
         compiled_details['W'].append(trial_record['chosen_stim']['W'])
         compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
-        
+
         # animal response data compilation
         phase_data = trial_record['phase_data']
         phase_types = np.asarray([p['phase_type'] for p in phase_data])
@@ -958,14 +1042,14 @@ class AFCGratings(object):
         lick_times = np.asarray(phase_data[pre_req_phase_num]['response_time'])
         which_licks = np.argwhere(lick_loc!='C')
         compiled_details['response_lick_timings_prev_trial'].append(lick_times[which_licks])
-        
-        
-        
-        
+
+
+
+
         compiled_record['compiled_details'] = compiled_details
-        
+
         return compiled_details
-    
+
 
 ##########################################################################################
 ##########################################################################################

@@ -388,7 +388,7 @@ class BServerLocal(object):
 
 
             cR['LUT'] = []
-            cR['trial_details'] = {}
+            cR['compiled_details'] = {}
             cR_file_name = '{0}.1-0.compiled_records'.format(subject_id)
             with open(os.path.join(compiled_folder_path, cR_file_name),'wb') as f:
                 pickle.dump(cR, f, pickle.HIGHEST_PROTOCOL)
