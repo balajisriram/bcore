@@ -40,17 +40,53 @@ def add_or_find_in_LUT(LUT,value):
     return idx,LUT
 
 def compile_records(compiled_record, trial_record):
-    regular_fields = ["session_number","trial_number","station_id","num_ports_in_station","trial_start_time","trial_stop_time","subject_id","current_step","num_steps","criterion_met","graduate","correct"]
-    lut_fields = ["station_name","station_version_number","subject_version_number","protocol_name","protocol_version_number","current_step_name","trial_manager_name","session_manager_name","criterion_name","reinforcement_manager_name","trial_manager_class","session_manager_class","criterion_class","reinforcement_manager_class","trial_manager_version_number","session_manager_version_number","criterion_version_number","reinforcement_manager_version_number",]
+    regular_fields = ["session_number",
+    "trial_number",
+    "station_id",
+    "num_ports_in_station",
+    "trial_start_time",
+    "trial_stop_time",
+    "subject_id",
+    "current_step",
+    "num_steps",
+    "criterion_met",
+    "graduate",
+    "errored_out",
+    "manual_quit",
+    "correct"]
+    lut_fields = ["station_name",
+    "station_version_number",
+    "subject_version_number",
+    "protocol_name",
+    "protocol_version_number",
+    "current_step_name",
+    "trial_manager_name",
+    "session_manager_name",
+    "criterion_name",
+    "reinforcement_manager_name",
+    "trial_manager_class",
+    "session_manager_class",
+    "criterion_class",
+    "reinforcement_manager_class",
+    "trial_manager_version_number",
+    "session_manager_version_number",
+    "criterion_version_number",
+    "reinforcement_manager_version_number",]
     LUT = compiled_record['LUT']
     num_trials = len(compiled_record['trial_number'])
     for field in regular_fields:
-        value = trial_record[field]
+        try:
+            value = trial_record[field]
+        except KeyError:
+            value = None
         if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(value)
 
     for field in lut_fields:
-        value = trial_record[field]
+        try:
+            value = trial_record[field]
+        except KeyError:
+            value = 'NotAvailable'
         idx,LUT = add_or_find_in_LUT(LUT,value)
         if not field in compiled_record: compiled_record[field] = [None for i in range(0,num_trials)] # None padding
         compiled_record[field].append(idx)
@@ -59,7 +95,7 @@ def compile_records(compiled_record, trial_record):
     try:
         trial_specific_compiler = trial_record['trial_compiler']
         compiled_record = trial_specific_compiler(compiled_record,trial_record)
-    except KeyError:
+    except KeyError as e:
         print('No trial specific compiler. Ignoring trial')
 
     return compiled_record
@@ -413,7 +449,7 @@ class StandardVisionBehaviorStation(Station):
     def set_index_pin_off(self):
         index_pin = self.parallel_port['index_pin']
         self.set_pin_off(index_pin)
-        
+
     def set_frame_pin_on(self):
         frame_pin = self.parallel_port['frame_pin']
         self.set_pin_on(frame_pin)

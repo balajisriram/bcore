@@ -68,8 +68,8 @@ class PhaseSpec(object):
 
     def on_exit(self,trial_record, **kwargs):
         return trial_record
-    
-    def on_frame(self,trial_record, **kwargs):
+
+    def on_frame(self,station, trial_record, **kwargs):
         station._window.flip()
 
 
@@ -119,7 +119,7 @@ class StimPhaseSpec(PhaseSpec):
         trial_record['stim_off_time'] = station._clocks['trial_clock'].getTime()
         station.set_frame_pin_off()
         return trial_record
-        
+
     def on_frame(self,station,trial_record,**kwargs):
         station.set_frame_pin_off()
         station._window.flip()
