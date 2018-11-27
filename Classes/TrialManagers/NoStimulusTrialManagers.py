@@ -48,6 +48,7 @@ class LickForReward(object):
     """
     _Phases = None
     _Cached_Stimuli = None
+    _simulation = False
 
     def __init__(self,
                  name,
@@ -70,12 +71,12 @@ class LickForReward(object):
         self.punish_misses = punish_misses
 
         self.itl = (0., 0., 0.,)
-
-        if not self.verify_params_ok():
-            ValueError('LickForReward::input values are bad')
+        
+        # check if values are ok
+        self.verify_params_ok()
 
     def __repr__(self):
-        return "LickForReward trial manager"
+        return "LickForReward trial manager object"
 
     def verify_params_ok(self):
         assert isinstance(self.trial_start_sound_on,bool),'trial_start_sound_on needs to be boolean'
@@ -189,7 +190,7 @@ class LickForReward(object):
         if self.punish_misses:
             self._Phases.append(PhaseSpec(
                 phase_number=2,
-                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(1.,1.,1.,),autoLog=False),
                 stimulus_update_fn=LickForReward.do_nothing_to_stim,
                 stimulus_details=stimulus_details,
                 transitions={do_nothing: 3, port_details['target_ports']:2},
@@ -202,7 +203,7 @@ class LickForReward(object):
         else:
             self._Phases.append(PhaseSpec(
                 phase_number=2,
-                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(1.,1.,1.,),autoLog=False),
                 stimulus_update_fn=LickForReward.do_nothing_to_stim,
                 stimulus_details=stimulus_details,
                 transitions={do_nothing: None, port_details['target_ports']:2},
@@ -231,7 +232,7 @@ class LickForReward(object):
         # punishment phase spec
         self._Phases.append(PunishmentPhaseSpec(
             phase_number=4,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(-1.,-1.,-1.,),autoLog=False),
             stimulus_details=None,
             stimulus_update_fn=LickForReward.do_nothing_to_stim,
             transitions=None,
@@ -252,6 +253,7 @@ class LickForReward(object):
         trial_record['trial_number'] = 0
         quit = False
         subject = DefaultVirtual()
+        self._simulation = True
         while not quit:
             station._clocks['trial_clock'].reset()
             trial_record,quit = self.do_trial(trial_record=trial_record,station=station,subject=subject,compiled_record=None,quit=quit)
