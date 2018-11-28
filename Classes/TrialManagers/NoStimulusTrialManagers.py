@@ -25,11 +25,10 @@ __status__ = "Production"
     2. Figure out a way to send subject into _setup_phases. Need it for reward and timeout values
 """
 ##########################################################################################
-##########################################################################################
 ########################### NO RESPONSE TRIAL MANAGERS ###################################
 ##########################################################################################
-##########################################################################################
 
+##################################### LICK FOR REWARD ####################################
 class LickForReward(object):
     """
         LICKFORREWARD defines a trial manager where rewards are provided for licking
@@ -123,7 +122,7 @@ class LickForReward(object):
         port_details['distractor_ports'] = None
 
         delay_frame_num = np.round(self.sample_delay()*Hz)
-        response_frame_num = np.round(self.response_duration)
+        response_frame_num = np.round(self.response_duration*Hz)
 
         stimulus = {}
         stimulus['delay_distribution'] = self.delay_distribution
@@ -153,11 +152,15 @@ class LickForReward(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
+        
+        # sounds
         if self.trial_start_sound_on:
             start_sound = (station._sounds['trial_start_sound'], 0.050)
         else:
             start_sound = None
-
+        go_sound = (station._sounds['go_sound'],0.1)
+        
+        # deal with the phases
         # delay phase
         if self.punish_delay_response:
             self._Phases.append(PhaseSpec(
@@ -165,7 +168,7 @@ class LickForReward(object):
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
                 stimulus_update_fn=LickForReward.do_nothing_to_stim,
                 stimulus_details=stimulus_details,
-                transitions={do_nothing: 1, port_details['target_ports']: 3},
+                transitions={do_nothing: 1, port_details['target_ports']:3},
                 frames_until_transition=delay_frame_num,
                 auto_trigger=False,
                 phase_type='stimulus',
@@ -199,7 +202,7 @@ class LickForReward(object):
                 phase_type='stimulus',
                 phase_name='delay-stim',
                 hz=hz,
-                sounds_played=start_sound))
+                sounds_played=go_sound))
         else:
             self._Phases.append(PhaseSpec(
                 phase_number=2,
@@ -212,7 +215,7 @@ class LickForReward(object):
                 phase_type='stimulus',
                 phase_name='delay-stim',
                 hz=hz,
-                sounds_played=start_sound))
+                sounds_played=go_sound))
 
         # reward phase spec
         self._Phases.append(RewardPhaseSpec(
@@ -416,6 +419,24 @@ class LickForReward(object):
         else:
             return False
 
+
+class RandomSquirtsOfWater(LickForReward):
+    def __init__(self,
+                 name = 'DefaultRSW_ConstantDelay_1s',
+                 reinforcement_manager=ConstantReinforcement(),
+                 delay_distribution = ('Constant',1.),
+                 response_duration = 1.,**kwargs):
+        self.ver = Ver('0.0.1')
+        super(RandomSquirtsOfWater, self).__init__(name=name,
+                                                   reinforcement_manager=reinforcement_manager,
+                                                   trial_start_sound_on=False,
+                                                   delay_distribution=delay_distribution,
+                                                   punish_delay_response=False,
+                                                   response_duration=response_duration,
+                                                   auto_reward=True,
+                                                   punish_misses=False, **kwargs)
+
+##################################### RUN FOR REWARD #####################################
 class RunForReward(object):
     """
         RUNFORREWARD defines a trial manager where rewards are provided for running

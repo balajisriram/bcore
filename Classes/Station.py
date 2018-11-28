@@ -176,11 +176,12 @@ class Station(object):
 
         self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
         self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
+        self._sounds['go_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.25,hamming=True)
 
         self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['reward_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
+        self._sounds['punishment_sound'] = psychopy.sound.Sound('C#',stereo=0,secs=0.1,hamming=True)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(400,stereo=0,secs=0.1,hamming=True)
         # try_again_array = np.random.randn(nSamples)
         # try_again_array[try_again_array>1] = 1
         # try_again_array[try_again_array<-1] = -1

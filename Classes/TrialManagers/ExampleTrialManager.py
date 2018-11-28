@@ -21,8 +21,11 @@ class ExampleTrialManager(object):
         self.input_feature_2 = input_feature_2
         
         # do QC on the inputs
-        assert input_feature_1=='default1','EXAMPLETRIALMANAGER::INIT::input_feature_1 is incorrect'
-        assert input_feature_2=='default2','EXAMPLETRIALMANAGER::INIT::input_feature_2 is incorrect'
+        self.verify_params_ok()
+    
+    def verify_params_ok(self):
+        assert self.input_feature_1=='default1','EXAMPLETRIALMANAGER::INIT::input_feature_1 is incorrect'
+        assert self.input_feature_2=='default2','EXAMPLETRIALMANAGER::INIT::input_feature_2 is incorrect'
         
     @property
     def n_afc():
