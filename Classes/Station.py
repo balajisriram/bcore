@@ -101,7 +101,9 @@ def compile_records(compiled_record, trial_record):
     return compiled_record
 
 
-
+####################################################################
+####################### CLASSES FOR STATIONS #######################
+####################################################################
 class Station(object):
     """
         STATION contains all the relevant details and interfaces to run
@@ -751,6 +753,10 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
     def close_all_valves(self):
         print('Closing all valves')
 
+    def initialize(self):
+        self.initialize_display(display=self.display)
+        self.initialize_sounds()
+        self.close_all_valves()
 
 def make_standard_behavior_station():
     pass
