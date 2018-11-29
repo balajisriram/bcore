@@ -643,7 +643,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = np.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
-
+        self._sounds['go_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.25,hamming=True)
         self._sounds['request_sound'] = self._sounds['keep_going_sound']
         self._sounds['stim_start_sound'] = self._sounds['trial_start_sound']
 
@@ -654,6 +654,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         val = np.matlib.repmat(val,2,1)
         val = val.T
         self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
+        self._sounds['reward_sound'] = psychopy.sound.Sound(val,hamming=True)
 
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)

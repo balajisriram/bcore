@@ -70,7 +70,7 @@ class LickForReward(object):
         self.punish_misses = punish_misses
 
         self.itl = (0., 0., 0.,)
-        
+
         # check if values are ok
         self.verify_params_ok()
 
@@ -152,14 +152,14 @@ class LickForReward(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        
+
         # sounds
         if self.trial_start_sound_on:
             start_sound = (station._sounds['trial_start_sound'], 0.050)
         else:
             start_sound = None
         go_sound = (station._sounds['go_sound'],0.1)
-        
+
         # deal with the phases
         # delay phase
         if self.punish_delay_response:
@@ -273,8 +273,10 @@ class LickForReward(object):
         # returns quit and trial_record
         # resetup the window according to the itl
         did_nothing = ()
+
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
+            print('LICKFORREWARD:DO_TRIAL::Station not ok for trial manager')
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
@@ -312,6 +314,8 @@ class LickForReward(object):
 
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
+            print('LICKFORREWARD:DO_TRIAL::current_phase_num::',current_phase_num)
+            print('LICKFORREWARD:DO_TRIAL::frames_until_transition::',frames_until_transition)
             stim = phase.stimulus
             stim_details = phase.stimulus_details
             transition = phase.transitions
