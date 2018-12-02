@@ -52,6 +52,20 @@ def get_lick_for_reward_protocol():
 
     return SequentialProtocol(training_steps=training_steps, name='lick_for_reward_biogen_09142018')
 
+def get_classical_conditioning_protocol():
+    training_steps = [TrainingStep(name='classical_conditioning_notimeoff_repeatindefinitely',
+                                    trial_manager=ClassicalConditioning(name='StandardClassicalConditioning',
+                                                 reinforcement_manager=ConstantReinforcement(fraction_reward_sound_in_on=1,fraction_penalty_sound_is_on=0.1),
+                                                 delay_distribution = ('Gaussian',[9,4]),
+                                                 punish_delay_response = False,
+                                                 response_duration = 1.,),
+                                    session_manager=NoTimeOff(),
+                                    criterion=RepeatIndefinitely()),]
+
+    return SequentialProtocol(training_steps=training_steps, name='classical_conditioning_12022018')
+    
 def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
-    if name=='lick_for_reward_biogen_09142018':
+    if name in ['lick_for_reward_biogen_09142018']:
         return get_lick_for_reward_protocol()
+    elif name in ['classical_conditioning_protocol_12022018','ccp']:
+        return get_classical_conditioning_protocol()
