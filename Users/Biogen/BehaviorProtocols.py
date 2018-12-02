@@ -7,10 +7,10 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-from BCore.Classes.Protocol import SequentialProtocol
+from BCore.Classes.Protocol import SequentialProtocol, TrainingStep
 from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion, PerformanceCriterion
 from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.NoStimulusTrialManagers import LickForReward
+from BCore.Classes.TrialManagers.NoStimulusTrialManagers import LickForReward, ClassicalConditioning
 from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings
 from BCore.Classes.ReinforcementManager import ConstantReinforcement
 
@@ -63,7 +63,7 @@ def get_classical_conditioning_protocol():
                                     criterion=RepeatIndefinitely()),]
 
     return SequentialProtocol(training_steps=training_steps, name='classical_conditioning_12022018')
-    
+
 def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
     if name in ['lick_for_reward_biogen_09142018']:
         return get_lick_for_reward_protocol()

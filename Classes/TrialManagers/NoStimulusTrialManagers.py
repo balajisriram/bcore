@@ -427,8 +427,8 @@ class LickForReward(object):
 class ClassicalConditioning(object):
     """
         CLASSICALCONDITIONING defines a trial manager where rewards are provided directly.
-        Every trial starts with a random delay, after which auditory go-signal is 
-        provided. We measure 
+        Every trial starts with a random delay, after which auditory go-signal is
+        provided. We measure
         Requires:
             reinforcement_manager: should define reward on a per-trial basis
             delay_distribution: This is the duration to go-signal
@@ -438,8 +438,8 @@ class ClassicalConditioning(object):
                                 ('FlatHazard',[pctile,val,fixed,max])
             go_signal: can be psychopy.visual object or psychopy.sound object or None
             response_duration: float (seconds)
-            
-            TODO: 
+
+            TODO:
             1. include go_signal. currently only psychopy.visual and psuchopy.sound object
     """
     _Phases = None
@@ -456,12 +456,12 @@ class ClassicalConditioning(object):
         self.delay_distribution = delay_distribution
         self.go_signal = go_signal
         self.response_duration = response_duration
-        
+
         self.itl = (0., 0., 0.,)
-        
+
         # check if values are ok
         self.verify_params_ok()
-                                                   
+
     def __repr__(self):
         return "ClassicalConditioning trial manager object"
 
@@ -488,13 +488,13 @@ class ClassicalConditioning(object):
             delay = fixed+np.random.exponential(p)
             if delay>max: delay=max
             return delay
-            
+
     def choose_resolution(self, station, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
-        
+
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
@@ -509,10 +509,6 @@ class ClassicalConditioning(object):
         stimulus['delay_distribution'] = self.delay_distribution
         stimulus['delay_frame_num'] = delay_frame_num
         stimulus['response_frame_num'] = response_frame_num
-        stimulus['trial_start_sound_on'] = self.trial_start_sound_on
-        stimulus['punish_delay_response'] = self.punish_delay_response
-        stimulus['auto_reward'] = self.auto_reward
-        stimulus['punish_misses'] = self.punish_misses
 
         return stimulus,resolution,port_details,delay_frame_num,response_frame_num
 
@@ -532,7 +528,7 @@ class ClassicalConditioning(object):
         # Just display stim
         do_nothing = ()
         go_sound = (station._sounds['go_sound'],0.1)
-        
+
         # deal with the phases
         # delay phase
         self._Phases.append(PhaseSpec(
@@ -546,7 +542,7 @@ class ClassicalConditioning(object):
             phase_type='stimulus',
             phase_name='delay_phase',
             hz=hz,
-            sounds_played=start_sound))
+            sounds_played=None))
 
         # response phase
         self._Phases.append(PhaseSpec(
@@ -580,13 +576,13 @@ class ClassicalConditioning(object):
     @staticmethod
     def do_nothing_to_stim(stimulus,details):
         pass
-        
+
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
 
         # check if okay to run the trial manager with the station
-        
+
         """
             TODO:
             (1) self.station_ok_for_tm to be created
@@ -632,6 +628,7 @@ class ClassicalConditioning(object):
 
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
+            print(frames_until_transition)
             stim = phase.stimulus
             stim_details = phase.stimulus_details
             transition = phase.transitions
@@ -731,7 +728,9 @@ class ClassicalConditioning(object):
         station.set_trial_pin_off()
         return trial_record,quit
 
-    
+    def station_ok_for_tm(self,station):
+        return True
+
 
 
 ##################################### RUN FOR REWARD #####################################
