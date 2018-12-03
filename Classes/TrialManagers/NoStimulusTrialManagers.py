@@ -423,7 +423,7 @@ class LickForReward(object):
         else:
             return False
 
-
+################################# CLASSICALCONDITIONING ##################################
 class ClassicalConditioning(object):
     """
         CLASSICALCONDITIONING defines a trial manager where rewards are provided directly.
@@ -592,6 +592,8 @@ class ClassicalConditioning(object):
             trial_record['correct'] = None
             trial_record['errored_out'] = True
             return trial_record,quit
+        
+        do_nothing = ()
 
 
         ## _setup_phases
@@ -628,7 +630,6 @@ class ClassicalConditioning(object):
 
             # collect details about the phase
             frames_until_transition = phase.frames_until_transition
-            print(frames_until_transition)
             stim = phase.stimulus
             stim_details = phase.stimulus_details
             transition = phase.transitions
@@ -706,14 +707,20 @@ class ClassicalConditioning(object):
                 # phase is done when there are no more frames in the phase or is we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
                 frames_until_transition = frames_until_transition-1
+                RuntimeError('Check if there is an option for do_nothing and if there is, implement that. Otherwise fail')
                 frames_led_to_transition = False
-                if frames_until_transition==0:
+                if frames_until_transition==0 and do_nothing in transition:
                     frames_led_to_transition = True
-                    if transition: current_phase_num = transition[None] - 1
-                    else: current_phase_num = None # the last phase has no
+                    current_phase_num = transition[do_nothing]
+                elif frames_until_transition==0 and do_nothing not in transition:
+                    current_phase_num = None
+                    trial_done = True
 
                 if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
+                    if sound: 
+                        sound.stop()
+                        sound_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
                     trial_record['manual_quit'] = True
