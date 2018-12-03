@@ -587,14 +587,16 @@ class ClassicalConditioning(object):
             TODO:
             (1) self.station_ok_for_tm to be created
         """
+        from psychopy import logging
+        logging.console.setLevel(logging.ERROR)
+
         if not self.station_ok_for_tm(station):
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
             return trial_record,quit
-        
-        do_nothing = ()
 
+        do_nothing = ()
 
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
@@ -707,7 +709,6 @@ class ClassicalConditioning(object):
                 # phase is done when there are no more frames in the phase or is we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
                 frames_until_transition = frames_until_transition-1
-                RuntimeError('Check if there is an option for do_nothing and if there is, implement that. Otherwise fail')
                 frames_led_to_transition = False
                 if frames_until_transition==0 and do_nothing in transition:
                     frames_led_to_transition = True
@@ -723,9 +724,11 @@ class ClassicalConditioning(object):
                         sound_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
+                    print('manual_quitted')
                     trial_record['manual_quit'] = True
                     trial_record['correct'] = None
                 quit = quit or manual_quit
+
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)
 
