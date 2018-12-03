@@ -59,10 +59,10 @@ class PhaseSpec(object):
         self.phase_name = phase_name
         self.pins_to_trigger = pins_to_trigger
         self.sounds_played = sounds_played
-        
+
         do_nothing = ()
         if frames_until_transition != float('inf'):
-            assert (do_nothing in transitions) or (transitions==None), "PHASESPEC:__INIT__::frames_until_transition is finite without a policy for no_response"
+            assert (transitions==None) or (do_nothing in transitions), "PHASESPEC:__INIT__::frames_until_transition is finite without a policy for no_response"
 
     def __repr__(self):
         return "PhaseSpec object"
