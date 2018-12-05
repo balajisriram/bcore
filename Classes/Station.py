@@ -288,7 +288,7 @@ class StandardVisionBehaviorStation(Station):
             pPort['center_port'] = 10
             pPort['right_port'] = 12
             pPort['left_port'] = 13
-            pPort['port_pins'] = [12, 10, 13]
+            pPort['port_pins'] = [13, 10, 12]
             pPort['index_pin'] = 8
             pPort['frame_pin'] = 9
             pPort['trial_pin'] = 6
@@ -421,9 +421,11 @@ class StandardVisionBehaviorStation(Station):
 
     def read_ports(self):
         out = [False, False, False]
+        port_names = ['left_port','center_port','right_port']
         for i,port in enumerate(self.parallel_port['port_pins']):
             out[i] = self._parallel_port_conn.readPin(port)
-        return out
+        active_ports = [x for x,y in zip(port_names,out) if y]
+        return active_ports
 
     def open_valve(self, valve):
         valve_pin = self.parallel_port[valve]
@@ -659,9 +661,12 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
 
-    def read_port(self):
-        out = self._parallel_port_conn.readPin(self.parallel_port['response_port'])
-        return out
+    def read_ports(self):
+        port_names = ['response_port']
+        if self._parallel_port_conn.readPin(self.parallel_port['port_pins'][0]):
+            return ['response_port']
+        else:
+            return []
 
     def open_valve(self):
         valve_pin = self.parallel_port['reward_valve']
