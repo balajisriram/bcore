@@ -746,8 +746,8 @@ class AFCGratings(object):
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
-        all_ports = ('L','C','R')
-        request_port = 'C'
+        all_ports = ('left_port','center_port','right_port')
+        request_port = 'center_port'
         response_ports = tuple(np.setdiff1d(all_ports,request_port))
         target_port = np.random.choice(response_ports)
         distractor_port = tuple(np.setdiff1d(response_ports,target_port))
@@ -796,11 +796,12 @@ class AFCGratings(object):
         """
         (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
-        if port_details['target_port'] == 'L':
+        do_nothing = ()
+        if port_details['target_port'] == 'left_port':
             reward_valve = 'left_valve'
-        elif port_details['target_port'] == 'R':
+        elif port_details['target_port'] == 'right_port':
             reward_valve = 'right_valve'
-        elif port_details['target_port'] == 'C':
+        elif port_details['target_port'] == 'center_port':
             reward_valve = 'center_valve'
 
         if stimulus_details['duration']==float('inf'):
@@ -833,7 +834,7 @@ class AFCGratings(object):
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=AFCGratings.update_stimulus,
                     stimulus_details=stimulus_details,
-                    transitions={None: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
+                    transitions={do_nothing: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
                     frames_until_transition=frames_total,
                     auto_trigger=False,
                     phase_type='stimulus',
@@ -846,7 +847,7 @@ class AFCGratings(object):
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=AFCGratings.update_stimulus,
                     stimulus_details=stimulus_details,
-                    transitions={None: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
+                    transitions={do_nothing: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
                     frames_until_transition=frames_total,
                     auto_trigger=False,
                     phase_type='stimulus',
@@ -870,7 +871,7 @@ class AFCGratings(object):
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
                 stimulus_details=None,
-                transitions={None: 6},
+                transitions={do_nothing: 6},
                 frames_until_transition=reward_size,
                 auto_trigger=False,
                 phase_type='reinforcement',
@@ -883,7 +884,7 @@ class AFCGratings(object):
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0.,0.,0.,),autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
                 stimulus_details=None,
-                transitions={None: 6},
+                transitions={do_nothing: 6},
                 frames_until_transition=penalty_size,
                 auto_trigger=False,
                 phase_type='reinforcement',
@@ -946,7 +947,7 @@ class AFCGratings(object):
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
                 stimulus_details=None,
-                transitions={None: 5},
+                transitions={do_nothing: 5},
                 frames_until_transition=reward_size,
                 auto_trigger=False,
                 phase_type='reinforcement',
@@ -959,7 +960,7 @@ class AFCGratings(object):
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
                 stimulus_details=None,
-                transitions={None: 5},
+                transitions={do_nothing: 5},
                 frames_until_transition=penalty_size,
                 auto_trigger=False,
                 phase_type='reinforcement',

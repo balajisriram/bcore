@@ -584,8 +584,7 @@ class ClassicalConditioning(object):
         # check if okay to run the trial manager with the station
 
         """
-            TODO:
-            (1) self.station_ok_for_tm to be created
+            TODO: should running port be part of the logic??
         """
         from psychopy import logging
         logging.console.setLevel(logging.ERROR)
@@ -605,7 +604,7 @@ class ClassicalConditioning(object):
         current_phase_num = 0
 
         # was on will be used to check for new responses
-        was_on = {'L':False, 'C': False, 'R':False}
+        was_on = {'response_ports':False}
 
         # Zero out the trial clock
         trial_clock = station._clocks['trial_clock']
@@ -687,6 +686,7 @@ class ClassicalConditioning(object):
                 if len(response)>1:
                     error_out = True
                     trial_record['errored_out'] = True
+                    print('ClassicalConditioning:do_trial:errored out')
                 elif len(response)==1:
                     response = response[0]
                     try:
@@ -737,9 +737,13 @@ class ClassicalConditioning(object):
             if is_last_phase: trial_done = True
         station.set_trial_pin_off()
         return trial_record,quit
-
+    
+    @staticmethod
     def station_ok_for_tm(self,station):
-        return True
+        if station.__class__.__name__ in ['StandardKeyboardStation','StandardVisionHeadfixStation']:
+            return True
+        else:
+            return False
 
 
 
