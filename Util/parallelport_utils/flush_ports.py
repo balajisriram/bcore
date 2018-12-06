@@ -1,13 +1,13 @@
-import psychopy
-from psychopy import parallel
+import psychopy.parallel
 from datetime import datetime
 import time
 import numpy as np
 
-port = parallel.ParallelPort(address='/dev/parport0')
+port = psychopy.parallel.ParallelPort(address='/dev/parport0')
 
 start_time = time.time()
 for i in range(10):
+    print(port.readData())
     port.setData(3)
     time.sleep(0.05)
     port.setData(0)
