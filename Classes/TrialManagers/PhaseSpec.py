@@ -160,12 +160,13 @@ class RewardPhaseSpec(PhaseSpec):
                                              sounds_played = sounds_played,
                                              **kwargs)
         self.reward_valve = reward_valve
-        assert reward_valve in ['center_valve','left_valve','right_valve'], 'reward valve provided is unknown'
+        #assert reward_valve in ['center_valve','left_valve','right_valve'], 'reward valve provided is unknown'
 
     def __repr__(self):
         return "RewardPhaseSpec object"
 
     def on_enter(self,station,trial_record,**kwargs):
+        station.open_valve(self.reward_valve)
         trial_record['correct'] = True
         trial_record['reward_duration'] = station._clocks['trial_clock'].getTime()
         return trial_record

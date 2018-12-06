@@ -668,20 +668,16 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         else:
             return []
 
-    def open_valve(self):
-        valve_pin = self.parallel_port['reward_valve']
-        val = list('{0:08b}'.format(self._parallel_port_conn.readData()))
-        val[valve_pin-2] = '1'
-        self._parallel_port_conn.setData(int(''.join(val),2))
+    def open_valve(self, valve):
+        valve_pin = self.parallel_port[valve]
+        self.set_pin_on(valve_pin)
 
-    def close_valve(self):
-        valve_pin = self.parallel_port['reward_valve']
-        val = list('{0:08b}'.format(self._parallel_port_conn.readData()))
-        val[valve_pin-2] = '0'
-        self._parallel_port_conn.setData(int(''.join(val),2))
+    def close_valve(self,valve):
+        valve_pin = self.parallel_port[valve]
+        self.set_pin_off(valve_pin)
 
     def close_all_valves(self):
-        self.close_valve()
+        self.close_valve('reward_valve')
 
 
 class StandardKeyboardStation(StandardVisionBehaviorStation):

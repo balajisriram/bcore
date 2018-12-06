@@ -551,7 +551,7 @@ class ClassicalConditioning(object):
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
             stimulus_details=stimulus_details,
             transitions={do_nothing: 2},
-            frames_until_transition=delay_frame_num,
+            frames_until_transition=response_frame_num,
             auto_trigger=False,
             phase_type='stimulus',
             phase_name='delay-stim',
@@ -571,7 +571,7 @@ class ClassicalConditioning(object):
             phase_name='delay_phase',
             hz=hz,
             sounds_played=(station._sounds['reward_sound'], ms_reward_sound/1000.),
-            reward_valve='center_valve'))
+            reward_valve='reward_valve'))
 
     @staticmethod
     def do_nothing_to_stim(stimulus,details):
@@ -604,7 +604,7 @@ class ClassicalConditioning(object):
         current_phase_num = 0
 
         # was on will be used to check for new responses
-        was_on = {'response_ports':False}
+        was_on = {'response_port':False}
 
         # Zero out the trial clock
         trial_clock = station._clocks['trial_clock']
@@ -710,16 +710,19 @@ class ClassicalConditioning(object):
                 # however we can stop playing the phase because we manual_quit or because we errored out
                 frames_until_transition = frames_until_transition-1
                 frames_led_to_transition = False
-                if frames_until_transition==0 and do_nothing in transition:
+                if frames_until_transition==0 and transition and do_nothing in transition:
                     frames_led_to_transition = True
                     current_phase_num = transition[do_nothing]
-                elif frames_until_transition==0 and do_nothing not in transition:
+                elif frames_until_transition==0 and transition is None:
                     current_phase_num = None
+                    phase_done = True
                     trial_done = True
-
+                    print('end of trial')
+                else:
+                    RuntimeError("transition cannot have frames go to zero without a do_nothing possibility")
                 if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
-                    if sound: 
+                    if sound:
                         sound.stop()
                         sound_done = True
                 manual_quit = station.check_manual_quit()
@@ -737,9 +740,9 @@ class ClassicalConditioning(object):
             if is_last_phase: trial_done = True
         station.set_trial_pin_off()
         return trial_record,quit
-    
+
     @staticmethod
-    def station_ok_for_tm(self,station):
+    def station_ok_for_tm(station):
         if station.__class__.__name__ in ['StandardKeyboardStation','StandardVisionHeadfixStation']:
             return True
         else:
