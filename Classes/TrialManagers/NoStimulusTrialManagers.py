@@ -8,8 +8,7 @@ import random
 import numpy as np
 import psychopy.visual,psychopy.core
 import pdb
-from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
-                                NOT_STARTED, FOREVER)
+from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED, NOT_STARTED, FOREVER)
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -438,6 +437,10 @@ class ClassicalConditioning(object):
                                 ('FlatHazard',[pctile,val,fixed,max])
             go_signal: can be psychopy.visual object or psychopy.sound object or None
             response_duration: float (seconds)
+            
+            VERSION HISTORY:
+            0.0.1: Basic Functionality circa 12/01/2018
+            0.0.2: Reformulated Sound functionality.
 
             TODO:
             1. include go_signal. currently only psychopy.visual and psuchopy.sound object
@@ -450,7 +453,7 @@ class ClassicalConditioning(object):
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
                  response_duration = 1.,**kwargs):
-        self.ver = Ver('0.0.1')
+        self.ver = Ver('0.0.2')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
         self.delay_distribution = delay_distribution
@@ -527,7 +530,12 @@ class ClassicalConditioning(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        go_sound = (station._sounds['go_sound'],0.1)
+        
+        # sounds
+        go_sound = station._sounds['go_sound']
+        go_sound.secs = 0.1
+        reward_sound = station._sounds['reward_sound']
+        reward_sound.secs = ms_reward_sound/1000.
 
         # deal with the phases
         # delay phase
@@ -556,7 +564,7 @@ class ClassicalConditioning(object):
             phase_type='stimulus',
             phase_name='delay-stim',
             hz=hz,
-            sounds_played=go_sound))
+            sounds_played=[go_sound]))
 
         # reward phase spec
         self._Phases.append(RewardPhaseSpec(
@@ -570,7 +578,7 @@ class ClassicalConditioning(object):
             phase_type='inter-trial',
             phase_name='delay_phase',
             hz=hz,
-            sounds_played=(station._sounds['reward_sound'], ms_reward_sound/1000.),
+            sounds_played=[reward_sound],
             reward_valve='reward_valve'))
 
     @staticmethod
@@ -638,16 +646,7 @@ class ClassicalConditioning(object):
                 is_last_phase = True
             else:
                 is_last_phase = False
-            auto_trigger = phase.auto_trigger
-            if phase.sounds_played:
-                sound = phase.sounds_played[0]
-                sound_duration = phase.sounds_played[1]
-                sound.seek(0.)
-                sound_started = False
-                sound_done = False
-                sound_timer = psychopy.core.CountdownTimer(sound_duration)
-            else:
-                sound = None
+            auto_trigger = phase.auto_trigger 
 
             # save relevant data into phase_data
             phase_data = {}
@@ -662,16 +661,9 @@ class ClassicalConditioning(object):
             trial_record = phase.on_enter(trial_record=trial_record, station=station)
             while not phase_done and not error_out and not quit:
                 # deal with sounds
-                if sound:
-                    if not sound_started:
-                        sound.play()
-                        sound_timer.reset()
-                        sound_started = True
-
-                    if sound_timer.getTime() <0 and not sound_done:
-                        sound.stop()
-                        sound_done = True
-
+                if phase.sounds_played:
+                    for snd in phase.sounds_played:
+                        if snd.status==NOT_STARTED: snd.play()
                 # deal with stim
                 if stim:
                     stim.draw()
@@ -731,6 +723,9 @@ class ClassicalConditioning(object):
                     trial_record['manual_quit'] = True
                     trial_record['correct'] = None
                 quit = quit or manual_quit
+                
+                if (phase_done or quit) and phase.sounds_played:
+                    for snd in phase.sounds_played: snd.stop()
 
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)

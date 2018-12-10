@@ -6,6 +6,9 @@ import psychopy.parallel
 import psychopy.visual
 psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy as np
+from psychopy import prefs
+prefs.general['audioLib'] = ['sounddevice']
+import psychopy.sound
 
 from BCore.Classes.Hardware.Displays import StandardDisplay
 from BCore import get_base_directory, get_ip_addr, get_mac_address
@@ -163,32 +166,33 @@ class Station(object):
         raise NotImplementedError('Run doTrials() on a subclass')
 
     def initialize_sounds(self):
-        from psychopy import prefs
-        prefs.general['audioLib'] = ['sounddevice']
-        import psychopy.sound
+        self._sounds['trial_start_sound'] = psychopy.sound.Sound(440,stereo=0,secs=1.,hamming=True)
 
-        sampleRate=44100
-        secs=0.1
+        self._sounds['request_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
+        self._sounds['stim_start_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
+        self._sounds['go_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
+        self._sounds['keep_going_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
+        self._sounds['request_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
+        
+        self._sounds['correct_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
+        self._sounds['reward_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
+        
+        sampleRate,secs,f_punishment=(44100,2,[370,440])
         nSamples = int(secs * sampleRate)
         phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
+        val = np.full_like(phase,0.)
+        for f in f_punishment:
+            val += np.sin(f*phase)
+        val = np.matlib.repmat(val,2,1)
+        self._sounds['punishment_sound'] = psychopy.sound.Sound(val.T,hamming=True)
+        
+        val = 0.5*np.random.randn(1,nSamples)+0.5
+        val = np.matlib.repmat(val,2,1)
+        self._sounds['try_something_else'] = psychopy.sound.Sound(val.T,hamming=True)
+        
 
-        self._sounds['trial_start_sound'] = psychopy.sound.Sound('A',stereo=0,secs=0.1,hamming=True)
-
-        self._sounds['request_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
-        self._sounds['stim_start_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.1,hamming=True)
-        self._sounds['go_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.25,hamming=True)
-
-        self._sounds['correct_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        self._sounds['reward_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        self._sounds['punishment_sound'] = psychopy.sound.Sound('C#',stereo=0,secs=0.1,hamming=True)
-        self._sounds['trial_end_sound'] = psychopy.sound.Sound(400,stereo=0,secs=0.1,hamming=True)
-        # try_again_array = np.random.randn(nSamples)
-        # try_again_array[try_again_array>1] = 1
-        # try_again_array[try_again_array<-1] = -1
-        # print(try_again_array.min())
-        # print(try_again_array.max())
-
-        # self._sounds['try_again_sound'] = psychopy.sound.Sound(try_again_array,stereo=0,secs=secs)
+        self._sounds['trial_end_sound'] = psychopy.sound.Sound(587.33,stereo=0,secs=1.,hamming=True)
 
     def _rewind_sounds(self,time=0.):
         for sound in self._sounds:
@@ -620,47 +624,6 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
     def __repr__(self):
         return "StandardVisionHeadfixStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
 
-    def initialize_sounds(self):
-        from psychopy import prefs
-        prefs.general['audioLib'] = ['sounddevice']
-        import psychopy.sound
-
-        sampleRate=44100
-        secs=1
-        nSamples = int(secs * sampleRate)
-        phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
-
-        f_keep_going = [300,600,1200,2400,4800,9600,19200]
-        val = np.full_like(phase,0.)
-        for f in f_keep_going:
-            val += np.sin(f*phase)
-        val = np.matlib.repmat(val,2,1)
-        val = val.T
-        self._sounds['keep_going_sound'] = psychopy.sound.Sound(val,hamming=True)
-
-        f_trial_start = [200,400,800,1600,3200,6400,12800]
-        val = np.full_like(phase,0.)
-        for f in f_trial_start:
-            val += np.sin(f*phase)
-        val = np.matlib.repmat(val,2,1)
-        val = val.T
-        self._sounds['trial_start_sound'] = psychopy.sound.Sound(val,hamming=True)
-        self._sounds['go_sound'] = psychopy.sound.Sound(300,stereo=0,secs=0.25,hamming=True)
-        self._sounds['request_sound'] = self._sounds['keep_going_sound']
-        self._sounds['stim_start_sound'] = self._sounds['trial_start_sound']
-
-        f_correct_sound = [400,800,1600,3200,6400,12800]
-        val = np.full_like(phase,0.)
-        for f in f_correct_sound:
-            val += np.sin(f*phase)
-        val = np.matlib.repmat(val,2,1)
-        val = val.T
-        self._sounds['correct_sound'] = psychopy.sound.Sound(val,hamming=True)
-        self._sounds['reward_sound'] = psychopy.sound.Sound(val,hamming=True)
-
-        self._sounds['punishment_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-        self._sounds['trial_end_sound'] = psychopy.sound.Sound(200,stereo=0,secs=0.1,hamming=True)
-
     def read_ports(self):
         port_names = ['response_port']
         if self._parallel_port_conn.readPin(self.parallel_port['port_pins'][0]):
@@ -766,17 +729,40 @@ def make_standard_behavior_station():
 
 
 if __name__ == '__main__':
-    import time
-    st = StandardVisionHeadfixStation()
-    st.initialize()
-    rect = psychopy.visual.Rect(st._window, lineColor=None,fillColor=(0.,0.,0.), width=0.5, height=0.5, units='norm')
+    from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED, NOT_STARTED, FOREVER)
+    import psychopy.core
+    nSamples = 4410
+    val = 0.5*np.random.randn(1,nSamples)+0.5
+    
+    # sampleRate,secs,f_punishment=(44100,0.02,[370,440])
+    # nSamples = int(secs * sampleRate)
+    # phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
+    # val = np.full_like(phase,0.)
+    # for f in f_punishment:
+        # val += np.sin(f*phase)
+    print(np.min(val))
+    print(np.max(val))
+    val = np.matlib.repmat(val,2,1)
+    punishment_sound = psychopy.sound.Sound(val.T,hamming=True)
+    
+    # print(val)
+    
+    punishment_sound.play()
+    while punishment_sound.status==PLAYING:
+        psychopy.core.wait(0.1)
+    punishment_sound.stop()
+    print(val.shape)
+    # import time
+    # st = StandardVisionHeadfixStation()
+    # st.initialize()
+    # rect = psychopy.visual.Rect(st._window, lineColor=None,fillColor=(0.,0.,0.), width=0.5, height=0.5, units='norm')
 
-    for i in range(256):
-        rect.fillColor=((2*i-255)/255., (2*i-255)/255., (2*i-255)/255.)
-        rect.draw()
-        st.set_pin_on(9)
-        st._window.flip()
-        st.set_pin_off(9)
+    # for i in range(256):
+        # rect.fillColor=((2*i-255)/255., (2*i-255)/255., (2*i-255)/255.)
+        # rect.draw()
+        # st.set_pin_on(9)
+        # st._window.flip()
+        # st.set_pin_off(9)
 
 
-    st.close_window()
+    # st.close_window()
