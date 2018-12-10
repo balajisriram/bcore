@@ -530,15 +530,16 @@ class ClassicalConditioning(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        
         # sounds
         go_sound = station._sounds['go_sound']
         go_sound.secs = 0.1
         go_sound.seek(0.)
+        go_sound.status = NOT_STARTED
         reward_sound = station._sounds['reward_sound']
         reward_sound.secs = ms_reward_sound/1000.
         reward_sound.seek(0.)
-        
+        reward_sound.status = NOT_STARTED
+
         # deal with the phases
         # delay phase
         self._Phases.append(PhaseSpec(
