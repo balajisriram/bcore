@@ -714,9 +714,6 @@ class ClassicalConditioning(object):
                     RuntimeError("transition cannot have frames go to zero without a do_nothing possibility")
                 if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
-                    if sound:
-                        sound.stop()
-                        sound_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
                     print('manual_quitted')
