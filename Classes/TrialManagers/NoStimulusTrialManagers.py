@@ -1,5 +1,5 @@
 from verlib import NormalizedVersion as Ver
-from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
+from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec,StimPhaseSpec
 from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
 from BCore.Classes.Station import StandardKeyboardStation
 from BCore.Classes.Subject import DefaultVirtual
@@ -426,8 +426,8 @@ class LickForReward(object):
 class ClassicalConditioning(object):
     """
         CLASSICALCONDITIONING defines a trial manager where rewards are provided directly.
-        Every trial starts with a random delay, after which auditory go-signal is
-        provided. We measure
+        Every trial starts with a random delay, after which auditory go-signal is 
+        provided. We measure 
         Requires:
             reinforcement_manager: should define reward on a per-trial basis
             delay_distribution: This is the duration to go-signal
@@ -442,7 +442,7 @@ class ClassicalConditioning(object):
             0.0.1: Basic Functionality circa 12/01/2018
             0.0.2: Reformulated Sound functionality.
 
-            TODO:
+            TODO: 
             1. include go_signal. currently only psychopy.visual and psuchopy.sound object
     """
     _Phases = None
@@ -452,7 +452,7 @@ class ClassicalConditioning(object):
                  reinforcement_manager=ConstantReinforcement(),
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
-                 response_duration = 1.,**kwargs):
+                 response_duration = 2..,**kwargs):
         self.ver = Ver('0.0.2')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
@@ -497,7 +497,7 @@ class ClassicalConditioning(object):
         W = 1920
         Hz = 60
         return (H,W,Hz)
-
+        
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
@@ -530,6 +530,7 @@ class ClassicalConditioning(object):
         self._Phases = []
         # Just display stim
         do_nothing = ()
+
         # sounds
         go_sound = station._sounds['go_sound']
         go_sound.secs = 0.1
@@ -540,6 +541,7 @@ class ClassicalConditioning(object):
         reward_sound.seek(0.)
         reward_sound.status = NOT_STARTED
 
+       
         # deal with the phases
         # delay phase
         self._Phases.append(PhaseSpec(
@@ -556,7 +558,7 @@ class ClassicalConditioning(object):
             sounds_played=None))
 
         # response phase
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(StimPhaseSpec(
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
