@@ -50,7 +50,7 @@ def load_bserver(path, subject_id):
 
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
-        sub = DefaultVirtual(subject_id=subject_id,reward=50.,timeout=1000.)
+        sub = DefaultVirtual(subject_id=subject_id,reward=20.,timeout=1000.)
         b_server.add_subject(sub)
     else:
         print("STANDALONERUN:LOAD_BSERVER:Subject {0} was found in server\n".format(subject_id))
