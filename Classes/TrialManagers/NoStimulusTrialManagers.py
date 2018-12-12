@@ -452,7 +452,7 @@ class ClassicalConditioning(object):
                  reinforcement_manager=ConstantReinforcement(),
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
-                 response_duration = 2..,**kwargs):
+                 response_duration = 2.,**kwargs):
         self.ver = Ver('0.0.2')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
