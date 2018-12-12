@@ -58,7 +58,7 @@ def get_classical_conditioning_protocol():
                                                  reinforcement_manager=ConstantReinforcement(fraction_reward_sound_in_on=1,fraction_penalty_sound_is_on=0.1),
                                                  delay_distribution = ('Gaussian',[9,4]),
                                                  punish_delay_response = False,
-                                                 response_duration = 1.,),
+                                                 response_duration = 2.,),
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
 
