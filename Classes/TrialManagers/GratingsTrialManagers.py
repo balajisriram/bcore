@@ -1,5 +1,6 @@
 from verlib import NormalizedVersion as Ver
 from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,StimPhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
+from BCore.Classes.TrialManagers.BaseTrialManagers import BaseTrialManager
 from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
 from BCore.Classes.Station import StandardKeyboardStation, add_or_find_in_LUT
 import psychopy
@@ -32,7 +33,7 @@ __status__ = "Production"
 ##########################################################################################
 ##########################################################################################
 
-class Gratings(object):
+class Gratings(BaseTrialManager):
     """
         GRATINGS defines a standard gratings trial manager
             deg_per_cycs
@@ -123,13 +124,27 @@ class Gratings(object):
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
-        phase. There is no "correct" and no responses are required/recorded
+        phase. Rewards may be provided and licks are recorded. There is no
+        concept of punishment
         """
         (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
+        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
+        reward_size = np.round(reward_size/1000*hz)
+
+        # sounds
+        trial_start_sound = station._sounds['trial_start_sound']
+        trial_start_sound.secs = 0.1
+        trial_start_sound.seek(0.)
+        reward_sound = station._sounds['reward_sound']
+        reward_sound.secs = 0.1
+        reward_sound.seek(0.)
+        
         self._Phases = []
         # Just display stim
         do_nothing = ()
+        
+        # the stimulus
         self._Phases.append(StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
@@ -141,21 +156,68 @@ class Gratings(object):
             phase_type='stimulus',
             phase_name='stim',
             hz=hz,
-            sounds_played=(station._sounds['trial_start_sound'], 0.050),
+            sounds_played=[trial_start_sound],
             is_last_phase=False))
-        self._Phases.append(PhaseSpec(
-            phase_number=2,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
-            stimulus_details=None,
-            stimulus_update_fn=Gratings.do_nothing_to_stim,
-            transitions={do_nothing: 2},
-            frames_until_transition=round(self.iti*hz),
-            auto_trigger=False,
-            phase_type='inter-trial',
-            phase_name='inter-trial',
-            hz=hz,
-            sounds_played=(station._sounds['trial_end_sound'], 0.050),
-            is_last_phase=True))
+            
+        # reward if its provided
+        if reward_size>0:
+            # pre-reward
+            self._Phases.append(PhaseSpec(
+                phase_number=2,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                transitions={do_nothing: 2},
+                frames_until_transition=6, # 6 frames to make the sound finish before reward
+                auto_trigger=False,
+                phase_type='pre-reward',
+                phase_name='pre-reward_phase_spec',
+                hz=hz,
+                sounds_played=None,
+                reward_valve='reward_valve'))
+            # reward
+            self._Phases.append(RewardPhaseSpec(
+                phase_number=3,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                transitions={do_nothing: 3},
+                frames_until_transition=reward_size,
+                auto_trigger=False,
+                phase_type='reward',
+                phase_name='reward_phase',
+                hz=hz,
+                sounds_played=[reward_sound],
+                reward_valve='reward_valve'))
+            # itl
+            self._Phases.append(PhaseSpec(
+                phase_number=4,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                transitions=None,
+                frames_until_transition=round(self.iti*hz),
+                auto_trigger=False,
+                phase_type='inter-trial',
+                phase_name='inter-trial',
+                hz=hz,
+                sounds_played=None,
+                is_last_phase=True))
+        else:
+            # itl
+            self._Phases.append(PhaseSpec(
+                phase_number=2,
+                stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
+                stimulus_details=None,
+                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                transitions=None,
+                frames_until_transition=round(self.iti*hz),
+                auto_trigger=False,
+                phase_type='inter-trial',
+                phase_name='inter-trial',
+                hz=hz,
+                sounds_played=None,
+                is_last_phase=True))
 
         self._compiler = Gratings.trial_compiler
 
@@ -200,6 +262,8 @@ class Gratings(object):
         trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
         trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
+        
+        
         station.set_trial_pin_on()
         for phase in self._Phases:
             frames_until_transition = phase.frames_until_transition
@@ -493,7 +557,7 @@ class Gratings_HardEdge(Gratings):
 ##########################################################################################
 ##########################################################################################
 
-class AFCGratings(object):
+class AFCGratings(BaseTrialManager):
     """
         AFCGRATINGS defines a standard gratings trial manager
             deg_per_cycs
@@ -1063,7 +1127,7 @@ class AFCGratings(object):
 ##########################################################################################
 ##########################################################################################
 
-class GNGGratings(object):
+class GNGGratings(BaseTrialManager):
     """
         GNGGRATINGS defines a standard gratings trial manager for Go-No-Go trials. Requires:
             deg_per_cycs

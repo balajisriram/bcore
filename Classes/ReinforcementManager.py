@@ -63,6 +63,38 @@ class ConstantReinforcement(ReinforcementManager):
         update_rm = False
         return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
 
+        
+class RandomReinforcement(ConstantReinforcement):
+
+    def __init__(self,
+                 probability = 0.01,
+                 reward_scalar = 1,
+                 request_reward_scalar = 1,
+                 penalty_scalar = 1,
+                 fraction_reward_sound_in_on = 0,
+                 fraction_penalty_sound_is_on = 0,
+                 request_mode = 'first',
+                 name = 'DefaultRandomReinforcement'):
+        self.ver = Ver("0.0.1")
+        super(RandomReinforcement, self).__init__(name=name, reward_scalar=reward_scalar,
+                                                  request_reward_scalar=request_reward_scalar,
+                                                  penalty_scalar=penalty_scalar,
+                                                  fraction_reward_sound_in_on=fraction_reward_sound_in_on,
+                                                  fraction_penalty_sound_is_on=fraction_penalty_sound_is_on,
+                                                  request_mode=request_mode)
+        self.probability=probability
+        assert self.probability>=0. and self.probability<=1., 'probability scalar between zero and one (inclusive)'
+
+    def __repr__(self):
+        return "RandomReinforcement object"
+
+    def calculate_reinforcement(self, subject, **kwargs):
+        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = 
+            super(RandomReinforcement,self).calculate_reinforcement(self, subject, **kwargs)
+        if np.random.rand()<self.probability:
+            return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
+        else:
+            return 0., 0., 0., 0., 0.
 
 class RewardNCorrectInARow(ReinforcementManager):
 

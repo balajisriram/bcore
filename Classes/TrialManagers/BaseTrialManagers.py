@@ -11,28 +11,12 @@ class BaseTrialManager(object):
         return "BaseTrialManager trial manager object"
 
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
-        # returns quit and trial_record
-        # resetup the window according to the itl
+        # returns quit and trial_record. Called by other trial managers
 
-        # check if okay to run the trial manager with the station
-
-        """
-            TODO: should running port be part of the logic??
-        """
         from psychopy import logging
         logging.console.setLevel(logging.ERROR)
 
-        if not self.station_ok_for_tm(station):
-            quit = True
-            trial_record['correct'] = None
-            trial_record['errored_out'] = True
-            return trial_record,quit
-
         do_nothing = ()
-
-        ## _setup_phases
-        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
-        station._key_pressed = []
 
         current_phase_num = 0
 
@@ -88,14 +72,11 @@ class BaseTrialManager(object):
                 # deal with sounds
                 if phase.sounds_played:
                     for snd in phase.sounds_played:
-                        if snd.NOT_STARTED: snd.play()
-                        elif snd.PLAYING: pass
-                        elif snd.STOPPED: snd.stop() # rewinds the sound for future use
-
+                        if snd.status==NOT_STARTED: snd.play()
                 # deal with stim
                 if stim:
                     stim.draw()
-                    if phase.phase_name=='stim':
+                    if self.draw_stim_onset_rect and phase.phase_type=='stim':
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
                 phase.on_frame(station=station,trial_record=trial_record)
@@ -106,7 +87,7 @@ class BaseTrialManager(object):
                 if len(response)>1:
                     error_out = True
                     trial_record['errored_out'] = True
-                    print('ClassicalConditioning:do_trial:errored out')
+                    print('BASETRIALMANAGER:DO_TRIAL:errored out')
                 elif len(response)==1:
                     response = response[0]
                     try:
@@ -126,7 +107,7 @@ class BaseTrialManager(object):
                     pass
 
                 # update the frames_until_transition and check if the phase is done
-                # phase is done when there are no more frames in the phase or is we flipped due to transition
+                # phase is done when there are no more frames in the phase or if we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
                 frames_until_transition = frames_until_transition-1
                 frames_led_to_transition = False
@@ -137,20 +118,20 @@ class BaseTrialManager(object):
                     current_phase_num = None
                     phase_done = True
                     trial_done = True
-                    print('end of trial')
+                    print('BASETRIALMANAGER:DO_TRIAL:end of trial')
                 else:
                     RuntimeError("transition cannot have frames go to zero without a do_nothing possibility")
                 if frames_led_to_transition or response_led_to_transition:
                     phase_done = True
-                    if sound:
-                        sound.stop()
-                        sound_done = True
                 manual_quit = station.check_manual_quit()
                 if manual_quit:
-                    print('manual_quitted')
+                    print('BASETRIALMANAGER:DO_TRIAL:manual quit')
                     trial_record['manual_quit'] = True
                     trial_record['correct'] = None
                 quit = quit or manual_quit
+                
+                if (phase_done or quit) and phase.sounds_played:
+                    for snd in phase.sounds_played: snd.stop()
 
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)
@@ -160,5 +141,4 @@ class BaseTrialManager(object):
             if is_last_phase: trial_done = True
         station.set_trial_pin_off()
         return trial_record,quit
-
 
