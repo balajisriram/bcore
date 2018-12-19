@@ -71,6 +71,7 @@ def get_auditory_go_protocol():
                                                  response_duration = 2.,),
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
+    return SequentialProtocol(training_steps=training_steps, name='auditory_go_12192018')
 
 def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
     if name in ['lick_for_reward_biogen_09142018']:
