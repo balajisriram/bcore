@@ -770,9 +770,9 @@ class AuditoryGoOnly(object):
     _Phases = None
     _Cached_Stimuli = None
     def __init__(self,
-                 name = 'DefaultCC_ConstantDelay_2s',
+                 name = 'DefaultAuditory_Go_ConstantDelay_2s',
                  reinforcement_manager=ConstantReinforcement(),
-                 delay_distribution = ('Constant',1.),
+                 delay_distribution = ('Constant',2.),
                  go_signal = None,
                  response_duration = 2.,**kwargs):
         self.ver = Ver('0.0.1')
