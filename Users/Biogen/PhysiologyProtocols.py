@@ -55,7 +55,7 @@ def get_short_duration_protocol():
     return StartsAtOneProtocol(training_steps=training_steps, name='short_duration_protocol_biogen_08292018')
 
 def get_phys_protocol_biogen(name='orientation_tuning_biogen_08292018'):
-    if name=='orientation_tuning_biogen_08292018':
+    if name in ['orientation_tuning_biogen_08292018','ortune']:
         return get_orientation_tuning_protocol()
-    elif name=='short_duration_biogen_08292018':
+    elif name in ['short_duration_biogen_08292018','orsdp']:
         return get_short_duration_protocol()

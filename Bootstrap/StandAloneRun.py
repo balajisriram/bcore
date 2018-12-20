@@ -18,6 +18,7 @@ from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboard
 # User specific protocols
 from BCore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
 from BCore.Users.Biogen.BehaviorProtocols import get_behavior_protocol_biogen
+from BCore.Users.Biogen import get_protocol_from_name
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -28,15 +29,6 @@ __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 SERVER_PORT = 12345
-
-def get_protocol_from_name(name):
-    if name in ['orientation_tuning_biogen_08292018','short_duration_biogen_08292018']:
-        return get_phys_protocol_biogen(name)
-    elif name in ['lick_for_reward_biogen_09142018','classical_conditioning_protocol_12022018','ccp','auditory_go_protocol_12192018','audgo']:
-        return get_behavior_protocol_biogen(name)
-    else:
-        raise ValueError('unknown protocol name')
-
 
 def load_bserver(path, subject_id):
     if not os.path.exists(path):
