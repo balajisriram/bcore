@@ -8,8 +8,6 @@ import random
 import numpy as np
 import psychopy.visual,psychopy.core
 import pdb
-from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
-                                NOT_STARTED, FOREVER)
 
 import traceback
 

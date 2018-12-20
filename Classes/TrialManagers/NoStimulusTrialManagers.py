@@ -454,6 +454,8 @@ class ClassicalConditioning(BaseTrialManager):
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
                  response_duration = 2.,**kwargs):
+
+        super(ClassicalConditioning,self).__init__()
         self.ver = Ver('0.0.2')
         self.reinforcement_manager = reinforcement_manager
         self.name = name

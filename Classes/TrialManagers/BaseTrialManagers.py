@@ -1,3 +1,8 @@
+from verlib import NormalizedVersion as Ver
+
+from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
+                                NOT_STARTED, FOREVER)
+
 ################################# BASETRIALMANAGER ##################################
 class BaseTrialManager(object):
     """
