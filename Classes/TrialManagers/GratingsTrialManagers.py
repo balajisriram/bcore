@@ -291,7 +291,7 @@ class Gratings(BaseTrialManager):
         compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
         compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
         compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
-        # compiled_details['radius_type'].append('None')
+        compiled_details['radius_type'].append('None')
         compiled_details['location'].append(trial_record['chosen_stim']['location'])
         compiled_details['H'].append(trial_record['chosen_stim']['H'])
         compiled_details['W'].append(trial_record['chosen_stim']['W'])
