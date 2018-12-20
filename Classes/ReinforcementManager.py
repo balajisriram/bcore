@@ -89,8 +89,7 @@ class RandomReinforcement(ConstantReinforcement):
         return "RandomReinforcement object"
 
     def calculate_reinforcement(self, subject, **kwargs):
-        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = 
-            super(RandomReinforcement,self).calculate_reinforcement(self, subject, **kwargs)
+        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = super(RandomReinforcement,self).calculate_reinforcement(self, subject, **kwargs)
         if np.random.rand()<self.probability:
             return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
         else:
