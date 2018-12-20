@@ -428,7 +428,7 @@ class StandardVisionBehaviorStation(Station):
         port_names = ['left_port','center_port','right_port']
         for i,port in enumerate(self.parallel_port['port_pins']):
             out[i] = self._parallel_port_conn.readPin(port)
-        active_ports = [x for x,y in zip(port_names,out) if y]
+        active_ports = [x for x,y in zip(port_names,out) if not y]
         return active_ports
 
     def open_valve(self, valve):
@@ -627,9 +627,9 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
     def read_ports(self):
         port_names = ['response_port']
         if self._parallel_port_conn.readPin(self.parallel_port['port_pins'][0]):
-            return ['response_port']
+            return [] # when the lick port is high then it is empty.
         else:
-            return []
+            return ['response_port'] # when the lick port is low, then there is licking
 
     def open_valve(self, valve):
         valve_pin = self.parallel_port[valve]
