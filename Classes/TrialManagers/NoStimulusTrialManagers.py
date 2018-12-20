@@ -462,6 +462,7 @@ class ClassicalConditioning(BaseTrialManager):
         self.response_duration = response_duration
 
         self.itl = (0., 0., 0.,)
+        self.iti = 1.
 
         # check if values are ok
         self.verify_params_ok()
@@ -549,7 +550,7 @@ class ClassicalConditioning(BaseTrialManager):
             phase_number=1,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
-            stimulus_details=stimulus_details,
+            stimulus_details=None,
             transitions={do_nothing: 1},
             frames_until_transition=delay_frame_num,
             auto_trigger=False,
@@ -563,7 +564,7 @@ class ClassicalConditioning(BaseTrialManager):
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
-            stimulus_details=stimulus_details,
+            stimulus_details=None,
             transitions={do_nothing: 2},
             frames_until_transition=response_frame_num,
             auto_trigger=False,
@@ -623,6 +624,361 @@ class ClassicalConditioning(BaseTrialManager):
         else:
             return False
 
+
+class AuditoryGoOnly(object):
+    """
+        AUDITORYGOONLY defines a trial manager Auditory go signals require response for
+        reward. Absence of response leads to error sounds
+        Requires:
+            reinforcement_manager: should define reward on a per-trial basis
+            delay_distribution: This is the duration to go-signal
+                                ('Constant',val)
+                                ('Uniform',[lo,hi])
+                                ('Gaussian',[mu,sd])
+                                ('FlatHazard',[pctile,val,fixed,max])
+            go_signal: can be psychopy.visual object or psychopy.sound object or None
+            response_duration: float (seconds)
+            
+            VERSION HISTORY:
+            0.0.1: Basic Functionality circa 12/13/2018
+
+            TODO: 
+            1. include go_signal. currently only psychopy.visual and psuchopy.sound object
+    """
+    _Phases = None
+    _Cached_Stimuli = None
+    def __init__(self,
+                 name = 'DefaultAuditory_Go_ConstantDelay_2s',
+                 reinforcement_manager=ConstantReinforcement(),
+                 delay_distribution = ('Constant',2.),
+                 go_signal = None,
+                 response_duration = 2.,**kwargs):
+        self.ver = Ver('0.0.1')
+        self.reinforcement_manager = reinforcement_manager
+        self.name = name
+        self.delay_distribution = delay_distribution
+        self.go_signal = go_signal
+        self.response_duration = response_duration
+
+        self.itl = (0., 0., 0.,)
+        self.iti = 1.
+
+        # check if values are ok
+        self.verify_params_ok()
+
+    def __repr__(self):
+        return "AuditoryGoOnly trial manager object"
+
+    def verify_params_ok(self):
+        assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distributoin are you using?'
+
+    def sample_delay(self):
+        if self.delay_distribution[0]=='Constant':
+            return self.delay_distribution[1]
+        elif self.delay_distribution[0]=='Uniform':
+            lo = self.delay_distribution[1][0]
+            hi = self.delay_distribution[1][1]
+            return np.abs(np.random.uniform(low=lo,high=hi))
+        elif self.delay_distribution[0]=='Gaussian':
+            mu = self.delay_distribution[1][0]
+            sd = self.delay_distribution[1][1]
+            return np.abs(np.random.normal(loc=mu,scale=sd)) # returning absolute values
+        elif self.delay_distribution[0]=='FlatHazard':
+            pctile = self.delay_distribution[1][0]
+            val = self.delay_distribution[1][1]
+            fixed = self.delay_distribution[1][2]
+            max = self.delay_distribution[1][3]
+            p = -val/np.log(1-pctile)
+            delay = fixed+np.random.exponential(p)
+            if delay>max: delay=max
+            return delay
+
+    def choose_resolution(self, station, **kwargs):
+        H = 1080
+        W = 1920
+        Hz = 60
+        return (H,W,Hz)
+        
+    def calc_stim(self, trial_record, station, **kwargs):
+        (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
+        resolution = (H,W,Hz)
+        port_details = {}
+        port_details['target_ports'] = 'response_port'
+        port_details['distractor_ports'] = None
+
+        delay_frame_num = np.round(self.sample_delay()*Hz)
+        response_frame_num = np.round(self.response_duration*Hz)
+
+        stimulus = {}
+        stimulus['delay_distribution'] = self.delay_distribution
+        stimulus['delay_frame_num'] = delay_frame_num
+        stimulus['response_frame_num'] = response_frame_num
+        return stimulus,resolution,port_details,delay_frame_num,response_frame_num
+
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
+        """
+        AuditoryGo:_setupPhases follows:
+            1. Delay Phase with duration sampled from delay_distribution
+            2. ResponsePhase with a GO sound with duration set by response_duration.
+            3    a. Response during response duration -> reward
+                 b. No response during response duration -> error sound
+            4. ITL   
+        """
+        (stimulus_details,resolution,port_details,delay_frame_num,response_frame_num) = self.calc_stim(trial_record=trial_record, station=station)
+        hz = resolution[2]
+        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = self.reinforcement_manager.calculate_reinforcement(subject=subject)
+        reward_size = np.round(reward_size/1000.*hz)
+        penalty_size = np.round(ms_penalty/1000.*hz)
+        iti_size = np.round(self.iti*hz)
+
+        self._Phases = []
+        # Just display stim
+        do_nothing = ()
+
+        # sounds
+        go_sound = station._sounds['go_sound']
+        go_sound.secs = 0.1
+        go_sound.seek(0.)
+        go_sound.status = NOT_STARTED
+        reward_sound = station._sounds['reward_sound']
+        reward_sound.secs = ms_reward_sound/1000.
+        reward_sound.seek(0.)
+        reward_sound.status = NOT_STARTED
+        punishment_sound = station._sounds['punishment_sound']
+        punishment_sound.seek(0.)
+        punishment_sound.status = NOT_STARTED
+
+       
+        # deal with the phases
+        # delay phase
+        self._Phases.append(PhaseSpec(
+            phase_number=1,
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_details=None,
+            transitions={do_nothing: 1},
+            frames_until_transition=delay_frame_num,
+            auto_trigger=False,
+            phase_type='stimulus',
+            phase_name='delay_phase',
+            hz=hz,
+            sounds_played=None))
+
+        # response phase
+        self._Phases.append(StimPhaseSpec(
+            phase_number=2,
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_details=None,
+            transitions={port_details['target_ports']: 2, do_nothing: 3},
+            frames_until_transition=response_frame_num,
+            auto_trigger=False,
+            phase_type='stimulus',
+            phase_name='delay-stim',
+            hz=hz,
+            sounds_played=[go_sound]))
+
+        # reward phase spec
+        self._Phases.append(RewardPhaseSpec(
+            phase_number=3,
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+            stimulus_details=None,
+            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            transitions={do_nothing: 4},
+            frames_until_transition=reward_size,
+            auto_trigger=False,
+            phase_type='reinforcement',
+            phase_name='reward_phase',
+            hz=hz,
+            sounds_played=[reward_sound],
+            reward_valve='reward_valve'))
+            
+        # punishment phase spec
+        self._Phases.append(PunishmentPhaseSpec(
+            phase_number=4,
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+            stimulus_details=None,
+            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            transitions={do_nothing: 4},
+            frames_until_transition=penalty_size,
+            auto_trigger=False,
+            phase_type='reinforcement',
+            phase_name='punishment_phase',
+            hz=hz,
+            sounds_played=[punishment_sound]))
+            
+        # itl
+        self._Phases.append(PhaseSpec(
+            phase_number=5,
+            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
+            stimulus_details=None,
+            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            transitions=None,
+            frames_until_transition=iti_size,
+            auto_trigger=False,
+            phase_type='inter-trial',
+            phase_name='iti_phase',
+            hz=hz,
+            sounds_played=None))
+
+    @staticmethod
+    def do_nothing_to_stim(stimulus,details):
+        pass
+
+    def do_trial(self, station, subject, trial_record, compiled_record,quit):
+        # returns quit and trial_record
+        # resetup the window according to the itl
+
+        # check if okay to run the trial manager with the station
+
+        """
+            TODO: should running port be part of the logic??
+        """
+        from psychopy import logging
+        logging.console.setLevel(logging.ERROR)
+
+        if not self.station_ok_for_tm(station):
+            quit = True
+            trial_record['correct'] = None
+            trial_record['errored_out'] = True
+            return trial_record,quit
+
+        do_nothing = ()
+
+        ## _setup_phases
+        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
+        station._key_pressed = []
+
+        current_phase_num = 0
+
+        # was on will be used to check for new responses
+        was_on = {'response_port':False}
+
+        # Zero out the trial clock
+        trial_clock = station._clocks['trial_clock']
+        trial_clock.reset()
+
+        trial_done = False
+        error_out = False
+
+        trial_record['errored_out'] = False
+        trial_record['manual_quit'] = False
+
+
+        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
+        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
+        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
+
+        trial_record['phase_data'] = []
+
+        station.set_trial_pin_on()
+        ### loop into trial phases
+        while not trial_done and not error_out and not quit:
+            # current_phase_num determines the phase
+            phase = self._Phases[current_phase_num]
+
+            # collect details about the phase
+            frames_until_transition = phase.frames_until_transition
+            stim = phase.stimulus
+            stim_details = phase.stimulus_details
+            transition = phase.transitions
+            if not transition:
+                is_last_phase = True
+            else:
+                is_last_phase = False
+            auto_trigger = phase.auto_trigger 
+
+            # save relevant data into phase_data
+            phase_data = {}
+            phase_data['phase_name'] = phase.phase_name
+            phase_data['phase_number'] = phase.phase_number
+            phase_data['enter_time'] = trial_clock.getTime()
+            phase_data['response'] = []
+            phase_data['response_time'] = []
+
+            # loop into phase
+            phase_done = False
+            trial_record = phase.on_enter(trial_record=trial_record, station=station)
+            while not phase_done and not error_out and not quit:
+                # deal with sounds
+                if phase.sounds_played:
+                    for snd in phase.sounds_played:
+                        if snd.status==NOT_STARTED: snd.play()
+                # deal with stim
+                if stim:
+                    stim.draw()
+                    if phase.phase_name=='stim':
+                        psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
+                    phase.stimulus_update_fn(stim,stim_details)
+                phase.on_frame(station=station,trial_record=trial_record)
+
+                # look for responses
+                response_led_to_transition = False
+                response = station.read_ports()
+                if len(response)>1:
+                    error_out = True
+                    trial_record['errored_out'] = True
+                    print('AuditoryGoOnly:do_trial:errored out')
+                elif len(response)==1:
+                    response = response[0]
+                    try:
+                        current_phase_num = transition[response]
+                        response_led_to_transition = True
+                    except KeyError:
+                        response_led_to_transition = False # that phase did not have a transition for that response
+                    except TypeError:
+                        assert is_last_phase, 'No reason why it should come here otherwise'
+                    finally:
+                        # logit but only if was_on wasnt already on
+                        if not was_on[response]:
+                            phase_data['response'].append(response)
+                            phase_data['response_time'].append(trial_clock.getTime())
+                    was_on[response] = True # flip was on to true after we used it to check for new events
+                else:
+                    pass
+
+                # update the frames_until_transition and check if the phase is done
+                # phase is done when there are no more frames in the phase or is we flipped due to transition
+                # however we can stop playing the phase because we manual_quit or because we errored out
+                frames_until_transition = frames_until_transition-1
+                frames_led_to_transition = False
+                if frames_until_transition==0 and transition and do_nothing in transition:
+                    frames_led_to_transition = True
+                    current_phase_num = transition[do_nothing]
+                elif frames_until_transition==0 and transition is None:
+                    current_phase_num = None
+                    phase_done = True
+                    trial_done = True
+                    print('end of trial')
+                else:
+                    RuntimeError("transition cannot have frames go to zero without a do_nothing possibility")
+                if frames_led_to_transition or response_led_to_transition:
+                    phase_done = True
+                manual_quit = station.check_manual_quit()
+                if manual_quit:
+                    print('manual_quitted')
+                    trial_record['manual_quit'] = True
+                    trial_record['correct'] = None
+                quit = quit or manual_quit
+                
+                if (phase_done or quit) and phase.sounds_played:
+                    for snd in phase.sounds_played: snd.stop()
+
+            trial_record = phase.on_exit(trial_record=trial_record, station=station)
+            trial_record['phase_data'].append(phase_data)
+
+            # when do we quit the trial? trial_done only when last phjase
+            # but we can exit if manual_quit or errored out
+            if is_last_phase: trial_done = True
+        station.set_trial_pin_off()
+        return trial_record,quit
+
+    @staticmethod
+    def station_ok_for_tm(station):
+        if station.__class__.__name__ in ['StandardKeyboardStation','StandardVisionHeadfixStation']:
+            return True
+        else:
+            return False
 
 
 ##################################### RUN FOR REWARD #####################################
