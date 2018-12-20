@@ -164,7 +164,7 @@ class Gratings(BaseTrialManager):
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
                 transitions={do_nothing: 2},
                 frames_until_transition=6, # 6 frames to make the sound finish before reward
                 auto_trigger=False,
@@ -178,7 +178,7 @@ class Gratings(BaseTrialManager):
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
                 transitions={do_nothing: 3},
                 frames_until_transition=reward_size,
                 auto_trigger=False,
@@ -192,7 +192,7 @@ class Gratings(BaseTrialManager):
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -207,7 +207,7 @@ class Gratings(BaseTrialManager):
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=Gratings.do_nothing_to_stim,
+                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -236,16 +236,13 @@ class Gratings(BaseTrialManager):
         if details['drift_frequency'] !=0:
             stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
 
-    @staticmethod
-    def do_nothing_to_stim(stimulus,details):
-        pass
-
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
         # resetup the window according to the itl
 
         # check if okay to run the trial manager with the station
         if not self.station_ok_for_tm(station):
+            print('GRATINGS:DO_TRIAL:Station not ok for TM')
             quit = True
             trial_record['correct'] = None
             trial_record['errored_out'] = True
@@ -254,56 +251,8 @@ class Gratings(BaseTrialManager):
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
         station._key_pressed = []
-        trial_record['enter_trial_loop'] = station._clocks['trial_clock'].getTime()
-        trial_record['correct'] = None
-
-        trial_record['reinforcement_manager_name'] = self.reinforcement_manager.name
-        trial_record['reinforcement_manager_class'] = self.reinforcement_manager.__class__.__name__
-        trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
         
-        
-        station.set_trial_pin_on()
-        for phase in self._Phases:
-            frames_until_transition = phase.frames_until_transition
-            phase_done = False
-            sound = phase.sounds_played
-            stim = phase.stimulus
-            stim_details = phase.stimulus_details
-            if phase.sounds_played:
-                sound = phase.sounds_played[0]
-                sound_duration = phase.sounds_played[1]
-                sound.seek(0.)
-                sound_started = False
-                sound_done = False
-                sound_timer = psychopy.core.CountdownTimer(sound_duration)
-            else:
-                sound = None
-            trial_record = phase.on_enter(station=station,trial_record=trial_record)
-            while not phase_done:
-                # deal with sounds
-                if sound:
-                    if not sound_started:
-                        sound.play()
-                        sound_timer.reset()
-                        sound_started = True
-
-                    if sound_timer.getTime() <0 and not sound_done:
-                        sound.stop()
-                        sound_done = True
-
-                # deal with stim
-                if stim:
-                    stim.draw()
-                    phase.stimulus_update_fn(stim,stim_details)
-                phase.on_frame(station=station,trial_record=trial_record)
-
-                # update the frames
-                frames_until_transition = frames_until_transition-1
-                if frames_until_transition==0: phase_done = True
-                quit = quit or station.check_manual_quit()
-            trial_record = phase.on_exit(station=station,trial_record=trial_record)
-        station.set_trial_pin_off()
-        trial_record['trial_compiler'] = Gratings.trial_compiler
+        trial_record,quit = super(Gratings,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
         return trial_record,quit
 
     @staticmethod
@@ -367,11 +316,15 @@ class Gratings_GaussianEdge(Gratings):
 
             RadiusType = "HardEdge"
             Scale = "ScaleToHeight"
+
+        VERSION HISTORY:
+        0.0.1 : first commit
+        0.0.2 : lean into Gratings subclass. Cleaned out method calls
     """
 
 
     def __init__(self, name, **kwargs):
-        self.ver = Ver('0.0.1')
+        self.ver = Ver('0.0.2')
         super(Gratings_GaussianEdge, self).__init__(name, **kwargs)
 
     def __repr__(self):
@@ -383,37 +336,14 @@ class Gratings_GaussianEdge(Gratings):
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
         phase. There is no "correct" and no responses are required/recorded
-        """
-        (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
-        hz = resolution[2]
-        self._Phases = []
-        # Just display stim
-        do_nothing = ()
-        self._Phases.append(StimPhaseSpec(
-            phase_number=1,
-            stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='gauss',autoLog=False),
-            stimulus_update_fn=Gratings.update_stimulus,
-            stimulus_details=stimulus_details,
-            transitions={do_nothing: 1},
-            frames_until_transition=frames_total,
-            auto_trigger=False,
-            phase_type='stimulus',
-            phase_name='stim',
-            hz=hz,
-            sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-        self._Phases.append(PhaseSpec(
-            phase_number=2,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
-            stimulus_details=None,
-            stimulus_update_fn=Gratings.do_nothing_to_stim,
-            transitions={do_nothing: 2},
-            frames_until_transition=round(self.iti*hz),
-            auto_trigger=False,
-            phase_type='inter-trial',
-            phase_name='inter-trial',
-            hz=hz,
-            sounds_played=(station._sounds['trial_end_sound'], 0.050)))
 
+        TODO:
+        1. add rewards to this
+        """
+        super(Gratings_GaussianEdge,self)._setup_phases(trial_record, station, **kwargs)
+        
+        # replace for the first phase
+        self._Phases[0].stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='gauss',autoLog=False)
         self._compiler = Gratings_GaussianEdge.trial_compiler
 
     @staticmethod
@@ -461,10 +391,14 @@ class Gratings_HardEdge(Gratings):
     """
         GRATINGS_HARDEDGE defines a standard gratings trial manager
         with hard edges for a view port
+
+        VERSION HISTORY:
+        0.0.1 : first commit
+        0.0.2 : lean into Gratings subclass. Cleaned out method calls
     """
 
     def __init__(self, name, **kwargs):
-        self.ver = Ver('0.0.1')
+        self.ver = Ver('0.0.2')
         super(Gratings_HardEdge, self).__init__(name, **kwargs)
 
     def __repr__(self):
@@ -475,38 +409,14 @@ class Gratings_HardEdge(Gratings):
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
-        phase. There is no "correct" and no responses are required/recorded
-        """
-        (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
-        hz = resolution[2]
-        self._Phases = []
-        # Just display stim
-        do_nothing = ()
-        self._Phases.append(StimPhaseSpec(
-            phase_number=1,
-            stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='circle',autoLog=False),
-            stimulus_update_fn=Gratings.update_stimulus,
-            stimulus_details=stimulus_details,
-            transitions={do_nothing: 1},
-            frames_until_transition=frames_total,
-            auto_trigger=False,
-            phase_type='stimulus',
-            phase_name='stim',
-            hz=hz,
-            sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-        self._Phases.append(PhaseSpec(
-            phase_number=2,
-            stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_details=None,
-            stimulus_update_fn=Gratings.do_nothing_to_stim,
-            transitions={do_nothing: 2},
-            frames_until_transition=round(self.iti*hz),
-            auto_trigger=False,
-            phase_type='inter-trial',
-            phase_name='inter-trial',
-            hz=hz,
-            sounds_played=(station._sounds['trial_end_sound'], 0.050)))
+        
 
+        TODO:
+        1. add rewards to this
+        """
+        super(Gratings_GaussianEdge,self)._setup_phases(trial_record, station, **kwargs)
+
+        self._Phases[0].stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='circle',autoLog=False)
         self._compiler = Gratings_HardEdge.trial_compiler
 
     @staticmethod

@@ -9,11 +9,15 @@ class BaseTrialManager(object):
         BASETRIALMANAGER defines a trial manager that defines a do_trial() method
     """
     def __init__(self,draw_stim_onset_rect = False):
-        self.ver = Ver('0.0.1')
+
         self.draw_stim_onset_rect = draw_stim_onset_rect
 
     def __repr__(self):
         return "BaseTrialManager trial manager object"
+
+    @staticmethod
+    def do_nothing_to_stim(stimulus,details):
+        pass
 
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record. Called by other trial managers
