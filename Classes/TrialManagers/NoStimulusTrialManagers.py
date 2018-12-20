@@ -770,9 +770,9 @@ class AuditoryGoOnly(object):
     _Phases = None
     _Cached_Stimuli = None
     def __init__(self,
-                 name = 'DefaultCC_ConstantDelay_2s',
+                 name = 'DefaultAuditory_Go_ConstantDelay_2s',
                  reinforcement_manager=ConstantReinforcement(),
-                 delay_distribution = ('Constant',1.),
+                 delay_distribution = ('Constant',2.),
                  go_signal = None,
                  response_duration = 2.,**kwargs):
         self.ver = Ver('0.0.1')
@@ -1040,11 +1040,11 @@ class AuditoryGoOnly(object):
                 if len(response)>1:
                     error_out = True
                     trial_record['errored_out'] = True
-                    print('ClassicalConditioning:do_trial:errored out')
+                    print('AuditoryGoOnly:do_trial:errored out')
                 elif len(response)==1:
                     response = response[0]
                     try:
-                        current_phase_num = transition[response] - 1
+                        current_phase_num = transition[response]
                         response_led_to_transition = True
                     except KeyError:
                         response_led_to_transition = False # that phase did not have a transition for that response
