@@ -8,6 +8,7 @@ class BaseTrialManager(object):
     """
         BASETRIALMANAGER defines a trial manager that defines a do_trial() method
     """
+    _Phases = []
     def __init__(self,draw_stim_onset_rect = False):
 
         self.draw_stim_onset_rect = draw_stim_onset_rect

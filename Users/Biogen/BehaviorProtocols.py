@@ -11,6 +11,7 @@ from BCore.Classes.Protocol import SequentialProtocol, TrainingStep
 from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion, PerformanceCriterion
 from BCore.Classes.SessionManager import NoTimeOff
 from BCore.Classes.TrialManagers.NoStimulusTrialManagers import LickForReward, ClassicalConditioning, AuditoryGoOnly
+from BCore.Classes.TrialManagers.GratingsTrialManagers import GratingsGoOnly
 from BCore.Classes.ReinforcementManager import ConstantReinforcement
 
 
@@ -72,6 +73,21 @@ def get_auditory_go_protocol():
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
     return SequentialProtocol(training_steps=training_steps, name='auditory_go_12192018')
+    
+def get_gratings_go_protocol():
+    training_steps = [TrainingStep(name='gratings_go_notimeoff_repeatindefinitely',
+                                    trial_manager=GratingsGoOnly(name='GratingsGoOnly_12202018',
+                                                 deg_per_cycs=[0.1],
+                                                 orientations=[0,45,90,135,180,225,270,315],
+                                                 contrasts=[1.],
+                                                 durations=[2.],
+                                                 radii=[400],
+                                                 drift_frequencies=[2.],
+                                                 iti=1., itl=0.,
+                                                 response_duration = 2.,),
+                                    session_manager=NoTimeOff(),
+                                    criterion=RepeatIndefinitely()),]
+    return SequentialProtocol(training_steps=training_steps, name='gratings_go_12202018')
 
 def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
     if name in ['lick_for_reward_biogen_09142018','lfr']:
