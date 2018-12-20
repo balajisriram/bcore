@@ -64,7 +64,7 @@ class BaseTrialManager(object):
                 is_last_phase = True
             else:
                 is_last_phase = False
-            auto_trigger = phase.auto_trigger 
+            auto_trigger = phase.auto_trigger
 
             # save relevant data into phase_data
             phase_data = {}
@@ -100,7 +100,7 @@ class BaseTrialManager(object):
                 elif len(response)==1:
                     response = response[0]
                     try:
-                        current_phase_num = transition[response] - 1
+                        current_phase_num = transition[response]
                         response_led_to_transition = True
                     except KeyError:
                         response_led_to_transition = False # that phase did not have a transition for that response
@@ -138,7 +138,7 @@ class BaseTrialManager(object):
                     trial_record['manual_quit'] = True
                     trial_record['correct'] = None
                 quit = quit or manual_quit
-                
+
                 if (phase_done or quit) and phase.sounds_played:
                     for snd in phase.sounds_played: snd.stop()
 
@@ -150,4 +150,3 @@ class BaseTrialManager(object):
             if is_last_phase: trial_done = True
         station.set_trial_pin_off()
         return trial_record,quit
-

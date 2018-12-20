@@ -772,7 +772,7 @@ class AuditoryGoOnly(BaseTrialManager):
         self._Phases.append(StimPhaseSpec(
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
             stimulus_details=None,
             transitions={port_details['target_ports']: 2, do_nothing: 3},
             frames_until_transition=response_frame_num,
@@ -787,7 +787,7 @@ class AuditoryGoOnly(BaseTrialManager):
             phase_number=3,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
             transitions={do_nothing: 4},
             frames_until_transition=reward_size,
             auto_trigger=False,
@@ -810,13 +810,13 @@ class AuditoryGoOnly(BaseTrialManager):
             phase_name='punishment_phase',
             hz=hz,
             sounds_played=[punishment_sound]))
-            
+
         # itl
         self._Phases.append(PhaseSpec(
             phase_number=5,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
             transitions=None,
             frames_until_transition=iti_size,
             auto_trigger=False,
@@ -824,10 +824,6 @@ class AuditoryGoOnly(BaseTrialManager):
             phase_name='iti_phase',
             hz=hz,
             sounds_played=None))
-
-    @staticmethod
-    def do_nothing_to_stim(stimulus,details):
-        pass
 
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
@@ -848,7 +844,7 @@ class AuditoryGoOnly(BaseTrialManager):
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
         station._key_pressed = []
 
-        trial_record,quit = super(ClassicalConditioning,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
+        trial_record,quit = super(AuditoryGoOnly,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
         return trial_record,quit
 
     @staticmethod

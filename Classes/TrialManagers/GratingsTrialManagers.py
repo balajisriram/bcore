@@ -7,9 +7,7 @@ import psychopy
 import random
 import numpy as np
 import psychopy.visual,psychopy.core
-import pdb
-
-import traceback
+from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED, NOT_STARTED, FOREVER)
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -60,6 +58,7 @@ class Gratings(BaseTrialManager):
                  itl=0., #inter trial luminance
                  reinforcement_manager=NoReinforcement(),
                  **kwargs):
+        super(Gratings,self).__init__()
         self.ver = Ver('0.0.1')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
@@ -117,7 +116,7 @@ class Gratings(BaseTrialManager):
         Hz = 60
         return (H,W,Hz)
 
-    def _setup_phases(self, trial_record, station, **kwargs):
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
@@ -134,14 +133,16 @@ class Gratings(BaseTrialManager):
         trial_start_sound = station._sounds['trial_start_sound']
         trial_start_sound.secs = 0.1
         trial_start_sound.seek(0.)
+        trial_start_sound.status= NOT_STARTED
         reward_sound = station._sounds['reward_sound']
         reward_sound.secs = 0.1
         reward_sound.seek(0.)
-        
+        reward_sound.status = NOT_STARTED
+
         self._Phases = []
         # Just display stim
         do_nothing = ()
-        
+
         # the stimulus
         self._Phases.append(StimPhaseSpec(
             phase_number=1,
@@ -249,9 +250,9 @@ class Gratings(BaseTrialManager):
             return trial_record,quit
 
         ## _setup_phases
-        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record)
+        self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record,subject=subject)
         station._key_pressed = []
-        
+
         trial_record,quit = super(Gratings,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
         return trial_record,quit
 
@@ -330,7 +331,7 @@ class Gratings_GaussianEdge(Gratings):
     def __repr__(self):
         return "Gratings_GaussianEdge object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
 
-    def _setup_phases(self, trial_record, station, **kwargs):
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
@@ -341,7 +342,7 @@ class Gratings_GaussianEdge(Gratings):
         1. add rewards to this
         """
         super(Gratings_GaussianEdge,self)._setup_phases(trial_record, station, **kwargs)
-        
+
         # replace for the first phase
         self._Phases[0].stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask='gauss',autoLog=False)
         self._compiler = Gratings_GaussianEdge.trial_compiler
@@ -404,12 +405,12 @@ class Gratings_HardEdge(Gratings):
     def __repr__(self):
         return "Gratings_HardEdge object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
 
-    def _setup_phases(self, trial_record, station, **kwargs):
+    def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
         Gratings:_setupPhases is a simple trialManager. It is for autopilot
         It selects from PixPerCycs, Orientations, DriftFrequencies, Phases
         Contrasts, Durations and shows them one at a time. There is only one
-        
+
 
         TODO:
         1. add rewards to this

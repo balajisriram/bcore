@@ -13,7 +13,7 @@ class ReinforcementManager(object):
 
     def __init__(self, name='DefaultReinforcementManager'):
         self.ver = Ver("0.0.1")
-        
+
         self.name = name
 
     def __repr__(self):
@@ -29,6 +29,15 @@ class NoReinforcement(ReinforcementManager):
 
     def __repr__(self):
         return "NoReinforcement object"
+
+    def calculate_reinforcement(self, subject, **kwargs):
+        reward_size = 0
+        request_reward_size = 0
+        ms_penalty = 0
+        ms_reward_sound = 0
+        ms_penalty_sound = 0
+
+        return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
 
 
 class ConstantReinforcement(ReinforcementManager):
@@ -63,7 +72,7 @@ class ConstantReinforcement(ReinforcementManager):
         update_rm = False
         return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
 
-        
+
 class RandomReinforcement(ConstantReinforcement):
 
     def __init__(self,
@@ -127,4 +136,3 @@ class RewardNCorrectInARow(ReinforcementManager):
 
         update_rm = False
         return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
-
