@@ -96,3 +96,5 @@ def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
         return get_classical_conditioning_protocol()
     elif name in ['auditory_go_protocol_12192018','audgo']:
         return get_auditory_go_protocol()
+    elif name in ['gratings_go_protocol_12202018','gratgo']:
+        return get_gratings_go_protocol()
