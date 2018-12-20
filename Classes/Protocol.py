@@ -1,7 +1,7 @@
 from verlib import NormalizedVersion as Ver
 from BCore.Classes.Criterion import RepeatIndefinitely
 from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings,AFCGratings
+from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings,GratingsAFC
 from BCore.Classes.ReinforcementManager import NoReinforcement,ConstantReinforcement
 import psychopy
 import traceback
@@ -237,7 +237,7 @@ class DemoGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1",
-        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
+        trial_manager=GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees
@@ -265,7 +265,7 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1",
-        trial_manager=AFCGratings(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
+        trial_manager=GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees

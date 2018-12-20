@@ -156,7 +156,7 @@ class Gratings(BaseTrialManager):
             hz=hz,
             sounds_played=[trial_start_sound],
             is_last_phase=False))
-            
+
         # reward if its provided
         if reward_size>0:
             # pre-reward
@@ -1136,7 +1136,7 @@ class GratingsGoNoGo(BaseTrialManager):
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
         station._key_pressed = []
-        
+
         trial_record,quit = super(GratingsGoNoGo,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
         return trial_record,quit
 
@@ -1369,7 +1369,7 @@ class GratingsGoOnly(BaseTrialManager):
             do_combos
             reinforcement_manager
     """
-    
+
     def __init__(self,
                  name = 'DemoGratingsGoOnlyTrialManager',
                  deg_per_cycs = [10],
@@ -1386,7 +1386,7 @@ class GratingsGoOnly(BaseTrialManager):
                  delay_distribution = ('Constant',2.),
                  reinforcement_manager = ConstantReinforcement(),
                  **kwargs):
-        super(GratingsGoNoGo,self).__init__()
+        super(GratingsGoOnly,self).__init__()
         self.ver = Ver('0.0.1')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
@@ -1401,16 +1401,18 @@ class GratingsGoOnly(BaseTrialManager):
         self.locations = locations
         self.radii = radii
 
+        self.delay_distribution = delay_distribution
+
         self.iti = iti # inter trial interval (s)
-        
+
         if np.isscalar(itl):
             self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
         else:
             self.itl = np.asarray(itl) #itl as color
 
         self.verify_params_ok()
-        
-    def verify_params_ok():
+
+    def verify_params_ok(self):
         if self.do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
@@ -1426,7 +1428,7 @@ class GratingsGoOnly(BaseTrialManager):
 
         assert np.logical_and(np.all(np.asarray(self.durations)>0), np.all(np.asarray(self.durations)<float('inf'))), 'All durations should be positive and finite'
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distributoin are you using?'
-        
+
     def __repr__(self):
         return "GRATINGSGOONLY object"
 
@@ -1479,16 +1481,16 @@ class GratingsGoOnly(BaseTrialManager):
         ## _setup_phases
         self._setup_phases(trial_record=trial_record, station=station,compiled_record=compiled_record, subject=subject)
         station._key_pressed = []
-        
+
         trial_record,quit = super(GratingsGoOnly,self).do_trial(station=station, subject=subject, trial_record=trial_record, compiled_record=compiled_record, quit=quit)
         return trial_record,quit
-        
+
     def choose_resolution(self, station, **kwargs):
         H = 1080
         W = 1920
         Hz = 60
         return (H,W,Hz)
-    
+
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
@@ -1509,19 +1511,19 @@ class GratingsGoOnly(BaseTrialManager):
         stimulus_details['H'] = H
         stimulus_details['W'] = W
         stimulus_details['Hz'] = Hz
-        
+
         delay_frame_num = np.round(self.sample_delay()*Hz)
         stimulus_details['delay_frame_num'] = delay_frame_num
 
         trial_record['chosen_stim'] = stimulus_details
-        
+
         port_details = {}
         port_details['target_ports'] = 'response_port'
         port_details['distractor_ports'] = None
 
 
         return stimulus_details, resolution, port_details, delay_frame_num
-        
+
     def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
         GratingsGoOnly:_setupPhases follows:
@@ -1529,7 +1531,7 @@ class GratingsGoOnly(BaseTrialManager):
             2. ResponsePhase with a GO sound with stimulus being gratings.
             3    a. Response during response duration -> reward
                  b. No response during response duration -> error sound
-            4. ITL   
+            4. ITL
         """
         (stimulus_details,resolution,port_details,delay_frame_num) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
@@ -1537,6 +1539,7 @@ class GratingsGoOnly(BaseTrialManager):
         reward_size = np.round(reward_size/1000.*hz)
         penalty_size = np.round(ms_penalty/1000.*hz)
         iti_size = np.round(self.iti*hz)
+        response_frame_num = round(hz*stimulus_details['duration'])
 
         self._Phases = []
         # Just display stim
@@ -1555,7 +1558,7 @@ class GratingsGoOnly(BaseTrialManager):
         punishment_sound.seek(0.)
         punishment_sound.status = NOT_STARTED
 
-       
+
         # deal with the phases
         # delay phase
         self._Phases.append(PhaseSpec(
@@ -1570,7 +1573,7 @@ class GratingsGoOnly(BaseTrialManager):
             phase_name='delay_phase',
             hz=hz,
             sounds_played=None))
-           
+
         # response phase
         self._Phases.append(StimPhaseSpec(
             phase_number=1,
@@ -1599,13 +1602,13 @@ class GratingsGoOnly(BaseTrialManager):
             hz=hz,
             sounds_played=[reward_sound],
             reward_valve='reward_valve'))
-            
+
         # punishment phase spec
         self._Phases.append(PunishmentPhaseSpec(
             phase_number=3,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
+            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
             transitions={do_nothing: 4},
             frames_until_transition=penalty_size,
             auto_trigger=False,

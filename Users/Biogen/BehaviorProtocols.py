@@ -73,7 +73,7 @@ def get_auditory_go_protocol():
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
     return SequentialProtocol(training_steps=training_steps, name='auditory_go_12192018')
-    
+
 def get_gratings_go_protocol():
     training_steps = [TrainingStep(name='gratings_go_notimeoff_repeatindefinitely',
                                     trial_manager=GratingsGoOnly(name='GratingsGoOnly_12202018',
@@ -84,6 +84,7 @@ def get_gratings_go_protocol():
                                                  radii=[400],
                                                  drift_frequencies=[2.],
                                                  iti=1., itl=0.,
+                                                 delay_distribution = ('Gaussian',[9,4]),
                                                  response_duration = 2.,),
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
