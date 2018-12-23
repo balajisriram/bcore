@@ -58,18 +58,17 @@ class ClassicalConditioning(BaseTrialManager):
                  reinforcement_manager=ConstantReinforcement(),
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
-                 response_duration = 2.,**kwargs):
+                 response_duration = 2.,
+                 iti=1.,
+                 itl=(0.,0.,0.,),**kwargs):
 
-        super(ClassicalConditioning,self).__init__()
+        super(ClassicalConditioning,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.2')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
         self.delay_distribution = delay_distribution
         self.go_signal = go_signal
         self.response_duration = response_duration
-
-        self.itl = (0., 0., 0.,)
-        self.iti = 1.
 
         # check if values are ok
         self.verify_params_ok()
@@ -259,17 +258,16 @@ class AuditoryGoOnly(BaseTrialManager):
                  reinforcement_manager=ConstantReinforcement(),
                  delay_distribution = ('Constant',2.),
                  go_signal = None,
-                 response_duration = 2.,**kwargs):
-        super(AuditoryGoOnly,self).__init__()
+                 response_duration = 2.,
+                 iti=1.,
+                 itl=(0.,0.,0.,),**kwargs):
+        super(AuditoryGoOnly,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.1')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
         self.delay_distribution = delay_distribution
         self.go_signal = go_signal
         self.response_duration = response_duration
-
-        self.itl = (0., 0., 0.,)
-        self.iti = 1.
 
         # check if values are ok
         self.verify_params_ok()
@@ -479,15 +477,16 @@ class RunForReward(BaseTrialManager):
                  reinforcement_manager=ConstantReinforcement(),
                  min_run_speed = 50, # sets_trigger on arduino
                  run_duration_distribution = 2., # seconds
+                 iti=1., 
+                 itl=(0.,0.,0.,),
                  **kwargs):
-        super(RunForReward,self).__init__()
+        super(RunForReward,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.1')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
         self.run_speed = run_speed
         self.run_duration_distribution = delay_distribution
 
-        self.itl = (0., 0., 0.,)
 
         if not self.verify_params_ok():
             ValueError('RunForReward::input values are bad')

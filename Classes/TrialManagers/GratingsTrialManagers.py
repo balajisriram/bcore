@@ -53,11 +53,11 @@ class Gratings(BaseTrialManager):
                  contrasts=[1],
                  durations=[1], #seconds
                  radii=[400], #degrees
-                 iti=1, #seconds
+                 iti=1., #seconds
                  itl=0., #inter trial luminance
                  reinforcement_manager=NoReinforcement(),
                  **kwargs):
-        super(Gratings,self).__init__()
+        super(Gratings,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.1')
         self.reinforcement_manager = reinforcement_manager
         self.name = name
@@ -476,18 +476,23 @@ class GratingsAFC(BaseTrialManager):
             durations
             radii # in units of "Scale"
             positions
+            
+            VERSION HISTORY:
+            0.0.1 : Initial design
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() are zero-indexed 
+                    (3) renamed ports to appropriate names
     """
 
     def __init__(self,
                  name = 'DemoAFCGratingsTrialManager',
-                 deg_per_cycs = {'L':[10],'R':[10]},
-                 orientations = {'L':[-np.pi / 4], 'R':[np.pi / 4]},
-                 drift_frequencies = {'L':[0],'R':[0]},
-                 phases = {'L':np.linspace(start=-np.pi,stop=np.pi,num=8,endpoint=True),'R':np.linspace(start=-np.pi,stop=np.pi,num=8, endpoint=True)},
-                 contrasts = {'L':[1],'R':[1]},
-                 durations = {'L':[float('Inf')],'R':[float('Inf')]},
-                 locations = {'L':[(0.5,0.5)],'R':[(0.5,0.5)]},
-                 radii = {'L':[40],'R':[40]},
+                 deg_per_cycs = {'left_port':[10],'right_port':[10]},
+                 orientations = {'left_port':[-np.pi / 4], 'right_port':[np.pi / 4]},
+                 drift_frequencies = {'left_port':[0],'right_port':[0]},
+                 phases = {'left_port':np.linspace(start=-np.pi,stop=np.pi,num=8,endpoint=True),'right_port':np.linspace(start=-np.pi,stop=np.pi,num=8, endpoint=True)},
+                 contrasts = {'left_port':[1],'right_port':[1]},
+                 durations = {'left_port':[float('Inf')],'right_port':[float('Inf')]},
+                 locations = {'left_port':[(0.5,0.5)],'right_port':[(0.5,0.5)]},
+                 radii = {'left_port':[40],'right_port':[40]},
                  radius_type = 'Circular',
                  iti = 1,
                  itl = 0.,
@@ -510,13 +515,6 @@ class GratingsAFC(BaseTrialManager):
 
         self.radius_type = radius_type
 
-        self.iti = iti # inter trial interval (s)
-
-        if np.isscalar(itl):
-            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
-        else:
-            self.itl = np.asarray(itl) #itl as color
-
         n_afc = len(deg_per_cycs)
         assert len(self.orientations)==n_afc,'AFCGRATINGS::INIT::orientations not same length as %r' % n_afc
         assert len(self.drift_frequencies)==n_afc,'AFCGRATINGS::INIT::drift_frequencies not same length as %r' % n_afc
@@ -530,23 +528,23 @@ class GratingsAFC(BaseTrialManager):
             # if do_combos, don't have to worry about the lengths of each values
             pass
         else:
-            num_options_L = len(self.deg_per_cycs['L'])
-            assert len(self.orientations['L'])==num_options_L,'AFCGRATINGS::INIT::L orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['L'])==num_options_L,'AFCGRATINGS::INIT::L drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['L'])==num_options_L,'AFCGRATINGS::INIT::L phases not same length as deg_per_cycs'
-            assert len(self.contrasts['L'])==num_options_L,'AFCGRATINGS::INIT::L contrasts not same length as deg_per_cycs'
-            assert len(self.durations['L'])==num_options_L,'AFCGRATINGS::INIT::L durations not same length as deg_per_cycs'
-            assert len(self.locations['L'])==num_options_L,'AFCGRATINGS::INIT::L locations not same length as deg_per_cycs'
-            assert len(self.radii['L'])==num_options_L,'AFCGRATINGS::INIT::L radii not same length as deg_per_cycs'
+            num_options_L = len(self.deg_per_cycs['left_port'])
+            assert len(self.orientations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['left_port'])==num_options_L,'AFCGRATINGS::INIT::L drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['left_port'])==num_options_L,'AFCGRATINGS::INIT::L phases not same length as deg_per_cycs'
+            assert len(self.contrasts['left_port'])==num_options_L,'AFCGRATINGS::INIT::L contrasts not same length as deg_per_cycs'
+            assert len(self.durations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L durations not same length as deg_per_cycs'
+            assert len(self.locations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L locations not same length as deg_per_cycs'
+            assert len(self.radii['left_port'])==num_options_L,'AFCGRATINGS::INIT::L radii not same length as deg_per_cycs'
 
-            num_options_R = len(self.deg_per_cycs['R'])
-            assert len(self.orientations['R'])==num_options_R,'AFCGRATINGS::INIT::R orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['R'])==num_options_R,'AFCGRATINGS::INIT::R drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['R'])==num_options_R,'AFCGRATINGS::INIT::R phases not same length as deg_per_cycs'
-            assert len(self.contrasts['R'])==num_options_R,'AFCGRATINGS::INIT::R contrasts not same length as deg_per_cycs'
-            assert len(self.durations['R'])==num_options_R,'AFCGRATINGS::INIT::R durations not same length as deg_per_cycs'
-            assert len(self.locations['R'])==num_options_R,'AFCGRATINGS::INIT::R locations not same length as deg_per_cycs'
-            assert len(self.radii['R'])==num_options_R,'AFCGRATINGS::INIT::R radii not same length as deg_per_cycs'
+            num_options_R = len(self.deg_per_cycs['right_port'])
+            assert len(self.orientations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['right_port'])==num_options_R,'AFCGRATINGS::INIT::R drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['right_port'])==num_options_R,'AFCGRATINGS::INIT::R phases not same length as deg_per_cycs'
+            assert len(self.contrasts['right_port'])==num_options_R,'AFCGRATINGS::INIT::R contrasts not same length as deg_per_cycs'
+            assert len(self.durations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R durations not same length as deg_per_cycs'
+            assert len(self.locations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R locations not same length as deg_per_cycs'
+            assert len(self.radii['right_port'])==num_options_R,'AFCGRATINGS::INIT::R radii not same length as deg_per_cycs'
 
         assert radius_type in ['Circular','Gaussian'], 'AFCGRATINGS::INIT::Unrecognized radius_type:%s' % radius_type
 
@@ -1008,15 +1006,15 @@ class GratingsAFC(BaseTrialManager):
         compiled_details['request_time'].append(phase_data[stim_phase_num]['enter_time'])
         # resonse_time is time from 'stim' phase enter_time to 'reinforcement' phase enter time
         compiled_details['response_time'].append(phase_data[reinf_phase_num]['enter_time']-phase_data[stim_phase_num]['enter_time'])
-        # request_lick_timings are 'C' licks in the stim_phase
+        # request_lick_timings are center_port' licks in the stim_phase
         lick_loc = np.asarray(phase_data[stim_phase_num]['response'])
         lick_times = np.asarray(phase_data[stim_phase_num]['response_time'])
-        which_licks = np.argwhere(lick_loc=='C')
+        which_licks = np.argwhere(lick_loc=='center_port')
         compiled_details['request_lick_timings'].append(lick_times[which_licks])
-        # response_lick_timings_prev_trial are non 'C' licks in the pre_req_phase_num
+        # response_lick_timings_prev_trial are non 'center_port' licks in the pre_req_phase_num
         lick_loc = np.asarray(phase_data[pre_req_phase_num]['response'])
         lick_times = np.asarray(phase_data[pre_req_phase_num]['response_time'])
-        which_licks = np.argwhere(lick_loc!='C')
+        which_licks = np.argwhere(lick_loc!='center_port')
         compiled_details['response_lick_timings_prev_trial'].append(lick_times[which_licks])
 
 
@@ -1048,6 +1046,11 @@ class GratingsGoNoGo(BaseTrialManager):
 
             do_combos
             reinforcement_manager
+            
+            VERSION HISTORY:
+            0.0.1 : Initial design
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() 
+                    are zero-indexed
     """
 
     def __init__(self,
@@ -1060,13 +1063,13 @@ class GratingsGoNoGo(BaseTrialManager):
                  durations = {'G':[1.],'N':[1.]},
                  locations = {'G':[(0.5,0.5)],'N':[(0.5,0.5)]},
                  radii = {'G':[40],'N':[40]},
-                 iti = 1,
+                 iti = 1.,
                  itl = 0.,
                  do_combos = True,
                  reinforcement_manager = ConstantReinforcement(),
                  **kwargs):
-        super(GratingsGoNoGo,self).__init__()
-        self.ver = Ver('0.0.1')
+        super(GratingsGoNoGo,self).__init__(iti=iti, itl=itl)
+        self.ver = Ver('0.0.2')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
 
@@ -1079,13 +1082,6 @@ class GratingsGoNoGo(BaseTrialManager):
         self.durations = durations
         self.locations = locations
         self.radii = radii
-
-        self.iti = iti # inter trial interval (s)
-
-        if np.isscalar(itl):
-            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
-        else:
-            self.itl = np.asarray(itl) #itl as color
 
         if do_combos:
             # if do_combos, don't have to worry about the lengths of each values
@@ -1143,8 +1139,8 @@ class GratingsGoNoGo(BaseTrialManager):
     def calc_stim(self, trial_record, station, **kwargs):
         (H, W, Hz) = self.choose_resolution(station=station, **kwargs)
         resolution = (H,W,Hz)
-        all_ports = ('L','C','R')
-        request_port = 'C'
+        all_ports = ('left_port','center_port','right_port')
+        request_port = 'center_port'
         response_ports = tuple(np.setdiff1d(all_ports,request_port))
         target_port = np.random.choice(response_ports)
         distractor_port = tuple(np.setdiff1d(response_ports,target_port))
@@ -1192,11 +1188,11 @@ class GratingsGoNoGo(BaseTrialManager):
         """
         (stimulus_details,resolution,frames_total,port_details) = self.calc_stim(trial_record=trial_record, station=station)
         hz = resolution[2]
-        if port_details['target_port'] == 'L':
+        if port_details['target_port'] == 'left_port':
             reward_valve = 'left_valve'
-        elif port_details['target_port'] == 'R':
+        elif port_details['target_port'] == 'right_port':
             reward_valve = 'right_valve'
-        elif port_details['target_port'] == 'C':
+        elif port_details['target_port'] == 'center_port':
             reward_valve = 'center_valve'
 
         if stimulus_details['duration']==float('inf'):
@@ -1368,6 +1364,11 @@ class GratingsGoOnly(BaseTrialManager):
 
             do_combos
             reinforcement_manager
+            
+            VERSION HISTORY:
+            0.0.1 : Initial design
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() 
+                    are zero-indexed
     """
 
     def __init__(self,
@@ -1380,14 +1381,14 @@ class GratingsGoOnly(BaseTrialManager):
                  durations = [2.],
                  locations = [(0.5,0.5)],
                  radii = [40],
-                 iti = 1,
+                 iti = 1.,
                  itl = 0.,
                  do_combos = True,
                  delay_distribution = ('Constant',2.),
                  reinforcement_manager = ConstantReinforcement(),
                  **kwargs):
-        super(GratingsGoOnly,self).__init__()
-        self.ver = Ver('0.0.1')
+        super(GratingsGoOnly,self).__init__(iti=iti, itl=itl)
+        self.ver = Ver('0.0.2')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
 
@@ -1402,12 +1403,6 @@ class GratingsGoOnly(BaseTrialManager):
         self.radii = radii
 
         self.delay_distribution = delay_distribution
-
-        self.iti = iti # inter trial interval (s)
-
-        if np.isscalar(itl):
-            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
-        else:
             self.itl = np.asarray(itl) #itl as color
 
         self.verify_params_ok()
