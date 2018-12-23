@@ -174,6 +174,7 @@ class RewardPhaseSpec(PhaseSpec):
     def on_exit(self,station,trial_record,**kwargs):
         station.close_valve(self.reward_valve)
         trial_record['reward_duration'] = station._clocks['trial_clock'].getTime() - trial_record['reward_duration']
+        trial_record['punishment_duration'] = 0.
         return trial_record
 
 class PunishmentPhaseSpec(PhaseSpec):
@@ -210,7 +211,10 @@ class PunishmentPhaseSpec(PhaseSpec):
 
     def on_enter(self,trial_record,**kwargs):
         trial_record['correct'] = False
+        trial_record['punishment_duration'] = station._clocks['trial_clock'].getTime()
         return trial_record
 
     def on_exit(self, trial_record,**kwargs):
+        trial_record['punishment_duration'] = station._clocks['trial_clock'].getTime() - trial_record['punishment_duration']
+        trial_record['reward_duration'] = 0.
         return trial_record
