@@ -392,7 +392,7 @@ class StandardVisionBehaviorStation(Station):
         self._session = value
 
     def get_ports(self):
-        return np.asarray(['left_port','center_port','rightt_port'])
+        return np.asarray(['left_port','center_port','right_port'])
 
     @property
     def num_ports(self):
@@ -623,6 +623,9 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
 
     def __repr__(self):
         return "StandardVisionHeadfixStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
+    
+    def get_ports(self):
+        return np.asarray(['response_port'])
 
     def read_ports(self):
         port_names = ['response_port']
