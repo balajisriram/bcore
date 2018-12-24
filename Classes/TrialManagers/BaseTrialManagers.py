@@ -1,5 +1,5 @@
 from verlib import NormalizedVersion as Ver
-
+import numpy as np
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
                                 NOT_STARTED, FOREVER)
 
@@ -7,11 +7,25 @@ from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
 class BaseTrialManager(object):
     """
         BASETRIALMANAGER defines a trial manager that defines a do_trial() method
+        
+        VERSION HISTORY:
+        0.0.1: Setup BaseTrial Manager as superclass of all trial managers
+        0.0.2: BTM defines (1) inter-trial-interval, (2) inter-trial-luminance
+               (3) defines was_on based on the characteristics of station
+               (4) try_something_else sound turns on when triggering port without a 
+               trasition target
+               (5) 
+               
     """
     _Phases = []
-    def __init__(self,draw_stim_onset_rect = False):
-
+    def __init__(self,draw_stim_onset_rect = False, iti=1.0, itl=(0., 0., 0.)):
+        self.ver = Ver('0.0.2')
         self.draw_stim_onset_rect = draw_stim_onset_rect
+        self.iti = iti
+        if np.isscalar(itl):
+            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
+        else:
+            self.itl = np.asarray(itl) #itl as color
 
     def __repr__(self):
         return "BaseTrialManager trial manager object"
@@ -31,8 +45,11 @@ class BaseTrialManager(object):
         current_phase_num = 0
 
         # was on will be used to check for new responses
-        was_on = {'response_port':False}
-
+        all_ports = station.get_ports()
+        was_on = {}
+        for port in all_ports:
+            was_on[port] = False        
+        
         # Zero out the trial clock
         trial_clock = station._clocks['trial_clock']
         trial_clock.reset()
@@ -49,7 +66,16 @@ class BaseTrialManager(object):
         trial_record['reinforcement_manager_version_number'] = self.reinforcement_manager.ver.__str__()
 
         trial_record['phase_data'] = []
-
+        
+        # What to do if response cannot lead to any thing??
+        try_something_else_sound = station._sounds['try_something_else']
+        try_something_else_sound.status = NOT_STARTED
+        try_something_else_sound_played_for = None
+        # first response after transition should not trigger a try_something_else_sound until that response ended
+        response_that_led_to_transition = None # response that led to transition for previous phase
+        transitioned_response_ended = True # did that previous transition end?
+        
+        
         station.set_trial_pin_on()
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
@@ -92,35 +118,54 @@ class BaseTrialManager(object):
                 phase.on_frame(station=station,trial_record=trial_record)
 
                 # look for responses
+                # (1) if no responses, only thing to do is stop the try_something_else_sound if its playing. then, switch off 
+                #     any was_on previously set to True
+                # (2) if response length >1 -> ERROR
+                # (3) if response is unique, log it as long as the response wasn't on before
+                #     (a) if it leads to transition, set the current phase num appropriately
+                #     (b) if there is no transition for response or if there is no transition , try_something_else_sound 
+                #        (except if the response is the ending of previous trigger)
+                # 
                 response_led_to_transition = False
                 response = station.read_ports()
                 if len(response)>1:
                     error_out = True
                     trial_record['errored_out'] = True
-                    print('BASETRIALMANAGER:DO_TRIAL:errored out')
+                    print('BASETRIALMANAGER:DO_TRIAL:errored out due to multiple responses')
                 elif len(response)==1:
                     response = response[0]
-                    try:
+                    if transition and response in transition:
                         current_phase_num = transition[response]
                         response_led_to_transition = True
-                    except KeyError:
-                        response_led_to_transition = False # that phase did not have a transition for that response
-                    except TypeError:
-                        assert is_last_phase, 'No reason why it should come here otherwise'
-                    finally:
-                        # logit but only if was_on wasnt already on
-                        if not was_on[response]:
-                            phase_data['response'].append(response)
-                            phase_data['response_time'].append(trial_clock.getTime())
+                        response_that_led_to_transition = response
+                        transitioned_response_ended = False # will flip to True the first time response_that_led_to_transition is no longer available
+                    else:
+                        # there was a response and it didnt lead to transition -> try something else
+                        if response is not response_that_led_to_transition or transitioned_response_ended:
+                            try_something_else_sound.play()
+                            try_something_else_sound.status==PLAYING
+                            try_something_else_sound_played_for = response
+                    
+                    # logit but only if was_on wasnt already on. thus only response onsets are measured.
+                    if not was_on[response]:
+                        phase_data['response'].append(response)
+                        phase_data['response_time'].append(trial_clock.getTime())                       
                     was_on[response] = True # flip was on to true after we used it to check for new events
                 else:
-                    pass
+                    # try somethign else has to go through a no_response phase otherwise, it will error out!!
+                    if try_something_else_sound.status==PLAYING:
+                        try_something_else_sound.stop()
+                        try_something_else_sound.seek(0.)
+                        try_something_else_sound_played_for = None
+                    for resp in was_on:was_on[resp] = False
+                    transitioned_response_ended=True # force to True. Wont come here unless the transitioned response ended
 
                 # update the frames_until_transition and check if the phase is done
                 # phase is done when there are no more frames in the phase or if we flipped due to transition
                 # however we can stop playing the phase because we manual_quit or because we errored out
                 frames_until_transition = frames_until_transition-1
                 frames_led_to_transition = False
+                autotrigger_led_to_transition = False
                 if frames_until_transition==0 and transition and do_nothing in transition:
                     frames_led_to_transition = True
                     current_phase_num = transition[do_nothing]
