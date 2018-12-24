@@ -10,7 +10,7 @@ __status__ = "Production"
 from BCore.Classes.Protocol import SequentialProtocol, TrainingStep
 from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion, PerformanceCriterion
 from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.NoStimulusTrialManagers import LickForReward, ClassicalConditioning, AuditoryGoOnly
+from BCore.Classes.TrialManagers.NoStimulusTrialManagers import ClassicalConditioning, AuditoryGoOnly
 from BCore.Classes.TrialManagers.GratingsTrialManagers import GratingsGoOnly
 from BCore.Classes.ReinforcementManager import ConstantReinforcement
 

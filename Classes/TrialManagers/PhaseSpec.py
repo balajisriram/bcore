@@ -209,12 +209,12 @@ class PunishmentPhaseSpec(PhaseSpec):
     def __repr__(self):
         return "PunishmentPhaseSpec object"
 
-    def on_enter(self,trial_record,**kwargs):
+    def on_enter(self,station,trial_record,**kwargs):
         trial_record['correct'] = False
         trial_record['punishment_duration'] = station._clocks['trial_clock'].getTime()
         return trial_record
 
-    def on_exit(self, trial_record,**kwargs):
+    def on_exit(self,station,trial_record,**kwargs):
         trial_record['punishment_duration'] = station._clocks['trial_clock'].getTime() - trial_record['punishment_duration']
         trial_record['reward_duration'] = 0.
         return trial_record
