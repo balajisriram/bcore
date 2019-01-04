@@ -11,10 +11,10 @@ number_times = [10,20,30,50,75,100]
 
 for open_time in port_open_times:
     for number_time in number_times:
-	    for time in range(number_time):
+        for i in range(number_time):
             port.setData(3)
-			time.sleep(open_time)
-			port.setData(0)
-			time.sleep(0.25)
+            time.sleep(open_time)
+            port.setData(0)
+            time.sleep(0.25)
         print('Finished open time::',open_time, 'number_time::',number_time)
-		raw_input("Press enter to continue")
+        input("Press enter to continue")
