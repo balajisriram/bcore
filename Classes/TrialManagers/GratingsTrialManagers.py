@@ -1625,6 +1625,52 @@ class GratingsGoOnly(BaseTrialManager):
             phase_name='iti_phase',
             hz=hz,
             sounds_played=None))
+    
+    @staticmethod
+    def trial_compiler(compiled_record, trial_record):
+        print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')
+
+        try:
+            import pprint
+            ppr = pprint.PrettyPrinter(indent=4).pprint
+            ppr(compiled_record)
+            compiled_details = compiled_record['compiled_details']['GratingsGoOnly']
+        except KeyError as e:
+            traceback.print_stack()
+            compiled_details = {}
+            compiled_details['trial_number'] = []
+            compiled_details['deg_per_cyc'] = []
+            compiled_details['orientation'] = []
+            compiled_details['drift_frequency'] = []
+            compiled_details['phase'] = []
+            compiled_details['contrast'] = []
+            compiled_details['duration'] = []
+            compiled_details['radius'] = []
+            # compiled_details['radius_type'] = []
+            compiled_details['location'] = []
+            compiled_details['H'] = []
+            compiled_details['W'] = []
+            compiled_details['Hz'] = []
+            # put an empty compiled_details in the compiled_records
+            compiled_record['compiled_details']['Gratings'] = compiled_details
+
+        compiled_details['trial_number'].append(trial_record['trial_number'])
+        compiled_details['deg_per_cyc'].append(trial_record['chosen_stim']['deg_per_cyc'])
+        compiled_details['orientation'].append(trial_record['chosen_stim']['orientation'])
+        compiled_details['drift_frequency'].append(trial_record['chosen_stim']['drift_frequency'])
+        compiled_details['phase'].append(trial_record['chosen_stim']['phase'])
+        compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
+        compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
+        compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
+        compiled_details['radius_type'].append('None')
+        compiled_details['location'].append(trial_record['chosen_stim']['location'])
+        compiled_details['H'].append(trial_record['chosen_stim']['H'])
+        compiled_details['W'].append(trial_record['chosen_stim']['W'])
+        compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
+
+        compiled_record['compiled_details'] = compiled_details
+
+        return compiled_details
 
 
 
