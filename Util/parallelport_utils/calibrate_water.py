@@ -11,7 +11,7 @@ number_times = [10,20,30,50,75,100]
 
 for open_time in port_open_times:
     for number_time in number_times:
-	    for time in range number_time:
+	    for time in range(number_time):
     	    port.setData(3)
 			time.sleep(open_time)
 			port.setData(0)
