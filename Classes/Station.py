@@ -727,9 +727,6 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
         self.initialize_sounds()
         self.close_all_valves()
 
-def make_standard_behavior_station():
-    pass
-
 
 if __name__ == '__main__':
     from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED, NOT_STARTED, FOREVER)

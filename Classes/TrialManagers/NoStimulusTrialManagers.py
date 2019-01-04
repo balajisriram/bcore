@@ -71,12 +71,12 @@ class ClassicalConditioning(BaseTrialManager):
         self.response_duration = response_duration
 
         # check if values are ok
-        self.verify_params_ok()
+        self._verify_params_ok()
 
     def __repr__(self):
         return "ClassicalConditioning trial manager object"
 
-    def verify_params_ok(self):
+    def _verify_params_ok(self):
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distributoin are you using?'
 
     def sample_delay(self):
@@ -270,12 +270,12 @@ class AuditoryGoOnly(BaseTrialManager):
         self.response_duration = response_duration
 
         # check if values are ok
-        self.verify_params_ok()
+        self._verify_params_ok()
 
     def __repr__(self):
         return "AuditoryGoOnly trial manager object"
 
-    def verify_params_ok(self):
+    def _verify_params_ok(self):
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distributoin are you using?'
 
     def sample_delay(self):
@@ -488,13 +488,12 @@ class RunForReward(BaseTrialManager):
         self.run_duration_distribution = delay_distribution
 
 
-        if not self.verify_params_ok():
-            ValueError('RunForReward::input values are bad')
+        self._verify_params_ok()
 
     def __repr__(self):
         return "RunForReward trial manager"
 
-    def verify_params_ok(self):
+    def _verify_params_ok(self):
         assert self.delay_distribution[0] in ['Constant', 'Uniform', 'Gaussian', 'FlatHazard'], 'what delay distribution are you using?'
 
     def load_ino(self):

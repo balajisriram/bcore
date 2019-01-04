@@ -69,13 +69,6 @@ class Gratings(BaseTrialManager):
         self.durations = durations
         self.radii = radii
 
-        self.iti = iti # inter trial interval (s)
-
-        if np.isscalar(itl):
-            self.itl = itl*np.asarray([1,1,1]) # inter trial luminance as gray scale
-        else:
-            self.itl = np.asarray(itl) #itl as color
-
     def __repr__(self):
         return "Gratings object with or:%s, tf:%s, ctr:%s and durs:%s)" % (self.orientations, self.drift_frequencies, self.contrasts, self.durations)
 
@@ -222,10 +215,11 @@ class Gratings(BaseTrialManager):
     def _simulate(self):
         station = StandardKeyboardStation()
         station.initialize()
+        
         trial_record = {}
-        Quit = False
-        while not Quit:
-            trial_record,Quit = self.do_trial(trial_record=trial_record,station=station,subject=None,compiled_record=None)
+        quit = False
+        while not quit:
+            trial_record,quit = self.do_trial(trial_record=trial_record,station=station,subject=None,compiled_record=None,quit=quit)
         station.close_window()
 
     def decache(self):
@@ -465,9 +459,9 @@ class Gratings_HardEdge(Gratings):
 ##########################################################################################
 ##########################################################################################
 
-class GratingsAFC(BaseTrialManager):
+class Gratings2AFC(BaseTrialManager):
     """
-        AFCGRATINGS defines a standard gratings trial manager
+        GRATINGS2AFC defines a standard gratings trial manager
             deg_per_cycs
             orientations
             drift_frequencies
@@ -480,11 +474,12 @@ class GratingsAFC(BaseTrialManager):
             VERSION HISTORY:
             0.0.1 : Initial design
             0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() are zero-indexed 
-                    (3) renamed ports to appropriate names
+                    (3) renamed ports to appropriate names (4) forced to 2-AFC
     """
+    _current_is_catch = False
 
     def __init__(self,
-                 name = 'DemoAFCGratingsTrialManager',
+                 name = 'DemoGratings2AFCTrialManager',
                  deg_per_cycs = {'left_port':[10],'right_port':[10]},
                  orientations = {'left_port':[-np.pi / 4], 'right_port':[np.pi / 4]},
                  drift_frequencies = {'left_port':[0],'right_port':[0]},
@@ -494,12 +489,15 @@ class GratingsAFC(BaseTrialManager):
                  locations = {'left_port':[(0.5,0.5)],'right_port':[(0.5,0.5)]},
                  radii = {'left_port':[40],'right_port':[40]},
                  radius_type = 'Circular',
+                 left_port_probability = 0.5,
+                 catch_trial_probability = 0.2,
                  iti = 1,
                  itl = 0.,
                  do_combos = True,
                  reinforcement_manager = NoReinforcement(),
                  **kwargs):
-        self.ver = Ver('0.0.1')
+        super(Gratings2AFC,self).__init__(iti=iti,itl=itl)
+        self.ver = Ver('0.0.2')
         self.name = name
         self.reinforcement_manager = reinforcement_manager
 
@@ -512,60 +510,60 @@ class GratingsAFC(BaseTrialManager):
         self.durations = durations
         self.locations = locations
         self.radii = radii
-
         self.radius_type = radius_type
-
-        n_afc = len(deg_per_cycs)
-        assert len(self.orientations)==n_afc,'AFCGRATINGS::INIT::orientations not same length as %r' % n_afc
-        assert len(self.drift_frequencies)==n_afc,'AFCGRATINGS::INIT::drift_frequencies not same length as %r' % n_afc
-        assert len(self.phases)==n_afc,'AFCGRATINGS::INIT::phases not same length as %r' % n_afc
-        assert len(self.contrasts)==n_afc,'AFCGRATINGS::INIT::contrasts not same length as %r' % n_afc
-        assert len(self.durations)==n_afc,'AFCGRATINGS::INIT::durations not same length as %r' % n_afc
-        assert len(self.locations)==n_afc,'AFCGRATINGS::INIT::locations not same length as %r' % n_afc
-        assert len(self.radii)==n_afc,'AFCGRATINGS::INIT::radii not same length as %r' % n_afc
+        
+        self.left_port_probability = left_port_probability
+        self.catch_trial_probability = catch_trial_probability
+        
+        self._verify_params_ok()
+        
+    def _verify_params_ok(self):
+        n_afc = 2
+        assert len(self.deg_per_cycs)==n_afc,'GRATINGS2AFC::INIT::orientations not same length as %r' % n_afc
+        assert len(self.orientations)==n_afc,'GRATINGS2AFC::INIT::orientations not same length as %r' % n_afc
+        assert len(self.drift_frequencies)==n_afc,'GRATINGS2AFC::INIT::drift_frequencies not same length as %r' % n_afc
+        assert len(self.phases)==n_afc,'GRATINGS2AFC::INIT::phases not same length as %r' % n_afc
+        assert len(self.contrasts)==n_afc,'GRATINGS2AFC::INIT::contrasts not same length as %r' % n_afc
+        assert len(self.durations)==n_afc,'GRATINGS2AFC::INIT::durations not same length as %r' % n_afc
+        assert len(self.locations)==n_afc,'GRATINGS2AFC::INIT::locations not same length as %r' % n_afc
+        assert len(self.radii)==n_afc,'GRATINGS2AFC::INIT::radii not same length as %r' % n_afc
 
         if do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
         else:
             num_options_L = len(self.deg_per_cycs['left_port'])
-            assert len(self.orientations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['left_port'])==num_options_L,'AFCGRATINGS::INIT::L drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['left_port'])==num_options_L,'AFCGRATINGS::INIT::L phases not same length as deg_per_cycs'
-            assert len(self.contrasts['left_port'])==num_options_L,'AFCGRATINGS::INIT::L contrasts not same length as deg_per_cycs'
-            assert len(self.durations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L durations not same length as deg_per_cycs'
-            assert len(self.locations['left_port'])==num_options_L,'AFCGRATINGS::INIT::L locations not same length as deg_per_cycs'
-            assert len(self.radii['left_port'])==num_options_L,'AFCGRATINGS::INIT::L radii not same length as deg_per_cycs'
+            assert len(self.orientations['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L phases not same length as deg_per_cycs'
+            assert len(self.contrasts['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L contrasts not same length as deg_per_cycs'
+            assert len(self.durations['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L durations not same length as deg_per_cycs'
+            assert len(self.locations['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L locations not same length as deg_per_cycs'
+            assert len(self.radii['left_port'])==num_options_L,'GRATINGS2AFC::INIT::L radii not same length as deg_per_cycs'
 
             num_options_R = len(self.deg_per_cycs['right_port'])
-            assert len(self.orientations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['right_port'])==num_options_R,'AFCGRATINGS::INIT::R drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['right_port'])==num_options_R,'AFCGRATINGS::INIT::R phases not same length as deg_per_cycs'
-            assert len(self.contrasts['right_port'])==num_options_R,'AFCGRATINGS::INIT::R contrasts not same length as deg_per_cycs'
-            assert len(self.durations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R durations not same length as deg_per_cycs'
-            assert len(self.locations['right_port'])==num_options_R,'AFCGRATINGS::INIT::R locations not same length as deg_per_cycs'
-            assert len(self.radii['right_port'])==num_options_R,'AFCGRATINGS::INIT::R radii not same length as deg_per_cycs'
+            assert len(self.orientations['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R phases not same length as deg_per_cycs'
+            assert len(self.contrasts['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R contrasts not same length as deg_per_cycs'
+            assert len(self.durations['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R durations not same length as deg_per_cycs'
+            assert len(self.locations['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R locations not same length as deg_per_cycs'
+            assert len(self.radii['right_port'])==num_options_R,'GRATINGS2AFC::INIT::R radii not same length as deg_per_cycs'
 
-        assert radius_type in ['Circular','Gaussian'], 'AFCGRATINGS::INIT::Unrecognized radius_type:%s' % radius_type
+        assert self.radius_type in ['Circular','Gaussian'], 'GRATINGS2AFC::INIT::Unrecognized radius_type:%s' % self.radius_type
 
     def __repr__(self):
-        return "AFCGratings object nafc:%s)" % self.n_afc
-
-    @property
-    def n_afc():
-        return len(self.deg_per_cycs)
+        return "GRATINGS2AFC object"
 
     @staticmethod
     def update_stimulus(stimulus,details):
         if details['drift_frequency'] !=0:
             stimulus.phase += float(details['drift_frequency'])/float(details['Hz'])
 
-    @staticmethod
-    def do_nothing_to_stim(stimulus,details):
-        pass
-
-    def choose_ports(self, trial_record, station, ):
-        pass
+    def choose_ports(self, trial_record, compiled_record, station,):
+        if not compiled_record['trial_manager_class'][-1] == 'BCore.Classes.TrialManagers.GratingsTrialManagers.Gratings2AFC':
+            pass
+        return 'left_port'
 
     def do_trial(self, station, subject, trial_record, compiled_record,quit):
         # returns quit and trial_record
@@ -756,7 +754,7 @@ class GratingsAFC(BaseTrialManager):
 
     def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
-        AFCGratings:_setup_phases
+        GratingsAFC:_setup_phases
         1. Pre-trial: gray screen. REQUEST_PORT -> 2
         2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
         3. Correct: Give reward
@@ -788,7 +786,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(PhaseSpec(
                 phase_number=0,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={port_details['request_port']: 2},
                 frames_until_transition=float('inf'),
@@ -801,7 +799,7 @@ class GratingsAFC(BaseTrialManager):
                 self._Phases.append(PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
-                    stimulus_update_fn=AFCGratings.update_stimulus,
+                    stimulus_update_fn=GratingsAFC.update_stimulus,
                     stimulus_details=stimulus_details,
                     transitions={do_nothing: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
                     frames_until_transition=frames_total,
@@ -814,7 +812,7 @@ class GratingsAFC(BaseTrialManager):
                 self._Phases.append(PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
-                    stimulus_update_fn=AFCGratings.update_stimulus,
+                    stimulus_update_fn=GratingsAFC.update_stimulus,
                     stimulus_details=stimulus_details,
                     transitions={do_nothing: 3, port_details['target_port']: 4, port_details['distractor_port']: 5},
                     frames_until_transition=frames_total,
@@ -826,7 +824,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(PhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={port_details['target_port']: 4, port_details['distractor_port']: 5},
                 frames_until_transition=float('inf'),
@@ -838,7 +836,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(RewardPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={do_nothing: 6},
                 frames_until_transition=reward_size,
@@ -851,7 +849,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(PunishmentPhaseSpec(
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0.,0.,0.,),autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={do_nothing: 6},
                 frames_until_transition=penalty_size,
@@ -864,7 +862,7 @@ class GratingsAFC(BaseTrialManager):
                 phase_number=5,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -876,7 +874,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(PhaseSpec(
                 phase_number=0,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={port_details['request_port']: 2},
                 frames_until_transition=float('inf'),
@@ -889,7 +887,7 @@ class GratingsAFC(BaseTrialManager):
                 self._Phases.append(PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
-                    stimulus_update_fn=AFCGratings.update_stimulus,
+                    stimulus_update_fn=GratingsAFC.update_stimulus,
                     stimulus_details=stimulus_details,
                     transitions={port_details['target_port']: 3, port_details['distractor_port']: 4},
                     frames_until_transition=float('inf'),
@@ -902,7 +900,7 @@ class GratingsAFC(BaseTrialManager):
                 self._Phases.append(PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
-                    stimulus_update_fn=AFCGratings.update_stimulus,
+                    stimulus_update_fn=GratingsAFC.update_stimulus,
                     stimulus_details=stimulus_details,
                     transitions={port_details['target_port']: 3, port_details['distractor_port']: 4},
                     frames_until_transition=float('inf'),
@@ -914,7 +912,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(RewardPhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={do_nothing: 5},
                 frames_until_transition=reward_size,
@@ -927,7 +925,7 @@ class GratingsAFC(BaseTrialManager):
             self._Phases.append(PunishmentPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 stimulus_details=None,
                 transitions={do_nothing: 5},
                 frames_until_transition=penalty_size,
@@ -940,7 +938,7 @@ class GratingsAFC(BaseTrialManager):
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=AFCGratings.do_nothing_to_stim,
+                stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -958,7 +956,7 @@ class GratingsAFC(BaseTrialManager):
 
     def trial_compiler(self, compiled_record, trial_record):
         try:
-            compiled_details = compiled_record['compiled_details']['AFCGratings']
+            compiled_details = compiled_record['compiled_details']['GratingsAFC']
         except KeyError:
             compiled_details = {}
             compiled_details['trial_number'] = []
@@ -1054,7 +1052,7 @@ class GratingsGoNoGo(BaseTrialManager):
     """
 
     def __init__(self,
-                 name = 'DemoAFCGratingsTrialManager',
+                 name = 'DemoGratingsAFCTrialManager',
                  deg_per_cycs = {'G':[10],'N':[10]},
                  orientations = {'G':[-np.pi / 4], 'N':[np.pi / 4]},
                  drift_frequencies = {'G':[0],'N':[0]},
@@ -1179,7 +1177,7 @@ class GratingsGoNoGo(BaseTrialManager):
 
     def _setup_phases(self, trial_record, station, subject, **kwargs):
         """
-        AFCGratings:_setup_phases
+        GratingsAFC:_setup_phases
         1. Pre-trial: gray screen. REQUEST_PORT -> 2
         2. Stimulus: Grating stimulus. RESPONSE_PORT==TARGET_PORT -> CORRECT, else PUNISH
         3. Correct: Give reward
@@ -1403,7 +1401,6 @@ class GratingsGoOnly(BaseTrialManager):
         self.radii = radii
 
         self.delay_distribution = delay_distribution
-            self.itl = np.asarray(itl) #itl as color
 
         self.verify_params_ok()
 
