@@ -1081,31 +1081,35 @@ class GratingsGoNoGo(BaseTrialManager):
         self.locations = locations
         self.radii = radii
 
-        if do_combos:
+        
+	def _verify_params_ok(self):
+		assert isinstance(self.do_combos,bool)
+	    if self.do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
         else:
             num_options_G = len(self.deg_per_cycs['G'])
-            assert len(self.orientations['G'])==num_options_G,'L orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['G'])==num_options_G,'L drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['G'])==num_options_G,'L phases not same length as deg_per_cycs'
-            assert len(self.contrasts['G'])==num_options_G,'L contrasts not same length as deg_per_cycs'
-            assert len(self.durations['G'])==num_options_G,'L durations not same length as deg_per_cycs'
-            assert len(self.locations['G'])==num_options_G,'L locations not same length as deg_per_cycs'
-            assert len(self.radii['G'])==num_options_G,'L radii not same length as deg_per_cycs'
+            assert len(self.orientations['G'])==num_options_G,'G orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['G'])==num_options_G,'G drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['G'])==num_options_G,'G phases not same length as deg_per_cycs'
+            assert len(self.contrasts['G'])==num_options_G,'G contrasts not same length as deg_per_cycs'
+            assert len(self.durations['G'])==num_options_G,'G durations not same length as deg_per_cycs'
+            assert len(self.locations['G'])==num_options_G,'G locations not same length as deg_per_cycs'
+            assert len(self.radii['G'])==num_options_G,'G radii not same length as deg_per_cycs'
 
             num_options_N = len(self.deg_per_cycs['N'])
-            assert len(self.orientations['N'])==num_options_N,'R orientations not same length as deg_per_cycs'
-            assert len(self.drift_frequencies['N'])==num_options_N,'R drift_frequencies not same length as deg_per_cycs'
-            assert len(self.phases['N'])==num_options_N,'R phases not same length as deg_per_cycs'
-            assert len(self.contrasts['N'])==num_options_N,'R contrasts not same length as deg_per_cycs'
-            assert len(self.durations['N'])==num_options_N,'R durations not same length as deg_per_cycs'
-            assert len(self.locations['N'])==num_options_N,'R locations not same length as deg_per_cycs'
-            assert len(self.radii['N'])==num_options_N,'R radii not same length as deg_per_cycs'
+            assert len(self.orientations['N'])==num_options_N,'N orientations not same length as deg_per_cycs'
+            assert len(self.drift_frequencies['N'])==num_options_N,'N drift_frequencies not same length as deg_per_cycs'
+            assert len(self.phases['N'])==num_options_N,'N phases not same length as deg_per_cycs'
+            assert len(self.contrasts['N'])==num_options_N,'N contrasts not same length as deg_per_cycs'
+            assert len(self.durations['N'])==num_options_N,'N durations not same length as deg_per_cycs'
+            assert len(self.locations['N'])==num_options_N,'N locations not same length as deg_per_cycs'
+            assert len(self.radii['N'])==num_options_N,'N radii not same length as deg_per_cycs'
 
         assert np.logical_and(np.all(np.asarray(self.durations['G'])>0), np.all(np.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
         assert np.logical_and(np.all(np.asarray(self.durations['N'])>0), np.all(np.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
-
+	
+		
     def __repr__(self):
         return "GRATINGSGONOGO object"
 
@@ -1347,6 +1351,53 @@ class GratingsGoNoGo(BaseTrialManager):
             return True
         else:
             return False
+    
+	@staticmethod
+    def trial_compiler(compiled_record, trial_record):
+        print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')
+
+        try:
+            import pprint
+            ppr = pprint.PrettyPrinter(indent=4).pprint
+            ppr(compiled_record)
+            compiled_details = compiled_record['compiled_details']['GratingsGoOnly']
+        except KeyError as e:
+            traceback.print_stack()
+            compiled_details = {}
+            compiled_details['trial_number'] = []
+            compiled_details['deg_per_cyc'] = []
+            compiled_details['orientation'] = []
+            compiled_details['drift_frequency'] = []
+            compiled_details['phase'] = []
+            compiled_details['contrast'] = []
+            compiled_details['duration'] = []
+            compiled_details['radius'] = []
+            # compiled_details['radius_type'] = []
+            compiled_details['location'] = []
+            compiled_details['H'] = []
+            compiled_details['W'] = []
+            compiled_details['Hz'] = []
+            # put an empty compiled_details in the compiled_records
+            compiled_record['compiled_details']['Gratings'] = compiled_details
+
+        compiled_details['trial_number'].append(trial_record['trial_number'])
+        compiled_details['deg_per_cyc'].append(trial_record['chosen_stim']['deg_per_cyc'])
+        compiled_details['orientation'].append(trial_record['chosen_stim']['orientation'])
+        compiled_details['drift_frequency'].append(trial_record['chosen_stim']['drift_frequency'])
+        compiled_details['phase'].append(trial_record['chosen_stim']['phase'])
+        compiled_details['contrast'].append(trial_record['chosen_stim']['contrast'])
+        compiled_details['duration'].append(trial_record['chosen_stim']['duration'])
+        compiled_details['radius'].append(trial_record['chosen_stim']['radius'])
+        compiled_details['radius_type'].append('None')
+        compiled_details['location'].append(trial_record['chosen_stim']['location'])
+        compiled_details['H'].append(trial_record['chosen_stim']['H'])
+        compiled_details['W'].append(trial_record['chosen_stim']['W'])
+        compiled_details['Hz'].append(trial_record['chosen_stim']['Hz'])
+
+        compiled_record['compiled_details'] = compiled_details
+
+        return compiled_details
+
 
 class GratingsGoOnly(BaseTrialManager):
     """
@@ -1402,9 +1453,9 @@ class GratingsGoOnly(BaseTrialManager):
 
         self.delay_distribution = delay_distribution
 
-        self.verify_params_ok()
+        self._verify_params_ok()
 
-    def verify_params_ok(self):
+    def _verify_params_ok(self):
         if self.do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
