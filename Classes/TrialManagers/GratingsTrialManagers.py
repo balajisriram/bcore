@@ -1679,9 +1679,6 @@ class GratingsGoOnly(BaseTrialManager):
         print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')
 
         try:
-            import pprint
-            ppr = pprint.PrettyPrinter(indent=4).pprint
-            ppr(compiled_record)
             compiled_details = compiled_record['compiled_details']['GratingsGoOnly']
         except KeyError as e:
             traceback.print_stack()
@@ -1693,6 +1690,7 @@ class GratingsGoOnly(BaseTrialManager):
             compiled_details['phase'] = []
             compiled_details['contrast'] = []
             compiled_details['duration'] = []
+            compiled_details['location'] = []
             compiled_details['radius'] = []
             # compiled_details['radius_type'] = []
             compiled_details['location'] = []
@@ -1700,7 +1698,7 @@ class GratingsGoOnly(BaseTrialManager):
             compiled_details['W'] = []
             compiled_details['Hz'] = []
             # put an empty compiled_details in the compiled_records
-            compiled_record['compiled_details']['Gratings'] = compiled_details
+            compiled_record['compiled_details']['GratingsGoOnly'] = compiled_details
 
         compiled_details['trial_number'].append(trial_record['trial_number'])
         compiled_details['deg_per_cyc'].append(trial_record['chosen_stim']['deg_per_cyc'])

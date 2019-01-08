@@ -143,7 +143,6 @@ class BaseTrialManager(object):
                         # there was a response and it didnt lead to transition -> try something else
                         if response is not response_that_led_to_transition or transitioned_response_ended:
                             try_something_else_sound.play()
-                            try_something_else_sound.status==PLAYING
                             try_something_else_sound_played_for = response
                     
                     # logit but only if was_on wasnt already on. thus only response onsets are measured.
@@ -154,8 +153,7 @@ class BaseTrialManager(object):
                 else:
                     # try somethign else has to go through a no_response phase otherwise, it will error out!!
                     if try_something_else_sound.status==PLAYING:
-                        try_something_else_sound.stop()
-                        try_something_else_sound.seek(0.)
+                        try_something_else_sound.pause()
                         try_something_else_sound_played_for = None
                     for resp in was_on:was_on[resp] = False
                     transitioned_response_ended=True # force to True. Wont come here unless the transitioned response ended
