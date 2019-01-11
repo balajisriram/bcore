@@ -23,7 +23,9 @@ class Subject(object):
                 iacuc_protocol_id      : string Identifier
         Changes::
             Ver 0.0.2 - Added iacuc_protocol_id to the object
+            Ver 0.0.3 - Added  _property_changed and made getters and setters
     """
+    _subject_changed = False
     def __init__(self, subject_id, **kwargs):
         """
                 Call as follows::
@@ -31,20 +33,20 @@ class Subject(object):
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        self.ver = Ver('0.0.2')
+        self.ver = Ver('0.0.3')
         self.subject_id = subject_id
-        self.protocol = []
-        self.session_manager = []
+        self._protocol = []
+        self._session_manager = []
         self.creation_date = time.time()
         self.iacuc_protocol_id = ''
         if 'reward' in kwargs:
-            self.reward = kwargs['reward']
+            self._reward = kwargs['reward']
         else:
-            self.reward = 0
+            self._reward = 0
         if 'timeout' in kwargs:
-            self.timeout = kwargs['timeout']
+            self._timeout = kwargs['timeout']
         else:
-            self.timeout = 0
+            self._timeout = 0
         if 'iacuc_protocol_id' in kwargs:
             self.iacuc_protocol_id = kwargs['iacuc_protocol_id']
 
@@ -57,7 +59,48 @@ class Subject(object):
     def __eq__(self, other):
         # if this method is called, then clearly
         return False
-
+        
+    ### getters
+    @property
+    def protocol(self):
+        return self._protocol
+        
+    @property
+    def session_manager(self):
+        return self._session_manager
+    
+    @property
+    def reward(self):
+        return self._reward
+        
+    @property
+    def timeout(self):
+        return self._timeout
+    
+    ### setters
+    @protocol.setter
+    def protocol(self, value):
+        self._protocol = value
+        _subject_changed = True
+        
+    @session_manager.setter
+    def session_manager(self, value):
+        self._session_manager = value
+        _subject_changed = True
+    
+    @reward.setter
+    def reward(self,value):
+        self._reward = value
+        _subject_changed = True
+        
+    @timeout.setter
+    def timeout(self, value):
+        self._timeout = value
+        _subject_changed = True
+        
+    
+    
+    
     def add_protocol(self, new_protocol):
         if not self.protocol:
             self.protocol = new_protocol
