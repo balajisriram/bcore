@@ -189,7 +189,7 @@ class BaseTrialManager(object):
             trial_record = phase.on_exit(trial_record=trial_record, station=station)
             trial_record['phase_data'].append(phase_data)
 
-            # when do we quit the trial? trial_done only when last phjase
+            # when do we quit the trial? trial_done only when last phase
             # but we can exit if manual_quit or errored out
             if is_last_phase: trial_done = True
         station.set_trial_pin_off()

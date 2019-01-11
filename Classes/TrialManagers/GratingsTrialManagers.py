@@ -1082,9 +1082,9 @@ class GratingsGoNoGo(BaseTrialManager):
         self.radii = radii
 
         
-	def _verify_params_ok(self):
-		assert isinstance(self.do_combos,bool)
-	    if self.do_combos:
+    def _verify_params_ok(self):
+        assert isinstance(self.do_combos,bool)
+        if self.do_combos:
             # if do_combos, don't have to worry about the lengths of each values
             pass
         else:
@@ -1108,8 +1108,8 @@ class GratingsGoNoGo(BaseTrialManager):
 
         assert np.logical_and(np.all(np.asarray(self.durations['G'])>0), np.all(np.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
         assert np.logical_and(np.all(np.asarray(self.durations['N'])>0), np.all(np.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
-	
-		
+    
+        
     def __repr__(self):
         return "GRATINGSGONOGO object"
 
@@ -1352,7 +1352,7 @@ class GratingsGoNoGo(BaseTrialManager):
         else:
             return False
     
-	@staticmethod
+    @staticmethod
     def trial_compiler(compiled_record, trial_record):
         print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')
 

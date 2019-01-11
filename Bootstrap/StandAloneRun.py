@@ -6,6 +6,8 @@ StandAloneRun
      -s, --subject    subject_id
      --server-path    server path to BServer
      -p, --protocol   protocol name. See ../User folder for example protocols
+     -r, --reward     reward amount in ms
+     -p, --punishment punishment timeout in ms
 """
 import sys
 import os
@@ -60,7 +62,7 @@ def load_bserver(path, subject_id):
 
 
 
-def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None):
+def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, reward = None, punishment = None):
     # look for local server and collect information about the Subject being run
     if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
 
@@ -113,6 +115,8 @@ if __name__ == '__main__':
     subject_id = 'demo1'
     bserver_path = None
     protocol = None
+    reward = None
+    punishment = None
 
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time
@@ -120,21 +124,28 @@ if __name__ == '__main__':
     added = False
 
     for arg in args:
-        if (arg == 'subject_id') or (arg == '--subject') or (arg == '-s'):
+        if arg in ['subject_id','--subject','-s']:
             subject_id = next(args)
             which_added = 'subject_id'
             added = True
-        elif (arg == 'bserver_path') or (arg == '--server-path'):
+        elif arg in ['bserver_path','--server-path']:
             bserver_path = next(args)
             which_added = 'bserver_path'
             added = True
-        elif (arg == 'protocol') or (arg == '--protocol') or (arg == '-p'):
+        elif arg in ['protocol','--protocol','-p']:
             protocol = next(args)
             which_added = 'protocol'
             added = True
-
+        elif arg in ['reward','--reward','-r']:
+            reward = next(args)
+            which_added = 'reward'
+            added = True
+        elif arg in ['punishment','--punishment','-p']:
+            punishment = next(args)
+            which_added = 'punishment'
+            added = True
         if added:
             print('added ::',which_added)
             added = False
     print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol))
-    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol)
+    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol,reward=reward,punishment=punishment)
