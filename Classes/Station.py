@@ -388,7 +388,7 @@ class StandardVisionBehaviorStation(Station):
         return self._session
 
     @session.setter
-    def subject(self,value):
+    def session(self,value):
         self._session = value
 
     def get_ports(self):
