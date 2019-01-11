@@ -62,7 +62,7 @@ def load_bserver(path, subject_id):
 
 
 
-def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, reward = None, punishment = None):
+def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, reward = None, timeout = None):
     # look for local server and collect information about the Subject being run
     if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
 
@@ -77,18 +77,21 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
         if subj==subject_id:
             found = True
             sub = b_server.subjects[i]
+            sub_idx = i
             break
-
+    
+    # keep track of any changes to the subject    
+    subject_property_changed = False
     # deal with subject protocol
     if not sub.protocol:
         # if i gave a protocol name, add that
         if protocol:
             protocol_name_requested = protocol
             protocol_requested = get_protocol_from_name(protocol_name_requested) # requested protocol
-            sub.add_protocol(protocol_requested)
+            sub.protocol = protocol_requested
         # else add the demo protocol
         else:
-            sub.add_protocol(DemoGratingsProtocol())
+            sub.protocol = DemoGratingsProtocol()
     else:
         if protocol:
             protocol_name_requested = protocol
@@ -96,14 +99,29 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
             if sub.protocol.name==protocol_requested.name:
                 pass
             else:
-                sub.replace_protocol(protocol_requested)
+                sub.protocol = protocol_requested
     stn._stand_alone = True
+    
+    
+    # change the subject reward and timeouts if available
+    if reward:
+        sub.reward = reward
+    if timeout:
+        sub.timeout = timeout
+        
+
+    # add subject to station
     stn.add_subject(sub)
-
-
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
     # run do_trials on station
     stn.do_trials()
+    
+    # if we saw any changes to the subject, then copy those changes to the b server and save
+    sub = stn.subject
+    if sub._subject_changed:
+        b_server.subjects[sub_idx] = sub
+        b_server.save()
+    
     # clean up at end of trials
     stn.remove_subject(sub)
 
@@ -124,28 +142,28 @@ if __name__ == '__main__':
     added = False
 
     for arg in args:
-        if arg in ['subject_id','--subject','-s']:
+        if arg in ['--subject','-s']:
             subject_id = next(args)
             which_added = 'subject_id'
             added = True
-        elif arg in ['bserver_path','--server-path']:
+        elif arg in ['--server-path']:
             bserver_path = next(args)
             which_added = 'bserver_path'
             added = True
-        elif arg in ['protocol','--protocol','-p']:
+        elif arg in ['--protocol','-p']:
             protocol = next(args)
             which_added = 'protocol'
             added = True
-        elif arg in ['reward','--reward','-r']:
-            reward = next(args)
+        elif arg in ['--reward','-r']:
+            reward = float(next(args))
             which_added = 'reward'
             added = True
-        elif arg in ['punishment','--punishment','-p']:
-            punishment = next(args)
-            which_added = 'punishment'
+        elif arg in ['--timeout','-t']:
+            timeout = float(next(args))
+            which_added = 'timeout'
             added = True
         if added:
             print('added ::',which_added)
             added = False
     print('running stand_alone on subject:{0},path:{1},protocol:{2}'.format(subject_id,bserver_path,protocol))
-    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol,reward=reward,punishment=punishment)
+    stand_alone_run(subject_id=subject_id, bserver_path=bserver_path, protocol=protocol,reward=reward,timeout=timeout)
