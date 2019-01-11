@@ -215,7 +215,7 @@ class Gratings(BaseTrialManager):
     def _simulate(self):
         station = StandardKeyboardStation()
         station.initialize()
-        
+
         trial_record = {}
         quit = False
         while not quit:
@@ -470,10 +470,10 @@ class Gratings2AFC(BaseTrialManager):
             durations
             radii # in units of "Scale"
             positions
-            
+
             VERSION HISTORY:
             0.0.1 : Initial design
-            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() are zero-indexed 
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() are zero-indexed
                     (3) renamed ports to appropriate names (4) forced to 2-AFC
     """
     _current_is_catch = False
@@ -511,12 +511,12 @@ class Gratings2AFC(BaseTrialManager):
         self.locations = locations
         self.radii = radii
         self.radius_type = radius_type
-        
+
         self.left_port_probability = left_port_probability
         self.catch_trial_probability = catch_trial_probability
-        
+
         self._verify_params_ok()
-        
+
     def _verify_params_ok(self):
         n_afc = 2
         assert len(self.deg_per_cycs)==n_afc,'GRATINGS2AFC::INIT::orientations not same length as %r' % n_afc
@@ -1044,10 +1044,10 @@ class GratingsGoNoGo(BaseTrialManager):
 
             do_combos
             reinforcement_manager
-            
+
             VERSION HISTORY:
             0.0.1 : Initial design
-            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() 
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases()
                     are zero-indexed
     """
 
@@ -1081,7 +1081,6 @@ class GratingsGoNoGo(BaseTrialManager):
         self.locations = locations
         self.radii = radii
 
-        
     def _verify_params_ok(self):
         assert isinstance(self.do_combos,bool)
         if self.do_combos:
@@ -1108,8 +1107,7 @@ class GratingsGoNoGo(BaseTrialManager):
 
         assert np.logical_and(np.all(np.asarray(self.durations['G'])>0), np.all(np.asarray(self.durations['G'])<float('inf'))), 'All durations should be positive and finite'
         assert np.logical_and(np.all(np.asarray(self.durations['N'])>0), np.all(np.asarray(self.durations['N'])<float('inf'))), 'All durations should be positive and finite'
-    
-        
+
     def __repr__(self):
         return "GRATINGSGONOGO object"
 
@@ -1413,10 +1411,10 @@ class GratingsGoOnly(BaseTrialManager):
 
             do_combos
             reinforcement_manager
-            
+
             VERSION HISTORY:
             0.0.1 : Initial design
-            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases() 
+            0.0.2 : (1) itl and iti sent to BTM and (2) _setup_phases()
                     are zero-indexed
     """
 
@@ -1673,7 +1671,7 @@ class GratingsGoOnly(BaseTrialManager):
             phase_name='iti_phase',
             hz=hz,
             sounds_played=None))
-    
+
     @staticmethod
     def trial_compiler(compiled_record, trial_record):
         print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')
