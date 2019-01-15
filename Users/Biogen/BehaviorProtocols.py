@@ -65,14 +65,22 @@ def get_classical_conditioning_protocol():
     return SequentialProtocol(training_steps=training_steps, name='classical_conditioning_12022018')
 
 def get_auditory_go_protocol():
-    training_steps = [TrainingStep(name='auditory_go_notimeoff_repeatindefinitely',
+    training_steps = [TrainingStep(name='classical_conditioning_notimeoff_repeatindefinitely',
+                                    trial_manager=ClassicalConditioning(name='StandardClassicalConditioning',
+                                                 reinforcement_manager=ConstantReinforcement(fraction_reward_sound_in_on=1,fraction_penalty_sound_is_on=0.1),
+                                                 delay_distribution = ('Gaussian',[9,4]),
+                                                 punish_delay_response = False,
+                                                 response_duration = 2.,),
+                                    session_manager=NoTimeOff(),
+                                    criterion=NumTrialsDoneCriterion(20)),
+                      TrainingStep(name='auditory_go_notimeoff_repeatindefinitely',
                                     trial_manager=AuditoryGoOnly(name='AuditoryGoOnly_12192018',
                                                  reinforcement_manager=ConstantReinforcement(fraction_reward_sound_in_on=1,fraction_penalty_sound_is_on=0.1),
                                                  delay_distribution = ('Gaussian',[9,4]),
                                                  response_duration = 2.,),
                                     session_manager=NoTimeOff(),
                                     criterion=RepeatIndefinitely()),]
-    return SequentialProtocol(training_steps=training_steps, name='auditory_go_12192018')
+    return SequentialProtocol(training_steps=training_steps, name='auditory_go_01152019')
 
 def get_gratings_go_protocol():
     training_steps = [TrainingStep(name='gratings_go_notimeoff_repeatindefinitely',
@@ -95,7 +103,7 @@ def get_behavior_protocol_biogen(name='lick_for_reward_biogen_09142018'):
         return get_lick_for_reward_protocol()
     elif name in ['classical_conditioning_protocol_12022018','ccp']:
         return get_classical_conditioning_protocol()
-    elif name in ['auditory_go_protocol_12192018','audgo']:
+    elif name in ['auditory_go_protocol_01152019','audgo']:
         return get_auditory_go_protocol()
     elif name in ['gratings_go_protocol_12202018','gratgo']:
         return get_gratings_go_protocol()
