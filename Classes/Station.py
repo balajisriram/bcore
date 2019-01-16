@@ -173,11 +173,11 @@ class Station(object):
         self._sounds['go_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
         self._sounds['keep_going_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
         self._sounds['request_sound'] = psychopy.sound.Sound(493.88,stereo=0,secs=1.,hamming=True)
-        
+
         self._sounds['correct_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
         self._sounds['reward_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(523.25,stereo=0,secs=1.,hamming=True)
-        
+
         sampleRate,secs,f_punishment=(44100,2,[370,440])
         nSamples = int(secs * sampleRate)
         phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
@@ -186,11 +186,11 @@ class Station(object):
             val += np.sin(f*phase)
         val = np.matlib.repmat(val,2,1)
         self._sounds['punishment_sound'] = psychopy.sound.Sound(val.T,hamming=True)
-        
+
         val = 0.5*np.random.randn(1,nSamples)+0.5
         val = np.matlib.repmat(val,2,1)
-        self._sounds['try_something_else'] = psychopy.sound.Sound(320,stereo=0,secs=2.,hamming=True)
-        
+        self._sounds['try_something_else'] = psychopy.sound.Sound(val.T,hamming=True)
+
 
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(587.33,stereo=0,secs=1.,hamming=True)
 
@@ -571,14 +571,13 @@ class StandardVisionBehaviorStation(Station):
             return True
         else:
             return False
-    
+
     def read_kb(self):
         key,modifier = event.getKeys(keyList=['1','2','3','k'],modifier=True)
         ports = np.asarray([False,False,False])
         if key:
             if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
         if 'k' in self._key_pressed and '1' in self._key_pressed:
-            if 'comma'
             self._key_pressed.remove('k')
             self._key_pressed.remove('1')
         if 'k' in self._key_pressed and '2' in self._key_pressed:
@@ -646,7 +645,7 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
 
     def __repr__(self):
         return "StandardVisionHeadfixStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
-    
+
     def get_ports(self):
         return np.asarray(['response_port'])
 
@@ -756,7 +755,7 @@ if __name__ == '__main__':
     import psychopy.core
     nSamples = 4410
     val = 0.5*np.random.randn(1,nSamples)+0.5
-    
+
     # sampleRate,secs,f_punishment=(44100,0.02,[370,440])
     # nSamples = int(secs * sampleRate)
     # phase = 2*np.pi*np.linspace(0.0, 1.0, nSamples)
@@ -767,9 +766,9 @@ if __name__ == '__main__':
     print(np.max(val))
     val = np.matlib.repmat(val,2,1)
     punishment_sound = psychopy.sound.Sound(val.T,hamming=True)
-    
+
     # print(val)
-    
+
     punishment_sound.play()
     while punishment_sound.status==PLAYING:
         psychopy.core.wait(0.1)

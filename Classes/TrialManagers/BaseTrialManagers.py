@@ -69,7 +69,7 @@ class BaseTrialManager(object):
 
         # What to do if response cannot lead to any thing??
         try_something_else_sound = station._sounds['try_something_else']
-        try_something_else_sound.status = NOT_STARTED
+        try_something_else_sound_status = NOT_STARTED
         try_something_else_sound_played_for = None
         # first response after transition should not trigger a try_something_else_sound until that response ended
         response_that_led_to_transition = None # response that led to transition for previous phase
@@ -141,8 +141,10 @@ class BaseTrialManager(object):
                         transitioned_response_ended = False # will flip to True the first time response_that_led_to_transition is no longer available
                     else:
                         # there was a response and it didnt lead to transition -> try something else
-                        if response is not response_that_led_to_transition or transitioned_response_ended:
+                        if (response is not response_that_led_to_transition or transitioned_response_ended) and try_something_else_sound_status == NOT_STARTED:
+                            print('sound turned on')
                             try_something_else_sound.play()
+                            try_something_else_sound_status = STARTED
                             try_something_else_sound_played_for = response
 
                     # logit but only if was_on wasnt already on. thus only response onsets are measured.
@@ -152,9 +154,10 @@ class BaseTrialManager(object):
                     was_on[response] = True # flip was on to true after we used it to check for new events
                 else:
                     # try somethign else has to go through a no_response phase otherwise, it will error out!!
-                    if try_something_else_sound.status==PLAYING:
+                    if try_something_else_sound_status==STARTED:
+                        print('sound turned off')
                         try_something_else_sound.stop()
-                        try_something_else_sound.seek(0.)
+                        try_something_else_sound_status = NOT_STARTED
                         try_something_else_sound_played_for = None
                     for resp in was_on:was_on[resp] = False
                     transitioned_response_ended=True # force to True. Wont come here unless the transitioned response ended
