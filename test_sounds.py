@@ -26,8 +26,12 @@ for i in range(15):
     off_interval = 1+0.03*np.random.randn()
     try_something_else_sound.play()
     t = psychopy.core.getTime()
-    while(psychopy.core.getTime()-t<on_interval): psychopy.core.wait(0.001) # wait a millisecond
-    try_something_else_sound.pause()
+    keep_playing = True
+    while keep_playing:
+        psychopy.core.wait(0.001) # wait a millisecond
+        keep_playing = psychopy.core.getTime()-t<on_interval
+    if try_something_else_sound.status==PLAYING:
+        try_something_else_sound.pause()
     t = psychopy.core.getTime()
     while(psychopy.core.getTime()-t<off_interval): psychopy.core.wait(0.001) # wait a millisecond
     
