@@ -1,6 +1,6 @@
 import os
 import psychopy
-import psychopy.event
+from psychopy import event
 import psychopy.logging
 import psychopy.parallel
 import psychopy.visual
@@ -189,7 +189,7 @@ class Station(object):
         
         val = 0.5*np.random.randn(1,nSamples)+0.5
         val = np.matlib.repmat(val,2,1)
-        self._sounds['try_something_else'] = psychopy.sound.Sound(val.T,hamming=True)
+        self._sounds['try_something_else'] = psychopy.sound.Sound(320,stereo=0,secs=2.,hamming=True)
         
 
         self._sounds['trial_end_sound'] = psychopy.sound.Sound(587.33,stereo=0,secs=1.,hamming=True)
@@ -571,7 +571,30 @@ class StandardVisionBehaviorStation(Station):
             return True
         else:
             return False
+    
+    def read_kb(self):
+        key,modifier = event.getKeys(keyList=['1','2','3','k'],modifier=True)
+        ports = np.asarray([False,False,False])
+        if key:
+            if not key[0] in self._key_pressed: self._key_pressed.append(key[0])
+        if 'k' in self._key_pressed and '1' in self._key_pressed:
+            if 'comma'
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('1')
+        if 'k' in self._key_pressed and '2' in self._key_pressed:
+            ports = np.bitwise_or(ports,[False,True,False])
+            psychopy.event.clearEvents()
+            print(self._key_pressed)
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('2')
+        if 'k' in self._key_pressed and '3' in self._key_pressed:
+            ports = np.bitwise_or(ports,[False,False,True])
+            psychopy.event.clearEvents()
+            print(self._key_pressed)
+            self._key_pressed.remove('k')
+            self._key_pressed.remove('3')
 
+        return self.get_ports()[ports]
 
 class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
     """
