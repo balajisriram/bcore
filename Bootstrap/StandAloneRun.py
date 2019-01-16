@@ -79,8 +79,8 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
             sub = b_server.subjects[i]
             sub_idx = i
             break
-    
-    # keep track of any changes to the subject    
+
+    # keep track of any changes to the subject
     subject_property_changed = False
     # deal with subject protocol
     if not sub.protocol:
@@ -101,27 +101,27 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
             else:
                 sub.protocol = protocol_requested
     stn._stand_alone = True
-    
-    
+
+
     # change the subject reward and timeouts if available
     if reward:
         sub.reward = reward
     if timeout:
         sub.timeout = timeout
-        
+
 
     # add subject to station
     stn.add_subject(sub)
     print("STANDALONERUN:STAND_ALONE_RUN:Running on Protocol "+stn.subject.protocol.name)
     # run do_trials on station
     stn.do_trials()
-    
+
     # if we saw any changes to the subject, then copy those changes to the b server and save
     sub = stn.subject
     if sub._subject_changed:
         b_server.subjects[sub_idx] = sub
         b_server.save()
-    
+
     # clean up at end of trials
     stn.remove_subject(sub)
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     bserver_path = None
     protocol = None
     reward = None
-    punishment = None
+    timeout = None
 
     # parse input arguments and send to bootstrap
     # loop through the arguments and deal with them one at a time
