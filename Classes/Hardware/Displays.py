@@ -19,8 +19,8 @@ def ViewSonic_V3D231():
     x_size = 509.8  # mm
     y_size = 286.7  # mm
     distance_to_subject = 120  # mm
-    make = 'Dell'
-    model = 'E2311H'
+    make = 'ViewSonic'
+    model = 'V3D231'
 
     mon = psychopy.monitors.Monitor(name,
                                     width = 50.98,
