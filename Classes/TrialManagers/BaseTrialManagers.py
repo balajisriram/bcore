@@ -142,7 +142,6 @@ class BaseTrialManager(object):
                     else:
                         # there was a response and it didnt lead to transition -> try something else
                         if (response is not response_that_led_to_transition or transitioned_response_ended) and try_something_else_sound_status == NOT_STARTED:
-                            print('sound turned on')
                             try_something_else_sound.play()
                             try_something_else_sound_status = STARTED
                             try_something_else_sound_played_for = response
@@ -155,7 +154,6 @@ class BaseTrialManager(object):
                 else:
                     # try somethign else has to go through a no_response phase otherwise, it will error out!!
                     if try_something_else_sound_status==STARTED:
-                        print('sound turned off')
                         try_something_else_sound.stop()
                         try_something_else_sound_status = NOT_STARTED
                         try_something_else_sound_played_for = None

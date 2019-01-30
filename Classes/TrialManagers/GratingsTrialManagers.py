@@ -1349,7 +1349,7 @@ class GratingsGoNoGo(BaseTrialManager):
             return True
         else:
             return False
-    
+
     @staticmethod
     def trial_compiler(compiled_record, trial_record):
         print('GRATINGSGOONLY:TRIAL_COMPILER::compiling trial')

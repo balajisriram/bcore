@@ -65,7 +65,7 @@ class TrainingStep(object):
             if graduate:
                 trial_record['graduate'] = True
         except Exception as e:
-            traceback.print_exc()
+            #traceback.print_exc()
             print("type error: " + str(e))
             station.close_session() # should this be here?
         return trial_record,quit

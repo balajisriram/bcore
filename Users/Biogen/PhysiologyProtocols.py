@@ -11,7 +11,7 @@ from BCore.Classes.Protocol import StartsAtOneProtocol, TrainingStep
 from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion
 from BCore.Classes.SessionManager import NoTimeOff
 from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings
-from BCore.Classes.ReinforcementManager import NoReinforcement, RandomReinforcement
+from BCore.Classes.ReinforcementManager import NoReinforcement, RandomReinforcement, ConstantReinforcement
 
 def get_orientation_tuning_protocol():
     ts1 = TrainingStep(name='or_tuning_ts_8_ors_drift_2Hz_2s_fullC',
@@ -22,6 +22,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
+                                              reinforcement_manager=ConstantReinforcement(fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
@@ -33,7 +34,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
 											  drift_frequencies=[2.],
-											  reinforcement_manager=RandomReinforcement(probability=0.1,fraction_reward_sound_in_on=1.)
+											  reinforcement_manager=ConstantReinforcement(fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())

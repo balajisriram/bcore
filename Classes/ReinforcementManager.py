@@ -41,21 +41,26 @@ class NoReinforcement(ReinforcementManager):
 
 
 class ConstantReinforcement(ReinforcementManager):
+    """
+        VERSION HISTORY:
+        0.0.1: Started out
+        0.0.2: fraction_reward_sound_is_on was incorrectly named. Changed
+    """
 
     def __init__(self,
                  reward_scalar = 1,
                  request_reward_scalar = 1,
                  penalty_scalar = 1,
-                 fraction_reward_sound_in_on = 0,
+                 fraction_reward_sound_is_on = 0,
                  fraction_penalty_sound_is_on = 0,
                  request_mode = 'first',
                  name = 'DefaultConstantReinforcement'):
-        self.ver = Ver("0.0.1")
+        self.ver = Ver("0.0.2")
         super(ConstantReinforcement, self).__init__(name = name)
         self.reward_scalar = reward_scalar
         self.request_reward_scalar = request_reward_scalar
         self.penalty_scalar = penalty_scalar
-        self.fraction_reward_sound_in_on = fraction_reward_sound_in_on
+        self.fraction_reward_sound_is_on = fraction_reward_sound_is_on
         self.fraction_penalty_sound_is_on = fraction_penalty_sound_is_on
         self.request_mode = request_mode
 
@@ -66,7 +71,7 @@ class ConstantReinforcement(ReinforcementManager):
         reward_size = subject.reward *self.reward_scalar
         request_reward_size = subject.reward*self.request_reward_scalar
         ms_penalty = subject.timeout*self.penalty_scalar
-        ms_reward_sound = reward_size*self.fraction_reward_sound_in_on
+        ms_reward_sound = reward_size*self.fraction_reward_sound_is_on
         ms_penalty_sound = ms_penalty*self.fraction_penalty_sound_is_on
 
         update_rm = False
@@ -80,7 +85,7 @@ class RandomReinforcement(ConstantReinforcement):
                  reward_scalar = 1,
                  request_reward_scalar = 1,
                  penalty_scalar = 1,
-                 fraction_reward_sound_in_on = 0,
+                 fraction_reward_sound_is_on = 0,
                  fraction_penalty_sound_is_on = 0,
                  request_mode = 'first',
                  name = 'DefaultRandomReinforcement'):
@@ -88,7 +93,7 @@ class RandomReinforcement(ConstantReinforcement):
         super(RandomReinforcement, self).__init__(name=name, reward_scalar=reward_scalar,
                                                   request_reward_scalar=request_reward_scalar,
                                                   penalty_scalar=penalty_scalar,
-                                                  fraction_reward_sound_in_on=fraction_reward_sound_in_on,
+                                                  fraction_reward_sound_is_on=fraction_reward_sound_is_on,
                                                   fraction_penalty_sound_is_on=fraction_penalty_sound_is_on,
                                                   request_mode=request_mode)
         self.probability=probability
@@ -110,7 +115,7 @@ class RewardNCorrectInARow(ReinforcementManager):
                  reward_scalar=1,
                  request_reward_scalar=1,
                  penalty_scalar=1,
-                 fraction_reward_sound_in_on=0,
+                 fraction_reward_sound_is_on=0,
                  fraction_penalty_sound_is_on=0,
                  request_mode='first',
                  name='DefaultNCorrectReinforcement'):
@@ -119,7 +124,7 @@ class RewardNCorrectInARow(ReinforcementManager):
         self.reward_scalar = reward_scalar
         self.request_reward_scalar = request_reward_scalar
         self.penalty_scalar = penalty_scalar
-        self.fraction_reward_sound_in_on = fraction_reward_sound_in_on
+        self.fraction_reward_sound_is_on = fraction_reward_sound_is_on
         self.fraction_penalty_sound_is_on = fraction_penalty_sound_is_on
         self.request_mode = request_mode
 
@@ -127,11 +132,11 @@ class RewardNCorrectInARow(ReinforcementManager):
         return "RewardNCorrectInARow object"
 
 
-    def calculate_reinforcement(self, subject):
+    def calculate_reinforcement(self, subject, **kwargs):
         reward_size = subject.reward *self.reward_scalar
         request_reward_size = subject.reward*self.request_reward_scalar
         ms_penalty = subject.timeout*self.penalty_scalar
-        ms_reward_sound = reward_size*self.fraction_reward_sound_in_on
+        ms_reward_sound = reward_size*self.fraction_reward_sound_is_on
         ms_penalty_sound = ms_penalty*self.fraction_penalty_sound_is_on
 
         update_rm = False
