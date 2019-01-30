@@ -22,7 +22,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
-                                              reinforcement_manager=ConstantReinforcement(fraction_reward_sound_is_on=1.),
+                                              reinforcement_manager=RandomReinforcement(probability=0.5, fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
@@ -34,7 +34,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
 											  drift_frequencies=[2.],
-											  reinforcement_manager=ConstantReinforcement(fraction_reward_sound_is_on=1.),
+											  reinforcement_manager=RandomReinforcement(fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())

@@ -1,4 +1,5 @@
 from verlib import NormalizedVersion as Ver
+import numpy as np
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -103,7 +104,7 @@ class RandomReinforcement(ConstantReinforcement):
         return "RandomReinforcement object"
 
     def calculate_reinforcement(self, subject, **kwargs):
-        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = super(RandomReinforcement,self).calculate_reinforcement(self, subject, **kwargs)
+        reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound = super(RandomReinforcement,self).calculate_reinforcement(subject=subject)
         if np.random.rand()<self.probability:
             return reward_size, request_reward_size, ms_penalty, ms_reward_sound, ms_penalty_sound
         else:
