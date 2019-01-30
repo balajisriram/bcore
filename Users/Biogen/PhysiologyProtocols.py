@@ -22,7 +22,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
-                                              reinforcement_manager=RandomReinforcement(probability=0.5, fraction_reward_sound_is_on=1.),
+                                              reinforcement_manager=RandomReinforcement(probability=0.25, fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
@@ -34,7 +34,7 @@ def get_orientation_tuning_protocol():
                                               durations=[2.],
                                               radii=[400],
 											  drift_frequencies=[2.],
-											  reinforcement_manager=RandomReinforcement(fraction_reward_sound_is_on=1.),
+											  reinforcement_manager=RandomReinforcement(probability=0.25,fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())
@@ -50,6 +50,7 @@ def get_short_duration_protocol():
                                               durations=[2.],
                                               radii=[400],
                                               drift_frequencies=[2.],
+                                              reinforcement_manager=RandomReinforcement(probability=0.25,fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=NumTrialsDoneCriterion(num_trials=200,num_trials_mode='consecutive'))
@@ -61,6 +62,7 @@ def get_short_duration_protocol():
                                               durations=[0.05,0.1,0.15,0.2],
 											  phases=[0,0.125,0.25,0.375,0.5,0.625,0.75,0.875],
                                               radii=[400],
+                                              reinforcement_manager=RandomReinforcement(probability=0.05,fraction_reward_sound_is_on=1.),
                                               iti=1., itl=0.),
                         session_manager=NoTimeOff(),
                         criterion=RepeatIndefinitely())
