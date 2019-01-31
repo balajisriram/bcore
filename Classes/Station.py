@@ -187,7 +187,7 @@ class Station(object):
         val = np.matlib.repmat(val,2,1)
         self._sounds['punishment_sound'] = psychopy.sound.Sound(val.T,hamming=True)
 
-        val = 0.1*np.random.randn(1,nSamples)
+        val = 0.5*np.random.randn(1,nSamples)
         val = np.matlib.repmat(val,2,1)
         self._sounds['try_something_else'] = psychopy.sound.Sound(val.T,hamming=True)
 
