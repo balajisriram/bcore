@@ -1,4 +1,4 @@
-from verlib import NormalizedVersion as Ver
+f	rom verlib import NormalizedVersion as Ver
 import numpy as np
 import psychopy.visual
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
@@ -78,12 +78,12 @@ class BaseTrialManager(object):
 
 
         station.set_trial_pin_on()
-		
-		# text stim to denote trial
-		trial_number_text = psychopy.visual.TextStim(station._window,
-		    text='trial_number::{0}'.format(trial_record['trial_number']), 
-		    pos=(-0.95,-0.95), units='norm', height=0.02, )
-		
+        
+        # text stim to denote trial
+        trial_number_text = psychopy.visual.TextStim(station._window,
+            text='trial_number::{0}'.format(trial_record['trial_number']), 
+            pos=(-0.95,-0.95), units='norm', height=0.02, )
+        
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
             # current_phase_num determines the phase
@@ -122,8 +122,8 @@ class BaseTrialManager(object):
                     if self.draw_stim_onset_rect and phase.phase_type=='stim':
                         psychopy.visual.Rect(station._window,pos=(-300,-300),width=100,height=100,units='pix',fillColor=(1,1,1)).draw()
                     phase.stimulus_update_fn(stim,stim_details)
-				trial_number_text.draw()
-				
+                trial_number_text.draw()
+                
                 phase.on_frame(station=station,trial_record=trial_record)
 
                 # look for responses
