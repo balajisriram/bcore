@@ -1,4 +1,4 @@
-f	rom verlib import NormalizedVersion as Ver
+from verlib import NormalizedVersion as Ver
 import numpy as np
 import psychopy.visual
 from psychopy.constants import (STARTED, PLAYING, PAUSED, FINISHED, STOPPED,
