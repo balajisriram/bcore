@@ -68,7 +68,7 @@ class TrainingStep(object):
             #traceback.print_exc()
             print("type error: " + str(e))
             trial_record['errored_out'] = True
-			quit = True
+            quit = True
         return trial_record,quit
 
 ###########################################################################
