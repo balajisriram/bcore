@@ -78,7 +78,7 @@ class NumTrialsDoneCriterion(Criterion):
             graduate = True
         else:
             graduate = False
-        print("NUMTRIALSDONECRITERION:CHECK_CRITERION::graduate=%s" % graduate)
+        print("NUMTRIALSDONECRITERION:CHECK_CRITERION::graduate=%s, nT=%d" % (graduate, nT))
         return graduate
 
 
