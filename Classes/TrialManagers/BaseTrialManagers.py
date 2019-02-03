@@ -82,7 +82,7 @@ class BaseTrialManager(object):
         # text stim to denote trial
         trial_number_text = psychopy.visual.TextStim(station._window,
             text='trial_number::{0}'.format(trial_record['trial_number']), 
-            pos=(-0.95,-0.95), units='norm', height=0.02, )
+            pos=(-0.95,0.95), units='norm', height=0.05, )
         
         ### loop into trial phases
         while not trial_done and not error_out and not quit:
