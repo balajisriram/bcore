@@ -19,7 +19,7 @@ def get_orientation_tuning_protocol():
                                               deg_per_cycs=[0.1],
                                               orientations=[0,45,90,135,180,225,270,315],
                                               contrasts=[1.],
-                                              durations=[2.],
+                                              durations=[0.25],
                                               radii=[400],
                                               drift_frequencies=[2.],
                                               reinforcement_manager=NoReinforcement(),
