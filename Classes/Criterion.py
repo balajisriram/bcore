@@ -40,7 +40,6 @@ class NumTrialsDoneCriterion(Criterion):
         return "NumTrialsDoneCriterion object, n:%d mode:%s", (self.num_trials, self.num_trials_mode)
 
     def check_criterion(self, compiled_record, trial_record, **kwargs):
-        print()
         # trial_number = np.append(np.asarray(compiled_record['trial_number']),np.asarray(trial_record['trial_number']))
         # current_step = np.append(np.asarray(compiled_record['current_step']),np.asarray(trial_record['current_step']))
         # protocol_name = np.append(np.asarray(compiled_record['protocol_name']),np.asarray(trial_record['protocol_name']))
@@ -68,7 +67,8 @@ class NumTrialsDoneCriterion(Criterion):
         if self.num_trials_mode == 'consecutive':
             jumps = np.array(np.where(np.diff(temp)!=1)) # jumps in trial number
             try:
-                nT = np.size(trial_number[jumps[0,-1]:])
+                tr_for_current_sequence = temp[jumps[0,-1]+1]
+                nT = trial_record['trial_number'] - tr_for_current_sequence +1
             except IndexError:
                 nT = 0
         else:  # 'global'
