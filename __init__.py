@@ -4,6 +4,8 @@ import time
 import struct
 import uuid
 import re
+import platform
+import netifaces as ni
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -35,31 +37,17 @@ def get_ip_addr(*args):
     """
         Code from : http://code.activestate.com/recipes/439094/
     """
-    import platform
-
     if platform.system()=='Linux':
-        import socket
-        if not args:
-            ifname = 'lo0'
-        else:
-            ifname = args[0]
-
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            import fcntl
-            ip = socket.inet_ntoa(fcntl.ioctl(
-                s.fileno(),
-                0x8927,  # SIOCGIFADDR
-                struct.pack('256s', bytes(ifname[:15], 'utf-8'))
-                )[20:24])
-        except IOError:
-            ip = ''
+        if 'enp4s0' in ni.interfaces():
+            return ni.ifaddresses('enp4s0')[ni.AF_INET][0]['addr']
+        elif 'eth0' in ni.interfaces():
+            return ni.ifaddresses('eth0')[ni.AF_INET][0]['addr']
     elif platform.system()=='Windows':
         import socket
         s = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         s.connect(("8.8.8.8",80))
-        ip = s.getsockname()[0]
-    return ip
+        return s.getsockname()[0]
+
 
 def get_time_stamp(*arg):
     if len(arg) > 1:
