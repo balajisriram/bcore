@@ -19,3 +19,4 @@ BCore is a Behavior training library built originally for training rodents but i
  - [ ] RunForReward trials
  - [ ] Flip trial_pin on trial_start in do_trials
  - [ ] ZMQ output
+ - [ ] Is session manager in protocol? Or in subject? Which spot makes the most sense?
