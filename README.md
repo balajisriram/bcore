@@ -1,22 +1,19 @@
 # BCore
 
-## Introduction
 BCore is a Behavior training library built originally for training rodents but is compatible with training any subject. It was built in MATLab originally but is now compatible with python.
 
-## Starting with BCore
- * use anaconda with BCore
- * For an example, run python -m BCore.Bootstrap.StandAloneRun
-
-## Installation:
-1. _git clone www.github.com/balajisriram/BCore.git_. Note this will also create a Folder in the same location for all the data collected during running experiments
-2. Install miniconda in Windows or Linux
-3. _conda create -n psychopy --file environment.yml_ and _source activate psychopy_
-4. _pip install -r piplist.txt_
-5. _python -m BCore.Bootstrap.StandAloneRun_. See StandAloneRun for details on how to call the function.
+### See [Getting Started guide](https://github.com/balajisriram/BCore/blob/master/Docs/0.GettingStartedWithBCore.md) for details on installing and using BCore
 
 ## TODO:
  - [ ] Plot compiled_record. Filter last 10000 trials.
  - [ ] RunForReward trials
- - [ ] Flip trial_pin on trial_start in do_trials
+ - [ ] Flip trial\_pin on trial\_start in do\_trials
  - [ ] ZMQ output
  - [ ] Is session manager in protocol? Or in subject? Which spot makes the most sense?
+ - [ ] Force IP address for a given computer
+ - [ ] decide on license and execute
+ - [ ] make module pip installable
+ - [ ] configuration script
+     - [ ] specify path to the data store location. verify write access
+     - [ ] identify as standalone, client or server
+     - [ ] 
