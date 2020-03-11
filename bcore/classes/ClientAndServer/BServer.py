@@ -1,6 +1,6 @@
 import os
 import time
-import pickle
+import json_tricks as json
 import shutil
 import copy
 import zmq
@@ -33,8 +33,20 @@ class BServer(object):
                                 and values being list of stationIDs
     """
     version = Ver('0.0.1')  # Feb 5, 2014
-
+    server_id = ''
+    server_name = ''
+    server_ip = ''
+    creation_time = None
+    stations = []
+    subjects = []
+    assignments = dict()
+    server_connection = []
+    station_connections = []
+    
     def __init__(self, **kwargs):
+        pass
+        
+    def create_server(self, **kwargs):
         if len(kwargs) in (0, 1):
             print('BServer.__init()::', len(kwargs),
                   ' %d args input. Loading standard Server')
@@ -73,16 +85,13 @@ class BServer(object):
     def load_server():
         # use standard location for path,
         # make sure to never modify server here:
-        dbLoc = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
+        dbLoc = os.path.join(get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
             with open(dbLoc, 'rb') as f:
-                server = pickle.load(f)
-
+                server = json.load(f)
             print('BServer loaded')
         else:
-            raise RuntimeError('db.Server not found. Ensure it exists before \
-                calling loadServer')
+            raise RuntimeError('db.Server not found. Ensure it exists before calling loadServer')
         return server
 
     def save(self):
@@ -92,10 +101,8 @@ class BServer(object):
         self.save_server()
 
     def save_server(self):
-        srcDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData')
-        desDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+        srcDir = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
+        desDir = os.path.join(get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
@@ -105,10 +112,7 @@ class BServer(object):
             print(('Old db.Bserver found. moving to backup'))
             old = BServer()  # standardLoad to old
             des_name = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
-            shutil.copyfile(
-                os.path.join(srcDir, 'db.BServer'),  # source
-                os.path.join(desDir, des_name)  # destination
-            )
+            shutil.copyfile(os.path.join(srcDir, 'db.BServer'),  os.path.join(desDir, des_name))
             print(('Moved to backup... deleting old copy'))
             os.remove(os.path.join(srcDir, 'db.BServer'))
 
@@ -479,4 +483,6 @@ class BServerLocal(object):
         return os.path.join(get_base_directory(),'BCoreData','ServerData','dB.BServer')
 
 if __name__ == "__main__":
-    print("here")
+    Serv=BServer()
+    with open('mydata.json','w') as f:
+        json.dump(Serv,f)
