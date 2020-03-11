@@ -16,4 +16,4 @@ BCore is a Behavior training library built originally for training rodents but i
  - [ ] configuration script
      - [ ] specify path to the data store location. verify write access
      - [ ] identify as standalone, client or server
-     - [ ] 
+ - [ ] add $BCOREPATH to path
