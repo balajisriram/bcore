@@ -7,12 +7,12 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-from BCore.Classes.Protocol import SequentialProtocol, TrainingStep
-from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion, PerformanceCriterion
-from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.NoStimulusTrialManagers import ClassicalConditioning, AuditoryGoOnly
-from BCore.Classes.TrialManagers.GratingsTrialManagers import GratingsGoOnly
-from BCore.Classes.ReinforcementManager import ConstantReinforcement
+from bcore.classes.Protocol import SequentialProtocol, TrainingStep
+from bcore.classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion, PerformanceCriterion
+from bcore.classes.SessionManager import NoTimeOff
+from bcore.classes.TrialManagers.NoStimulusTrialManagers import ClassicalConditioning, AuditoryGoOnly
+from bcore.classes.TrialManagers.GratingsTrialManagers import GratingsGoOnly
+from bcore.classes.ReinforcementManager import ConstantReinforcement
 
 
 def get_lick_for_reward_protocol():

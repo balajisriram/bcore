@@ -7,11 +7,11 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-from BCore.Classes.Protocol import StartsAtOneProtocol, TrainingStep
-from BCore.Classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion
-from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings
-from BCore.Classes.ReinforcementManager import NoReinforcement, RandomReinforcement, ConstantReinforcement
+from bcore.classes.Protocol import StartsAtOneProtocol, TrainingStep
+from bcore.classes.Criterion import RepeatIndefinitely, NumTrialsDoneCriterion
+from bcore.classes.SessionManager import NoTimeOff
+from bcore.classes.TrialManagers.GratingsTrialManagers import Gratings
+from bcore.classes.ReinforcementManager import NoReinforcement, RandomReinforcement, ConstantReinforcement
 
 def get_orientation_tuning_protocol():
     ts1 = TrainingStep(name='or_tuning_ts_8_ors_drift_2Hz_2s_fullC',

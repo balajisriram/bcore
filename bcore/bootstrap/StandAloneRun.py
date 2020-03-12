@@ -12,7 +12,9 @@ StandAloneRun
 import sys
 import os
 
-import bcore
+print('name::',__file__)
+print('path::',sys.path)
+__package__='bcore'
 from bcore import get_base_directory, get_ip_addr
 import bcore.classes.ClientAndServer.BServer as server
 import bcore.classes.Protocol as protocol
