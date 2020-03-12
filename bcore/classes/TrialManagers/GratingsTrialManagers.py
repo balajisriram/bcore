@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-import bcore.Classes.TrialManagers.PhaseSpec as ps
-import bcore.Classes.TrialManagers.BaseTrialManagers as btm
-import bcore.Classes.ReinforcementManager as reinfmgr
-import bcore.Classes.Station as st
+import bcore.classes.TrialManagers.PhaseSpec as ps
+import bcore.classes.TrialManagers.BaseTrialManagers as btm
+import bcore.classes.ReinforcementManager as reinfmgr
+import bcore.classes.Station as st
 import psychopy
 import random
 import numpy as np

@@ -10,7 +10,7 @@ from psychopy import prefs
 prefs.general['audioLib'] = ['sounddevice']
 import psychopy.sound
 
-import bcore.Classes.Hardware.Displays as displays
+import bcore.classes.Hardware.Displays as displays
 from bcore import get_base_directory, get_ip_addr, get_mac_address
 from verlib import NormalizedVersion as Ver
 

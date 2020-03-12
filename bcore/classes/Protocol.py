@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-import bcore.Classes.Criterion as crit
-import bcore.Classes.SessionManager as sessmgr
-import bcore.Classes.TrialManagers.GratingsTrialManagers as gratings
-import bcore.Classes.ReinforcementManager as reinfmgr
+import bcore.classes.Criterion as crit
+import bcore.classes.SessionManager as sessmgr
+import bcore.classes.TrialManagers.GratingsTrialManagers as gratings
+import bcore.classes.ReinforcementManager as reinfmgr
 import psychopy
 import traceback
 
