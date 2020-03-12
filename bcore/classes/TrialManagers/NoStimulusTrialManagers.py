@@ -1,9 +1,9 @@
 from verlib import NormalizedVersion as Ver
-from bcore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec,StimPhaseSpec
-from bcore.Classes.TrialManagers.BaseTrialManagers import BaseTrialManager
-from bcore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
-from bcore.Classes.Station import StandardKeyboardStation
-from bcore.Classes.Subject import DefaultVirtual
+
+import bcore.Classes.TrialManagers.PhaseSpec as ps
+import bcore.Classes.TrialManagers.BaseTrialManagers as btm
+import bcore.Classes.ReinforcementManager as reinfmgr
+
 import psychopy
 import random
 import numpy as np
@@ -29,7 +29,7 @@ __status__ = "Production"
 ##########################################################################################
 
 ################################# CLASSICALCONDITIONING ##################################
-class ClassicalConditioning(BaseTrialManager):
+class ClassicalConditioning(btm.BaseTrialManager):
     """
         CLASSICALCONDITIONING defines a trial manager where rewards are provided directly.
         Every trial starts with a random delay, after which auditory go-signal is 
@@ -55,7 +55,6 @@ class ClassicalConditioning(BaseTrialManager):
     _Cached_Stimuli = None
     def __init__(self,
                  name = 'DefaultCC_ConstantDelay_1s',
-                 reinforcement_manager=ConstantReinforcement(),
                  delay_distribution = ('Constant',1.),
                  go_signal = None,
                  response_duration = 2.,
@@ -152,7 +151,7 @@ class ClassicalConditioning(BaseTrialManager):
        
         # deal with the phases
         # delay phase
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(ps.PhaseSpec(
             phase_number=0,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
@@ -166,7 +165,7 @@ class ClassicalConditioning(BaseTrialManager):
             sounds_played=None))
 
         # response phase
-        self._Phases.append(StimPhaseSpec(
+        self._Phases.append(ps.StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=ClassicalConditioning.do_nothing_to_stim,
@@ -180,7 +179,7 @@ class ClassicalConditioning(BaseTrialManager):
             sounds_played=[go_sound]))
 
         # reward phase spec
-        self._Phases.append(RewardPhaseSpec(
+        self._Phases.append(ps.RewardPhaseSpec(
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
@@ -231,7 +230,7 @@ class ClassicalConditioning(BaseTrialManager):
             return False
 
 
-class AuditoryGoOnly(BaseTrialManager):
+class AuditoryGoOnly(btm.BaseTrialManager):
     """
         AUDITORYGOONLY defines a trial manager Auditory go signals require response for
         reward. Absence of response leads to error sounds
@@ -255,7 +254,7 @@ class AuditoryGoOnly(BaseTrialManager):
     _Cached_Stimuli = None
     def __init__(self,
                  name = 'DefaultAuditory_Go_ConstantDelay_2s',
-                 reinforcement_manager=ConstantReinforcement(),
+                 reinforcement_manager=reinfmgr.ConstantReinforcement(),
                  delay_distribution = ('Constant',2.),
                  go_signal = None,
                  response_duration = 2.,
@@ -357,7 +356,7 @@ class AuditoryGoOnly(BaseTrialManager):
        
         # deal with the phases
         # delay phase
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(ps.PhaseSpec(
             phase_number=0,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_update_fn=AuditoryGoOnly.do_nothing_to_stim,
@@ -371,10 +370,10 @@ class AuditoryGoOnly(BaseTrialManager):
             sounds_played=None))
 
         # response phase
-        self._Phases.append(StimPhaseSpec(
+        self._Phases.append(ps.StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             stimulus_details=None,
             transitions={port_details['target_ports']: 2, do_nothing: 3},
             frames_until_transition=response_frame_num,
@@ -385,11 +384,11 @@ class AuditoryGoOnly(BaseTrialManager):
             sounds_played=[go_sound]))
 
         # reward phase spec
-        self._Phases.append(RewardPhaseSpec(
+        self._Phases.append(ps.RewardPhaseSpec(
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             transitions={do_nothing: 4},
             frames_until_transition=reward_size,
             auto_trigger=False,
@@ -400,7 +399,7 @@ class AuditoryGoOnly(BaseTrialManager):
             reward_valve='reward_valve'))
             
         # punishment phase spec
-        self._Phases.append(PunishmentPhaseSpec(
+        self._Phases.append(ps.PunishmentPhaseSpec(
             phase_number=3,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
@@ -414,11 +413,11 @@ class AuditoryGoOnly(BaseTrialManager):
             sounds_played=[punishment_sound]))
 
         # itl
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(ps.PhaseSpec(
             phase_number=4,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             transitions=None,
             frames_until_transition=iti_size,
             auto_trigger=False,
@@ -458,7 +457,7 @@ class AuditoryGoOnly(BaseTrialManager):
 
 
 ##################################### RUN FOR REWARD #####################################
-class RunForReward(BaseTrialManager):
+class RunForReward(btm.BaseTrialManager):
     """
         RUNFORREWARD defines a trial manager where rewards are provided for running
         above a specified running speed for a specified duration. Requires:
@@ -474,7 +473,7 @@ class RunForReward(BaseTrialManager):
 
     def __init__(self,
                  name,
-                 reinforcement_manager=ConstantReinforcement(),
+                 reinforcement_manager=reinfmgr.ConstantReinforcement(),
                  min_run_speed = 50, # sets_trigger on arduino
                  run_duration_distribution = 2., # seconds
                  iti=1., 

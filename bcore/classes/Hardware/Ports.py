@@ -1,7 +1,7 @@
 import time
 import zmq
 
-from ...Util.parallel.parallelppdev import Parallel
+import bcore.util.parallel.parallelppdev as parallel import Parallel
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -12,7 +12,7 @@ __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
 
-class StandardParallelPort(Parallel):
+class StandardParallelPort(parallel.Parallel):
     """
         STANDARDPARALLELPORT is a wrapper around parallel.Parallel and is
         specifically used to read and write multiple pins simultaneously.

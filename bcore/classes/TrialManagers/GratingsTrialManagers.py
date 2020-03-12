@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-from bcore.Classes.TrialManagers.PhaseSpec import PhaseSpec,StimPhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec
-from bcore.Classes.TrialManagers.BaseTrialManagers import BaseTrialManager
-from bcore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
-from bcore.Classes.Station import StandardKeyboardStation, add_or_find_in_LUT
+import bcore.Classes.TrialManagers.PhaseSpec as ps
+import bcore.Classes.TrialManagers.BaseTrialManagers as btm
+import bcore.Classes.ReinforcementManager as reinfmgr
+import bcore.Classes.Station as st
 import psychopy
 import random
 import numpy as np
@@ -29,7 +29,7 @@ __status__ = "Production"
 ##########################################################################################
 ##########################################################################################
 
-class Gratings(BaseTrialManager):
+class Gratings(btm.BaseTrialManager):
     """
         GRATINGS defines a standard gratings trial manager
             deg_per_cycs
@@ -55,7 +55,7 @@ class Gratings(BaseTrialManager):
                  radii=[400], #degrees
                  iti=1., #seconds
                  itl=0., #inter trial luminance
-                 reinforcement_manager=NoReinforcement(),
+                 reinforcement_manager=reinfmgr.NoReinforcement(),
                  **kwargs):
         super(Gratings,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.1')
@@ -136,7 +136,7 @@ class Gratings(BaseTrialManager):
         do_nothing = ()
 
         # the stimulus
-        self._Phases.append(StimPhaseSpec(
+        self._Phases.append(ps.StimPhaseSpec(
             phase_number=0,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
             stimulus_update_fn=Gratings.update_stimulus,
@@ -153,11 +153,11 @@ class Gratings(BaseTrialManager):
         # reward if its provided
         if reward_size>0:
             # pre-reward
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=1,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+                stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
                 transitions={do_nothing: 2},
                 frames_until_transition=6, # 6 frames to make the sound finish before reward
                 auto_trigger=False,
@@ -167,11 +167,11 @@ class Gratings(BaseTrialManager):
                 sounds_played=None,
                 reward_valve='reward_valve'))
             # reward
-            self._Phases.append(RewardPhaseSpec(
+            self._Phases.append(ps.RewardPhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+                stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
                 transitions={do_nothing: 3},
                 frames_until_transition=reward_size,
                 auto_trigger=False,
@@ -181,11 +181,11 @@ class Gratings(BaseTrialManager):
                 sounds_played=[reward_sound],
                 reward_valve='reward_valve'))
             # itl
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+                stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -196,11 +196,11 @@ class Gratings(BaseTrialManager):
                 is_last_phase=True))
         else:
             # itl
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=1,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(self.itl),autoLog=False),
                 stimulus_details=None,
-                stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+                stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
                 transitions=None,
                 frames_until_transition=round(self.iti*hz),
                 auto_trigger=False,
@@ -213,7 +213,7 @@ class Gratings(BaseTrialManager):
         self._compiler = Gratings.trial_compiler
 
     def _simulate(self):
-        station = StandardKeyboardStation()
+        station = st.StandardKeyboardStation()
         station.initialize()
 
         trial_record = {}
@@ -459,7 +459,7 @@ class Gratings_HardEdge(Gratings):
 ##########################################################################################
 ##########################################################################################
 
-class Gratings2AFC(BaseTrialManager):
+class Gratings2AFC(btm.BaseTrialManager):
     """
         GRATINGS2AFC defines a standard gratings trial manager
             deg_per_cycs
@@ -494,7 +494,7 @@ class Gratings2AFC(BaseTrialManager):
                  iti = 1,
                  itl = 0.,
                  do_combos = True,
-                 reinforcement_manager = NoReinforcement(),
+                 reinforcement_manager = reinfmgr.NoReinforcement(),
                  **kwargs):
         super(Gratings2AFC,self).__init__(iti=iti,itl=itl)
         self.ver = Ver('0.0.2')
@@ -783,7 +783,7 @@ class Gratings2AFC(BaseTrialManager):
         request_reward_size = np.round(request_reward_size/1000*60)
         penalty_size = np.round(ms_penalty/1000*60)
         if do_post_discrim_stim:
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=0,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -796,7 +796,7 @@ class Gratings2AFC(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['trial_start_sound'], 0.050)))
             if self.radius_type=='Gaussian':
-                self._Phases.append(PhaseSpec(
+                self._Phases.append(ps.PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=GratingsAFC.update_stimulus,
@@ -809,7 +809,7 @@ class Gratings2AFC(BaseTrialManager):
                     hz=hz,
                     sounds_played=(station._sounds['stim_start_sound'], 0.050)))
             else:
-                self._Phases.append(PhaseSpec(
+                self._Phases.append(ps.PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=GratingsAFC.update_stimulus,
@@ -821,7 +821,7 @@ class Gratings2AFC(BaseTrialManager):
                     phase_name='stim',
                     hz=hz,
                     sounds_played=(station._sounds['stim_start_sound'], 0.050)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -833,7 +833,7 @@ class Gratings2AFC(BaseTrialManager):
                 phase_name='post-stim',
                 hz=hz,
                 sounds_played=None))
-            self._Phases.append(RewardPhaseSpec(
+            self._Phases.append(ps.RewardPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -846,7 +846,7 @@ class Gratings2AFC(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['correct_sound'], ms_reward_sound/1000),
                 reward_valve=reward_valve))
-            self._Phases.append(PunishmentPhaseSpec(
+            self._Phases.append(ps.PunishmentPhaseSpec(
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0.,0.,0.,),autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -858,7 +858,7 @@ class Gratings2AFC(BaseTrialManager):
                 phase_name='punishment',
                 hz=hz,
                 sounds_played=(station._sounds['punishment_sound'],ms_penalty_sound/1000)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=5,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
@@ -871,7 +871,7 @@ class Gratings2AFC(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['trial_end_sound'], 0.050)))
         else:
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=0,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -884,7 +884,7 @@ class Gratings2AFC(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['trial_start_sound'], 0.050)))
             if self.radius_type=='Gaussian':
-                self._Phases.append(PhaseSpec(
+                self._Phases.append(ps.PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=GratingsAFC.update_stimulus,
@@ -897,7 +897,7 @@ class Gratings2AFC(BaseTrialManager):
                     hz=hz,
                     sounds_played=(station._sounds['stim_start_sound'], 0.050)))
             else:
-                self._Phases.append(PhaseSpec(
+                self._Phases.append(ps.PhaseSpec(
                     phase_number=1,
                     stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='circle',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                     stimulus_update_fn=GratingsAFC.update_stimulus,
@@ -909,7 +909,7 @@ class Gratings2AFC(BaseTrialManager):
                     phase_name='stim',
                     hz=hz,
                     sounds_played=(station._sounds['stim_start_sound'], 0.050)))
-            self._Phases.append(RewardPhaseSpec(
+            self._Phases.append(ps.RewardPhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -922,7 +922,7 @@ class Gratings2AFC(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['correct_sound'], ms_reward_sound/1000),
                 reward_valve=reward_valve))
-            self._Phases.append(PunishmentPhaseSpec(
+            self._Phases.append(ps.PunishmentPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
                 stimulus_update_fn=GratingsAFC.do_nothing_to_stim,
@@ -934,7 +934,7 @@ class Gratings2AFC(BaseTrialManager):
                 phase_name='punishment',
                 hz=hz,
                 sounds_played=(station._sounds['punishment_sound'],ms_penalty_sound/1000)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
@@ -1030,7 +1030,7 @@ class Gratings2AFC(BaseTrialManager):
 ##########################################################################################
 ##########################################################################################
 
-class GratingsGoNoGo(BaseTrialManager):
+class GratingsGoNoGo(btm.BaseTrialManager):
     """
         GRATINGSGONOGO defines a standard gratings trial manager for Go-No-Go trials. Requires:
             deg_per_cycs
@@ -1064,7 +1064,7 @@ class GratingsGoNoGo(BaseTrialManager):
                  iti = 1.,
                  itl = 0.,
                  do_combos = True,
-                 reinforcement_manager = ConstantReinforcement(),
+                 reinforcement_manager = reinfmgr.ConstantReinforcement(),
                  **kwargs):
         super(GratingsGoNoGo,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.2')
@@ -1207,7 +1207,7 @@ class GratingsGoNoGo(BaseTrialManager):
         request_reward_size = np.round(request_reward_size/1000*60)
         penalty_size = np.round(ms_penalty/1000*60)
         if do_post_discrim_stim:
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=0,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1219,7 +1219,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='pre-request',
                 hz=hz,
                 sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=1,
                 stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                 stimulus_update_fn=AFCGratings.update_stimulus,
@@ -1231,7 +1231,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='stim',
                 hz=hz,
                 sounds_played=(station._sounds['stim_start_sound'], 0.050)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1243,7 +1243,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='post-stim',
                 hz=hz,
                 sounds_played=None))
-            self._Phases.append(RewardPhaseSpec(
+            self._Phases.append(ps.RewardPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1256,7 +1256,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['correct_sound'], ms_reward_sound/1000),
                 reward_valve=reward_valve))
-            self._Phases.append(PunishmentPhaseSpec(
+            self._Phases.append(ps.PunishmentPhaseSpec(
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0.,0.,0.,),autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1268,7 +1268,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='punishment',
                 hz=hz,
                 sounds_played=(station._sounds['punishment_sound'],ms_penalty_sound/1000)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=5,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
@@ -1281,7 +1281,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['trial_end_sound'], 0.050)))
         else:
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=1,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1293,7 +1293,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='pre-request',
                 hz=hz,
                 sounds_played=(station._sounds['trial_start_sound'], 0.050)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=2,
                 stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],mask='gauss',ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',autoLog=False),
                 stimulus_update_fn=AFCGratings.update_stimulus,
@@ -1305,7 +1305,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='stim',
                 hz=hz,
                 sounds_played=(station._sounds['stim_start_sound'], 0.050)))
-            self._Phases.append(RewardPhaseSpec(
+            self._Phases.append(ps.RewardPhaseSpec(
                 phase_number=3,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1318,7 +1318,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 hz=hz,
                 sounds_played=(station._sounds['correct_sound'], ms_reward_sound/1000),
                 reward_valve=reward_valve))
-            self._Phases.append(PunishmentPhaseSpec(
+            self._Phases.append(ps.PunishmentPhaseSpec(
                 phase_number=4,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=(0,0,0,),autoLog=False),
                 stimulus_update_fn=AFCGratings.do_nothing_to_stim,
@@ -1330,7 +1330,7 @@ class GratingsGoNoGo(BaseTrialManager):
                 phase_name='punishment',
                 hz=hz,
                 sounds_played=(station._sounds['punishment_sound'],ms_penalty_sound/1000)))
-            self._Phases.append(PhaseSpec(
+            self._Phases.append(ps.PhaseSpec(
                 phase_number=5,
                 stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
                 stimulus_details=None,
@@ -1397,7 +1397,7 @@ class GratingsGoNoGo(BaseTrialManager):
         return compiled_details
 
 
-class GratingsGoOnly(BaseTrialManager):
+class GratingsGoOnly(btm.BaseTrialManager):
     """
         GRATINGSGOONLY defines a standard gratings trial manager for Go-No-Go trials. Requires:
             deg_per_cycs
@@ -1432,7 +1432,7 @@ class GratingsGoOnly(BaseTrialManager):
                  itl = 0.,
                  do_combos = True,
                  delay_distribution = ('Constant',2.),
-                 reinforcement_manager = ConstantReinforcement(),
+                 reinforcement_manager = reinfmgr.ConstantReinforcement(),
                  **kwargs):
         super(GratingsGoOnly,self).__init__(iti=iti, itl=itl)
         self.ver = Ver('0.0.2')
@@ -1602,10 +1602,10 @@ class GratingsGoOnly(BaseTrialManager):
 
         # deal with the phases
         # delay phase
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(ps.PhaseSpec(
             phase_number=0,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             stimulus_details=None,
             transitions={do_nothing: 1},
             frames_until_transition=delay_frame_num,
@@ -1616,7 +1616,7 @@ class GratingsGoOnly(BaseTrialManager):
             sounds_played=None))
 
         # response phase
-        self._Phases.append(StimPhaseSpec(
+        self._Phases.append(ps.StimPhaseSpec(
             phase_number=1,
             stimulus=psychopy.visual.GratingStim(win=station._window,tex='sin',sf=stimulus_details['deg_per_cyc'],size=stimulus_details['radius'],ori=stimulus_details['orientation'],phase=stimulus_details['phase'],contrast=stimulus_details['contrast'],units='deg',mask=None,autoLog=False),
             stimulus_update_fn=GratingsGoOnly.update_stimulus,
@@ -1630,11 +1630,11 @@ class GratingsGoOnly(BaseTrialManager):
             sounds_played=[go_sound]))
 
         # reward phase spec
-        self._Phases.append(RewardPhaseSpec(
+        self._Phases.append(ps.RewardPhaseSpec(
             phase_number=2,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             transitions={do_nothing: 4},
             frames_until_transition=reward_size,
             auto_trigger=False,
@@ -1645,11 +1645,11 @@ class GratingsGoOnly(BaseTrialManager):
             reward_valve='reward_valve'))
 
         # punishment phase spec
-        self._Phases.append(PunishmentPhaseSpec(
+        self._Phases.append(ps.PunishmentPhaseSpec(
             phase_number=3,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             transitions={do_nothing: 4},
             frames_until_transition=penalty_size,
             auto_trigger=False,
@@ -1659,11 +1659,11 @@ class GratingsGoOnly(BaseTrialManager):
             sounds_played=[punishment_sound]))
 
         # itl
-        self._Phases.append(PhaseSpec(
+        self._Phases.append(ps.PhaseSpec(
             phase_number=4,
             stimulus=psychopy.visual.Rect(win=station._window,width=station._window.size[0],height=station._window.size[1],fillColor=self.itl,autoLog=False),
             stimulus_details=None,
-            stimulus_update_fn=BaseTrialManager.do_nothing_to_stim,
+            stimulus_update_fn=btm.BaseTrialManager.do_nothing_to_stim,
             transitions=None,
             frames_until_transition=iti_size,
             auto_trigger=False,

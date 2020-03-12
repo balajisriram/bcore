@@ -10,7 +10,7 @@ from psychopy import prefs
 prefs.general['audioLib'] = ['sounddevice']
 import psychopy.sound
 
-from bcore.Classes.Hardware.Displays import StandardDisplay
+import bcore.Classes.Hardware.Displays as displays
 from bcore import get_base_directory, get_ip_addr, get_mac_address
 from verlib import NormalizedVersion as Ver
 
@@ -279,7 +279,7 @@ class StandardVisionBehaviorStation(Station):
         return "StandardVisionBehaviorStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
 
     def get_display(self):
-        return StandardDisplay()
+        return displays.StandardDisplay()
 
     def get_parport_mappings(self):
         if self.parallel_port == 'standardVisionBehaviorDefault':
@@ -339,7 +339,7 @@ class StandardVisionBehaviorStation(Station):
                 prot = self._session['protocol']
                 trial_num = self._session['trial_num']
 
-    def initialize_display(self, display = StandardDisplay()):
+    def initialize_display(self, display = displays.StandardDisplay()):
         self._window = psychopy.visual.Window(color=(0.,0.,0.), fullscr=True, winType='pyglet', allowGUI=False, units='deg', screen=0, viewScale=None, waitBlanking=True, allowStencil=True,monitor = display)
         self._window.flip()
 

@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-from bcore.Classes.Criterion import RepeatIndefinitely
-from bcore.Classes.SessionManager import NoTimeOff
-from bcore.Classes.TrialManagers.GratingsTrialManagers import Gratings,Gratings2AFC
-from bcore.Classes.ReinforcementManager import NoReinforcement,ConstantReinforcement
+import bcore.Classes.Criterion as crit
+import bcore.Classes.SessionManager as sessmgr
+import bcore.Classes.TrialManagers.GratingsTrialManagers as gratings
+import bcore.Classes.ReinforcementManager as reinfmgr
 import psychopy
 import traceback
 
@@ -238,7 +238,7 @@ class DemoGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1",
-        trial_manager=GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
+        trial_manager=gratings.GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=reinfmgr.ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees
@@ -248,8 +248,8 @@ class DemoGratingsProtocol(SimpleProtocol):
                                # iti=1, #seconds
                                # itl=0., #inter trial luminance,
                                # ),
-        session_manager=NoTimeOff(),
-        criterion=RepeatIndefinitely())]
+        session_manager=sessmgr.NoTimeOff(),
+        criterion=crit.RepeatIndefinitely())]
         super(DemoGratingsProtocol,self).__init__(training_steps, name=name)
 
     def __repr__(self):
@@ -266,7 +266,7 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
         name = "DemoGratingsProtocol"
         training_steps = [TrainingStep(
         name="DemoGratingStepNum1",
-        trial_manager=GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=ConstantReinforcement()),
+        trial_manager=gratings.GratingsAFC(name='DemoAFCGratingsTrialManager',deg_per_cycs={'L':[0.20],'R':[0.20]},durations = {'L':[1.],'R':[1.]},reinforcement_manager=reinfmgr.ConstantReinforcement()),
         # trial_manager=Gratings(name='DemoAFCGratingsTrialManager',
                                # deg_per_cycs=[0.1], #degrees
                                # orientations=[45,-45,], #degrees
@@ -276,8 +276,8 @@ class DemoAFCGratingsProtocol(SimpleProtocol):
                                # iti=1, #seconds
                                # itl=0., #inter trial luminance,
                                # ),
-        session_manager=NoTimeOff(),
-        criterion=RepeatIndefinitely())]
+        session_manager=sessmgr.NoTimeOff(),
+        criterion=crit.RepeatIndefinitely())]
         super(DemoAFCGratingsProtocol,self).__init__(training_steps, name=name)
 
     def __repr__(self):
