@@ -15,8 +15,8 @@ __status__ = "Production"
 
 import sys
 
-from BCore.Classes.Stations.StandardVisionBehaviorStation import StandardVisionBehaviorStation
-from BCore.Classes.Stations.Station import Station
+from bcore.Classes.Stations.StandardVisionBehaviorStation import StandardVisionBehaviorStation
+from bcore.Classes.Stations.Station import Station
 
 
 def bootstrap(mode='init', procType='client', **kwargs):

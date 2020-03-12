@@ -11,16 +11,17 @@ StandAloneRun
 """
 import sys
 import os
-from BCore import get_base_directory, get_ip_addr
-from BCore.Classes.ClientAndServer.BServer import BServerLocal
-from BCore.Classes.Protocol import Protocol, DemoGratingsProtocol
-from BCore.Classes.Subject import DefaultVirtual
-from BCore.Classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation,StandardVisionHeadfixStation
+
+from bcore import get_base_directory, get_ip_addr
+from bcore.classes.ClientAndServer.BServer import BServerLocal
+from bcore.classes.Protocol import Protocol, DemoGratingsProtocol
+from bcore.classes.Subject import DefaultVirtual
+from bcore.classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation,StandardVisionHeadfixStation
 
 # User specific protocols
-from BCore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
-from BCore.Users.Biogen.BehaviorProtocols import get_behavior_protocol_biogen
-from BCore.Users.Biogen import get_protocol_from_name
+from bcore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
+from bcore.Users.Biogen.BehaviorProtocols import get_behavior_protocol_biogen
+from bcore.Users.Biogen import get_protocol_from_name
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -126,7 +127,8 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
     stn.remove_subject(sub)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__'and __package__ is None:
+    __package__='bcore'
     # set defaults for all the things that need to be sent to the bootstrap
     # function
 

@@ -2,7 +2,7 @@ import time
 from verlib import NormalizedVersion as Ver
 import os
 import pickle
-from BCore import get_base_directory
+from bcore import get_base_directory
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"

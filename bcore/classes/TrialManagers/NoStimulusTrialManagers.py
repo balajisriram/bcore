@@ -1,9 +1,9 @@
 from verlib import NormalizedVersion as Ver
-from BCore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec,StimPhaseSpec
-from BCore.Classes.TrialManagers.BaseTrialManagers import BaseTrialManager
-from BCore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
-from BCore.Classes.Station import StandardKeyboardStation
-from BCore.Classes.Subject import DefaultVirtual
+from bcore.Classes.TrialManagers.PhaseSpec import PhaseSpec,RewardPhaseSpec,PunishmentPhaseSpec,StimPhaseSpec
+from bcore.Classes.TrialManagers.BaseTrialManagers import BaseTrialManager
+from bcore.Classes.ReinforcementManager import ConstantReinforcement,NoReinforcement
+from bcore.Classes.Station import StandardKeyboardStation
+from bcore.Classes.Subject import DefaultVirtual
 import psychopy
 import random
 import numpy as np

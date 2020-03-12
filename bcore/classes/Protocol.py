@@ -1,8 +1,8 @@
 from verlib import NormalizedVersion as Ver
-from BCore.Classes.Criterion import RepeatIndefinitely
-from BCore.Classes.SessionManager import NoTimeOff
-from BCore.Classes.TrialManagers.GratingsTrialManagers import Gratings,Gratings2AFC
-from BCore.Classes.ReinforcementManager import NoReinforcement,ConstantReinforcement
+from bcore.Classes.Criterion import RepeatIndefinitely
+from bcore.Classes.SessionManager import NoTimeOff
+from bcore.Classes.TrialManagers.GratingsTrialManagers import Gratings,Gratings2AFC
+from bcore.Classes.ReinforcementManager import NoReinforcement,ConstantReinforcement
 import psychopy
 import traceback
 

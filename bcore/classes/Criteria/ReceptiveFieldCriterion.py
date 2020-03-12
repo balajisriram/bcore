@@ -1,4 +1,4 @@
-from Criterion import Criterion
+from bcore.Classes.Criterion import Criterion
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
