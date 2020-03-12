@@ -15,18 +15,18 @@ __status__ = "Production"
 
 import sys
 
-from bcore.Classes.Stations.StandardVisionBehaviorStation import StandardVisionBehaviorStation
-from bcore.Classes.Stations.Station import Station
+import bcore.Classes.Stations.StandardVisionBehaviorStation as svbs
+import bcore.Classes.Stations.Station as st
 
 
 def bootstrap(mode='init', procType='client', **kwargs):
     print(('Currently bootstrap automatically calls git pull'))
     if mode == 'init':
         if procType == 'client':
-            st = Station(**kwargs)
+            st = st.Station(**kwargs)
             st.run()
         elif procType == 'standardVisionClient' or procType == 'std-cli':
-            st = StandardVisionBehaviorStation(**kwargs)
+            st = svbs.StandardVisionBehaviorStation(**kwargs)
             st.run()
         elif procType == 'server':
             server = BServer(**kwargs)
@@ -36,7 +36,7 @@ def bootstrap(mode='init', procType='client', **kwargs):
         if procType == 'client':
             pass
         elif procType == 'standardVisionClient' or procType == 'std-cli':
-            st = StandardVisionBehaviorStation(**kwargs)
+            st = svbs.StandardVisionBehaviorStation(**kwargs)
             st.run()
         elif procType == 'server':
             server = BServer()

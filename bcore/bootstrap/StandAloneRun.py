@@ -13,15 +13,13 @@ import sys
 import os
 
 from bcore import get_base_directory, get_ip_addr
-from bcore.classes.ClientAndServer.BServer import BServerLocal
-from bcore.classes.Protocol import Protocol, DemoGratingsProtocol
-from bcore.classes.Subject import DefaultVirtual
-from bcore.classes.Station import StandardVisionBehaviorStation,StandardKeyboardStation,StandardVisionHeadfixStation
+import bcore.classes.ClientAndServer.BServer as server
+import bcore.classes.Protocol as protocol
+import bcore.classes.Subject as subject
+import  bcore.classes.Station as station
 
 # User specific protocols
-from bcore.Users.Biogen.PhysiologyProtocols import get_phys_protocol_biogen
-from bcore.Users.Biogen.BehaviorProtocols import get_behavior_protocol_biogen
-from bcore.Users.Biogen import get_protocol_from_name
+import bcore.Users.Biogen as biogen_protocol
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -36,23 +34,23 @@ SERVER_PORT = 12345
 def load_bserver(path, subject_id):
     if not os.path.exists(path):
         print("STANDALONERUN:LOAD_BSERVER:Server not found at location. Creating new server by default.")
-        b_server = BServerLocal()
+        b_server = server.BServerLocal()
         b_server._setup_paths()
         b_server.save()
     else:
-        b_server = BServerLocal.load_server(path)  # load the server from path
+        b_server = server.BServerLocal.load_server(path)  # load the server from path
 
 
     if subject_id not in b_server.get_subject_ids():
         print("STANDALONERUN:LOAD_BSERVER:Subject %r wasn''t found in server. Adding...\n" % subject_id)
-        sub = DefaultVirtual(subject_id=subject_id,reward=20.,timeout=1000.)
+        sub = subject.DefaultVirtual(subject_id=subject_id,reward=20.,timeout=1000.)
         b_server.add_subject(sub)
     else:
         print("STANDALONERUN:LOAD_BSERVER:Subject {0} was found in server\n".format(subject_id))
 
     if not b_server.get_station_ids():
         print("STANDALONERUN:LOAD_BSERVER:No Stations found in server. Creating new station...\n")
-        stn  = StandardVisionHeadfixStation(sound_on=True, station_id=0, station_location=(0, 0, 0))
+        stn  = station.StandardVisionHeadfixStation(sound_on=True, station_id=0, station_location=(0, 0, 0))
         b_server.add_station(stn)
     elif len(b_server.get_station_ids())>1:
         RuntimeError('STANDALONERUN:LOAD_BSERVER:too many stations for server')
@@ -65,7 +63,7 @@ def load_bserver(path, subject_id):
 
 def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, reward = None, timeout = None):
     # look for local server and collect information about the Subject being run
-    if not bserver_path:bserver_path = BServerLocal.get_standard_server_path()
+    if not bserver_path:bserver_path = server.BServerLocal.get_standard_server_path()
 
     b_server = load_bserver(bserver_path, subject_id)
 
@@ -88,15 +86,15 @@ def stand_alone_run(subject_id = 'demo1', bserver_path = None, protocol = None, 
         # if i gave a protocol name, add that
         if protocol:
             protocol_name_requested = protocol
-            protocol_requested = get_protocol_from_name(protocol_name_requested) # requested protocol
+            protocol_requested = biogen_protocol.get_protocol_from_name(protocol_name_requested) # requested protocol
             sub.protocol = protocol_requested
         # else add the demo protocol
         else:
-            sub.protocol = DemoGratingsProtocol()
+            sub.protocol = protocol.DemoGratingsProtocol()
     else:
         if protocol:
             protocol_name_requested = protocol
-            protocol_requested = get_protocol_from_name(protocol_name_requested) # requested protocol
+            protocol_requested = biogen_protocol.get_protocol_from_name(protocol_name_requested) # requested protocol
             if sub.protocol.name==protocol_requested.name:
                 pass
             else:
