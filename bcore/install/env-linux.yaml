@@ -1,0 +1,22 @@
+name: bcore
+channels:
+  - defaults
+dependencies:
+  - certifi
+  - pip
+  - python=3.7
+  - setuptools
+  - wheel
+  - matplotlib
+  - numpy
+  - scipy
+  - pandas
+  - git
+  - pytest
+  - pip:
+    - psychopy
+    - tqdm
+    - verlib
+    - zmq
+    - json-tricks
+    - netifaces
