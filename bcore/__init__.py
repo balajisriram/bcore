@@ -19,6 +19,7 @@ def get_base_directory():
     # returns the directory under the BCore directory
     base = os.path.split(os.path.abspath(__file__))
     base = os.path.split(base[0])
+    base = os.path.split(base[0])
     return base[0]
 
 def add_paths():

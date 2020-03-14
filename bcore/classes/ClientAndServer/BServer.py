@@ -24,18 +24,19 @@ class BServer(object):
             version             : string identifier
             serverID            : string Identifier
             serverName          : string identifier
-            serverDataPath      : allowed data storage location
-            serverIP            : IPV4 value
+            server_data_path    : allowed data storage location
+            server_ip           : IPV4 value
             creation_time       : time.time()
             stations            : list of stations
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
-                                and values being list of stationIDs
+                                  and values being list of stationIDs
     """
     version = Ver('0.0.1')  # Feb 5, 2014
     server_id = ''
     server_name = ''
     server_ip = ''
+    server_data_path = ''
     creation_time = None
     stations = []
     subjects = []
@@ -45,6 +46,12 @@ class BServer(object):
     
     def __init__(self, **kwargs):
         pass
+
+    def load_from_dict(self,dict_data):
+        self.version = Ver(dict_data['version'])
+        self.server_id = data_dict['server_id']
+
+
         
     def create_server(self, **kwargs):
         if len(kwargs) in (0, 1):
