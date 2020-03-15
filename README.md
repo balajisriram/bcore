@@ -4,7 +4,7 @@ BCore is a Behavior training library built originally for training rodents but i
 
 ### See [Getting Started guide](https://github.com/balajisriram/BCore/blob/master/Docs/0.GettingStartedWithBCore.md) for details on installing and using BCore
 
-## TODO:
+## TODO:vant for 
  - [ ] Plot compiled_record. Filter last 10000 trials.
  - [ ] RunForReward trials
  - [ ] Flip trial\_pin on trial\_start in do\_trials
@@ -17,3 +17,8 @@ BCore is a Behavior training library built originally for training rodents but i
      - [ ] specify path to the data store location. verify write access
      - [ ] identify as standalone, client or server
  - [ ] add $BCOREPATH to path
+ - [ ] configuration setup for bserver and bclient
+	 - [ ] specify base path. [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
+	 - [ ] create .bcore in the basepath to contain relevant cofguration details for the installation
+	 - [ ] create bcore data paths as required [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
+ - [ ] 
