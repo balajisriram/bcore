@@ -22,3 +22,4 @@ BCore is a Behavior training library built originally for training rodents but i
 	 - [ ] create .bcore in the basepath to contain relevant cofguration details for the installation
 	 - [ ] create bcore data paths as required [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
  - [ ] How are heats implemented?
+ - [ ] Trial data - how to operationalize saving previous data and current data: pandas adding records is super slow
