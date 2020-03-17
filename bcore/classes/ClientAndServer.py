@@ -1,5 +1,5 @@
 import os
-import time
+import datetime
 import json_tricks as json
 import shutil
 import copy
@@ -7,6 +7,7 @@ import zmq
 
 from verlib import NormalizedVersion as Ver
 from bcore import get_base_directory, get_ip_addr, get_time_stamp
+from bcore.classes.Subject import Subject
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -33,7 +34,6 @@ class BServer(object):
     """
     version = Ver('0.0.1')  # Feb 5, 2014
     server_id = ''
-    server_name = ''
     server_ip = ''
     server_data_path = ''
     creation_time = None
@@ -49,36 +49,38 @@ class BServer(object):
         elif 'dict' in kwargs:
             self = self.load_from_dict(kwargs['dict'],convert=False)
         else:
-            for kw in kwargs:
+            pass
                 
     def load_from_dict(self,data):
         self.version = Ver(data['version']) # needed
         self.server_id = data['server_id'] # needed
-        self.
-        self.server
+        self.server_data_path = data['server_data_path'] # needed
+        self.creation_time = datetime.datetime.strptime(data['creation_time'],'%B-%m-%Y::%H:%M:%S') # Month-dd-YYYY::Hr:Min:Sec
+        for sub in data['subjects']:
+            self.subjects.append(Subject.load_from_dict(sub))
+        for stn in data['stations']:
+            self.stations.append(Station.load_from_dict(stn))
+        self.assignments = data['assignemnts']
 
+    def save_to_dict(self):
+        data = dict()
+        data['version'] = self.version.__str__()
+        data['server_id'] = self.server_id
+        data['server_data_path'] = self.server_data_path
+        data['creation_time'] = datetime.datetime.strftime(self.creation_time,'%B-%m-%Y::%H:%M:%S')
 
-    def create_server(self, **kwargs):
-        if len(kwargs) in (0, 1):
-            print('BServer.__init()::', len(kwargs),
-                  ' %d args input. Loading standard Server')
-            self = BServer.load_server()
-            if 'requireVersion' in kwargs:
-                if self.version < Ver(kwargs['requireVersion']):
-                    raise ValueError('you are trying to load an old version.')
-        else:
-            self.server_id = kwargs['server_id']
-            self.server_name = kwargs['server_name']
-            self.server_data_path = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
-            self.server_ip = get_ip_addr()
-            self.creation_time = time.time()
-            self.stations = []
-            self.subjects = []
-            self.assignments = {}
-            self.server_connection = []
-            self.station_connections = {}
-            self.save_server()
+        subjects = []
+        for sub in self.subjects:
+            subjects.append(sub.save_to_dict())
+        data['subjects'] = subjects
+        
+        stations = []
+        for stn in self.stations:
+            stations.append(stn.save_to_dict())
+        data['stations'] = stations
 
+        data['assignments'] = self.assignments
+        
     def __repr__(self):
         return "BServer with id:%s, name:%s, created on:%s)" % (self.server_id, self.server_name, time.strftime("%b-%d-%Y", self.creation_time))
 

@@ -20,3 +20,4 @@ dependencies:
     - zmq
     - json-tricks
     - netifaces
+    - npyscreen

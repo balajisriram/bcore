@@ -2,7 +2,7 @@ from setuptools import setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-    
+
 setup(name='bcore',
       version='0.0.1',
       description='Train subjects in tasks',

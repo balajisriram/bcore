@@ -15,12 +15,19 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
-def get_base_directory():
+def get_codebase_path():
     # returns the directory under the BCore directory
     base = os.path.split(os.path.abspath(__file__))
     base = os.path.split(base[0])
     base = os.path.split(base[0])
-    return base[0]
+    return(base[0])
+
+def get_config_base_path():
+    base = get_base_path()
+    config_path = os.path.join(base,'.bcore')
+
+def get_base_path():
+    pass
 
 def add_paths():
     # make a list of all the directories in the os.walk of the base
