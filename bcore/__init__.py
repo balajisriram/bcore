@@ -6,6 +6,7 @@ import uuid
 import re
 import platform
 import netifaces as ni
+import json
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -22,12 +23,13 @@ def get_codebase_path():
     base = os.path.split(base[0])
     return(base[0])
 
-def get_config_base_path():
+def get_config_path():
     base = get_base_path()
     config_path = os.path.join(base,'.bcore')
+    return config_path
 
 def get_base_path():
-    pass
+    temp = json.load(os.path.join(get_config_path(),'bcore.config'))
 
 def add_paths():
     # make a list of all the directories in the os.walk of the base
@@ -40,6 +42,9 @@ def add_paths():
                   # make a list of all the directories
     sys.path.append(baseDirTree)
     print('INFO:: added module folders to path')
+    
+def create_directories(path):
+    pass
 
 def get_ip_addr(*args):
     """
