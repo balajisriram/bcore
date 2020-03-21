@@ -31,10 +31,10 @@ def get_config_path():
 
 class BaseConfigForm(nps.ActionForm):
     def create(self):
+        self.nextrely=5
         self.base_path = self.add(nps.TitleFilenameCombo, name="Provide data base path:",value=get_database_path(),select_dir=True,must_exist=True,confirm_if_exists=True)
         self.bcore_mode = self.add(nps.TitleSelectOne, max_height=5, value = [1,], name="How will this BCore installation work? Pick One:",values = ["Server","Client","Stand Alone"], scroll_exit=True)
         self.ip_addr = self.add(nps.TitleText, name="Your IP address (you can change this is the detailsed config form):",value = get_ip_addr(), scroll_exit=False,editable=False)
-        
         self.detail_config = self.add(nps.CheckBox,name="Further configure install?")
         
     def on_ok(self):
@@ -46,17 +46,45 @@ class BaseConfigForm(nps.ActionForm):
         configuration_text = "base_path::{0}\nmode::{1}\n".format(self.base_path.value,self.bcore_mode.values[self.bcore_mode.value[0]])
         if self.detail_config.value:
             configuration_text = configuration_text+'Will move to next form as we further configure the installation\n'
-            if configuration['mode']=='Server':self.parentApp.setNextForm('SERVER_CONFIG')
-            elif configuration['mode']=='Client':self.parentApp.setNextForm('CLIENT_CONFIG')
-            else:self.parentApp.setNextForm('STANDALONE_CONFIG')
+            if configuration['mode']=='Server':
+                try:
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','ServerData','backup'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','SubjectData','History'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','TrialData'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','StationData'))
+                except FileExistsError: pass
+                    
+                self.parentApp.setNextForm('SERVER_CONFIG')
+            elif configuration['mode']=='Client':
+                try:
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','SubjectData'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','StationData'))
+                except FileExistsError: pass
+                    
+                self.parentApp.setNextForm('CLIENT_CONFIG')
+            else:
+                try:
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','ServerData','backup'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','SubjectData','History'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','TrialData'))
+                    os.makedirs(os.path.join(configuration['base_path'],'BCoreData','StationData'))
+                except FileExistsError: pass
+                    
+                self.parentApp.setNextForm('STANDALONE_CONFIG')
         else:
             self.parentApp.setNextForm(None)
             
         nps.notify_confirm('Saving configuration at {0}\n\n{1}'.format(get_config_path(),configuration_text),'OK Button',editw=1,wide=True)
         self.parentApp.basic_config = configuration
         
-        
-        
+        # now create the directory and save the data
+        try:
+            os.makedirs(get_config_path())
+        except FileExistsError:
+            pass
+        with open(os.path.join(get_config_path(),'bcore.config'),'w') as f:
+            json.dump(configuration,f,indent=4)
+
     def on_cancel(self):
         nps.notify_confirm("No changes have been made to configuration. Re-run install/configure.py to configure your installation",'Exiting',editw=1)
         self.parentApp.setNextForm(None)
