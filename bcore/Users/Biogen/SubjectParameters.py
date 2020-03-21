@@ -1,4 +1,4 @@
-from BCore import get_base_directory, get_ip_addr, get_mac_address
+from BCore import get_base_path, get_ip_addr, get_mac_address
 from BCore.Classes.ClientAndServer.BServer import BServerLocal
 from BCore.Classes.Subject import Mouse
 from BCore.Classes.Station import StandardVisionHeadfixStation

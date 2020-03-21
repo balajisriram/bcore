@@ -6,7 +6,7 @@ import copy
 import zmq
 
 from verlib import NormalizedVersion as Ver
-from bcore import get_base_directory, get_ip_addr, get_time_stamp
+from bcore import get_base_path, get_ip_addr, get_time_stamp
 from bcore.classes.Subject import Subject
 
 __author__ = "Balaji Sriram"
@@ -99,7 +99,7 @@ class BServer(object):
     def load_server():
         # use standard location for path,
         # make sure to never modify server here:
-        dbLoc = os.path.join(get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
+        dbLoc = os.path.join(get_base_path(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
             with open(dbLoc, 'rb') as f:
                 server = json.load(f)
@@ -115,8 +115,8 @@ class BServer(object):
         self.save_server()
 
     def save_server(self):
-        srcDir = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
-        desDir = os.path.join(get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+        srcDir = os.path.join(get_base_path(), 'BCoreData', 'ServerData')
+        desDir = os.path.join(get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
@@ -145,9 +145,9 @@ class BServer(object):
             back up is used.
         """
         desDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData')
+            get_base_path(), 'BCoreData', 'ServerData')
         srcDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
         # delete the original database
         os.remove(os.path.join(desDir, 'db.BServer'))
         # find the latest file in the backupDBs
@@ -161,25 +161,25 @@ class BServer(object):
 
     def _setup_paths(server):
         # create 'BServerData'
-        os.mkdir(os.path.join(get_base_directory(), 'BCoreData'))
+        os.mkdir(os.path.join(get_base_path(), 'BCoreData'))
         # create 'ServerData','Stations','PermanentTrialRecordStore' in
         # BServerData
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData'))
+            get_base_path(), 'BCoreData', 'ServerData'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'StationData'))
+            get_base_path(), 'BCoreData', 'StationData'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'SubjectData'))
+            get_base_path(), 'BCoreData', 'SubjectData'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'ChangeParams'))
+            get_base_path(), 'BCoreData', 'ChangeParams'))
         # create 'replacedDBs' in 'ServerData'
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs'))
+            get_base_path(), 'BCoreData', 'ServerData', 'backupDBs'))
         # create 'Full' and 'Compiled' in 'SubjectData'
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'SubjectData', 'SessionRecords'))
+            get_base_path(), 'BCoreData', 'SubjectData', 'SessionRecords'))
         os.mkdir(os.path.join(
-            get_base_directory(), 'BCoreData', 'SubjectData', 'CompiledTrialRecords'))
+            get_base_path(), 'BCoreData', 'SubjectData', 'CompiledTrialRecords'))
 
     def add_station(self, new_station):
         if (new_station.station_id in self.get_station_ids() or
@@ -237,7 +237,7 @@ class BServerLocal(object):
 
     def __init__(self):
         self.server_id = 0
-        self.server_data_path = os.path.join(get_base_directory(), 'BCoreData', 'ServerData')
+        self.server_data_path = os.path.join(get_base_path(), 'BCoreData', 'ServerData')
         self.server_ip = 'http://localhost'
         self.creation_time = time.time()
         self.stations = []
@@ -262,7 +262,7 @@ class BServerLocal(object):
         # make sure to never modify server here:
         if not path:
             dbLoc = os.path.join(
-                get_base_directory(), 'BCoreData', 'ServerData', 'db.BServer')
+                get_base_path(), 'BCoreData', 'ServerData', 'db.BServer')
         else:
             dbLoc = path
         if os.path.isfile(dbLoc):
@@ -283,9 +283,9 @@ class BServerLocal(object):
 
     def save_server(self):
         srcDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData')
+            get_base_path(), 'BCoreData', 'ServerData')
         desDir = os.path.join(
-            get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+            get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
@@ -317,9 +317,9 @@ class BServerLocal(object):
             back up is used.
         """
         desDir = os.path.join(
-            BCore.get_base_directory(), 'BCoreData', 'ServerData')
+            BCore.get_base_path(), 'BCoreData', 'ServerData')
         srcDir = os.path.join(
-            BCore.get_base_directory(), 'BCoreData', 'ServerData', 'backupDBs')
+            BCore.get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
         # delete the original database
         os.remove(os.path.join(desDir, 'db.BServer'))
         # find the latest file in the backupDBs
@@ -335,32 +335,32 @@ class BServerLocal(object):
     def _setup_paths(self, force_delete=False):
         if force_delete:
             import shutil
-            shutil.rmtree(os.path.join(get_base_directory(),'BCoreData'))
+            shutil.rmtree(os.path.join(get_base_path(),'BCoreData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','ServerData')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','ServerData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','ServerData','backupDBs'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','ServerData','backupDBs')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','ServerData','backupDBs'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords'))
 
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords'))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','CompiledTrialRecords')):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
     def add_subject_permanent_trial_record_store(self,subject_id):
-        if not os.path.exists(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id)):
-            os.mkdir(os.path.join(get_base_directory(),'BCoreData','SubjectData','SessionRecords',subject_id))
+        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords',subject_id)):
+            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords',subject_id))
 
     def create_base_compiled_record_file(self,subject_id):
-        compiled_folder_path = os.path.join(get_base_directory(),'BCoreData','SubjectData','CompiledTrialRecords')
+        compiled_folder_path = os.path.join(get_base_path(),'BCoreData','SubjectData','CompiledTrialRecords')
         compiled_file_for_subject = [f for f in os.listdir(compiled_folder_path) if subject_id in f]
         if not compiled_file_for_subject:
             cR = {}
@@ -494,7 +494,7 @@ class BServerLocal(object):
 
     @staticmethod
     def get_standard_server_path():
-        return os.path.join(get_base_directory(),'BCoreData','ServerData','dB.BServer')
+        return os.path.join(get_base_path(),'BCoreData','ServerData','dB.BServer')
 
 if __name__ == "__main__":
     Serv=BServer()

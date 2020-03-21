@@ -14,7 +14,7 @@ import os
 import pickle
 import datetime
 from dateutil.parser import parse
-from BCore import get_mac_address, get_base_directory
+from BCore import get_mac_address, get_base_path
 from BCore.Classes.ClientAndServer.BServer import BServerLocal
 from BCore.Classes.Protocol import DemoGratingsProtocol
 from BCore.Classes.Subject import get_subject
@@ -34,12 +34,12 @@ def load_standard_bserver():
     return b_server
 
 def load_change_params():
-    path = os.path.join(get_base_directory(),'BCoreData','ChangeParams','change_params.pkl')
+    path = os.path.join(get_base_path(),'BCoreData','ChangeParams','change_params.pkl')
     if os.path.exist(path):
         with open(path,'rb') as f:
             change_params = pickle.load(f)
         curr_time = datetime.datetime.now().strftime('m%md%dy%YT%H%M')
-        path_new = os.path.join(get_base_directory(),'BCoreData','ChangeParams','change_params.'+curr_time)
+        path_new = os.path.join(get_base_path(),'BCoreData','ChangeParams','change_params.'+curr_time)
         os.rename(path,path_new)
     else:
         change_params = None

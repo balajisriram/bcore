@@ -2,7 +2,7 @@ import time
 from verlib import NormalizedVersion as Ver
 import os
 import pickle
-from bcore import get_base_directory
+from bcore import get_base_path
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -161,8 +161,8 @@ class Subject(object):
         return trial_record, quit
 
     def load_compiled_records(self):
-        # location is get_base_directory->BCoreData->CompiledTrialRecords->subject_id.compiled_record
-        compiled_file_loc = os.path.join(get_base_directory(),"BCoreData","SubjectData","CompiledTrialRecords")
+        # location is get_base_path->BCoreData->CompiledTrialRecords->subject_id.compiled_record
+        compiled_file_loc = os.path.join(get_base_path(),"BCoreData","SubjectData","CompiledTrialRecords")
         files = [i for i in os.listdir(compiled_file_loc) if \
                  os.path.isfile(os.path.join(compiled_file_loc,i)) and self.subject_id in i]
         print(self.subject_id)
@@ -178,11 +178,11 @@ class Subject(object):
         return cR
 
     def save_compiled_records(self, cR):
-        # location is get_base_directory->BCoreData->SubjectData->CompiledTrialRecords->subject_id.compiled_record
-        from BCore import get_base_directory
+        # location is get_base_path->BCoreData->SubjectData->CompiledTrialRecords->subject_id.compiled_record
+        from BCore import get_base_path
         import os
         import pickle
-        compiled_file_loc = os.path.join(get_base_directory(), "BCoreData", "SubjectData", "CompiledTrialRecords")
+        compiled_file_loc = os.path.join(get_base_path(), "BCoreData", "SubjectData", "CompiledTrialRecords")
         files = [i for i in os.listdir(compiled_file_loc) if \
                  os.path.isfile(os.path.join(compiled_file_loc, i)) and self.subject_id in i]
 
@@ -200,11 +200,11 @@ class Subject(object):
             pickle.dump(cR,f)
 
     def save_session_records(self,sR):
-        # location is get_base_directory->BCoreData->PermanentTrialRecords->subject_id->trialRecord.1-N.session_record
-        from BCore import get_base_directory
+        # location is get_base_path->BCoreData->PermanentTrialRecords->subject_id->trialRecord.1-N.session_record
+        from BCore import get_base_path
         import os
         import pickle
-        session_file_loc = os.path.join(get_base_directory(), "BCoreData", "SubjectData", "SessionRecords",self.subject_id)
+        session_file_loc = os.path.join(get_base_path(), "BCoreData", "SubjectData", "SessionRecords",self.subject_id)
         if not os.path.exists(session_file_loc):
             os.makedirs(session_file_loc)
         tnum_lo = sR[0]["trial_number"]

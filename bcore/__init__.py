@@ -30,6 +30,7 @@ def get_config_path():
 
 def get_base_path():
     temp = json.load(os.path.join(get_config_path(),'bcore.config'))
+    return temp['base_path']
 
 def add_paths():
     # make a list of all the directories in the os.walk of the base
@@ -43,8 +44,6 @@ def add_paths():
     sys.path.append(baseDirTree)
     print('INFO:: added module folders to path')
     
-def create_directories(path):
-    pass
 
 def get_ip_addr(*args):
     """

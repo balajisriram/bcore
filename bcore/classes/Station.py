@@ -11,7 +11,7 @@ prefs.general['audioLib'] = ['sounddevice']
 import psychopy.sound
 
 import bcore.classes.Hardware.Displays as displays
-from bcore import get_base_directory, get_ip_addr, get_mac_address
+from bcore import get_base_path, get_ip_addr, get_mac_address
 from verlib import NormalizedVersion as Ver
 
 __author__ = "Balaji Sriram"
@@ -131,7 +131,7 @@ class Station(object):
         self.station_id = station_id
         self.station_name = station_name
         self.station_path = os.path.join(
-            get_base_directory(), 'BCoreData', 'StationData', str(self.station_id))
+            get_base_path(), 'BCoreData', 'StationData', str(self.station_id))
         self.station_location = station_location
 
         self._setup_paths()
