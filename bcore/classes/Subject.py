@@ -1,8 +1,9 @@
-import time
+import datetime
 from verlib import NormalizedVersion as Ver
 import os
 import pickle
-from bcore import get_base_path
+from bcore import get_base_path, DATETIME_TO_STR
+import importlib
 
 __author__ = "Balaji Sriram"
 __version__ = "0.0.1"
@@ -25,30 +26,69 @@ class Subject(object):
             Ver 0.0.2 - Added iacuc_protocol_id to the object
             Ver 0.0.3 - Added  _property_changed and made getters and setters
     """
+    subject_version = Ver('0.0.3')
+    subject_id = ''
+    _protocol = []
+    _session_manager = []
+    creation_time = None
+    iacuc_protocol_id = ''
+    reward = None
+    timeout = None
+
+
     _subject_changed = False
-    def __init__(self, subject_id, **kwargs):
+    def __init__(self, **kwargs):
         """
                 Call as follows::
                 subject(subjectID='demo')
                 subjectID               - MANDATORY
                 protocols               - EMPTY
         """
-        self.ver = Ver('0.0.3')
-        self.subject_id = subject_id
-        self._protocol = []
-        self._session_manager = []
-        self.creation_date = time.time()
-        self.iacuc_protocol_id = ''
-        if 'reward' in kwargs:
-            self._reward = kwargs['reward']
+        if not kwargs:
+            self.creation_time = datetime.datetime.now()
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        elif 'subject_id' in kwargs:
+            self.subject_id = subject_id
+            self.creation_time = datetime.datetime.now()
         else:
-            self._reward = 0
-        if 'timeout' in kwargs:
-            self._timeout = kwargs['timeout']
-        else:
-            self._timeout = 0
-        if 'iacuc_protocol_id' in kwargs:
-            self.iacuc_protocol_id = kwargs['iacuc_protocol_id']
+            pass
+
+    def load_from_dict(self,data)
+        self.subject_version = Ver(data['subject_version'])
+        self.subject_id = data['subject_id']
+        self.creation_date = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR)
+        self.iacuc_protocol_id = data['iacuc_protocol_id']
+        self.reward = data['reward']
+        self.timeout = data['timeout']
+
+        prot_class = data['protocol']['class_name']
+        prot_data = data['protocol']['protocol_data']
+        P = importlib.import_module(prot_class)
+        self.protocol = P(data=prot_data)
+
+        sessmgr_class = data['session_manager']['class_name']
+        sessmgr_data = data['session_manager']['sessmgr_data']
+        SM = importlib.import_module(sessmgr_class)
+        self.session_manager = SM(data=sessmgr_data)
+        return self
+
+    def save_to_dict(self):
+        data = dict()
+        data['subject_version'] = self.subject_version.__str__()
+        data['subject_id'] = self.subject_id
+        data['creation_date'] = datetime.datetime.strftime(self.creation_time,DATETIME_TO_STR)
+        data['iacuc_protocol_id'] = self.iacuc_protocol_id
+        data['reward'] = self.reward
+        data['timeout'] = self.timeout
+
+        p = dict()
+        #p['class_name'] = '{0}.{1}'.format(self.protocol.__class__.__module__,self.protocol.__class__.__name__)
+        data['protocol'] = self.protocol.save_to_dict()
+        #p['protocol_data'] = self.protocol.save_to_dict()
+        # need to change how load is run...
+        return data
+
 
     def __repr__(self):
         return "Subject with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
@@ -97,10 +137,7 @@ class Subject(object):
     def timeout(self, value):
         self._timeout = value
         _subject_changed = True
-        
-    
-    
-    
+
     def add_protocol(self, new_protocol):
         if not self.protocol:
             self.protocol = new_protocol
@@ -214,7 +251,6 @@ class Subject(object):
         with open(os.path.join(session_file_loc, sR_name), "wb") as f:
             pickle.dump(sR, f)
 
-
 class Mouse(Subject):
     """
         MOUSE has the following attributes
@@ -225,17 +261,40 @@ class Mouse(Subject):
         geneBkgd                  : string identifier
         manipulation              : three-ple list
     """
+    mouse_version = Ver('0.0.1')
+    gender = ''
+    birth_date = None
+    strain = ''
+    gene_bkgd = ''
+    manipulation = []
 
+    def __init__(self, , **kwargs):
+        super(Mouse,self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data]'])
+        else:
+            pass
 
-    def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
-        self.ver = Ver('0.0.1')
+    def load_from_dict(self,data):
+        self.mouse_version = Ver(data['mouse_version'])
+        self.gender = data['gender']
+        self.birth_date = datetime.datetime.strptime(data['birth_date'], DATETIME_TO_STR)
+        self.strain = data['strain']
+        self.gene_bkgd = data['gene_bkgd']
+        self.manipulation = data['manipulation']
+        return self
 
-        super(Mouse, self).__init__(subject_id , **kwargs)
-        self.gender = gender
-        self.birth_date = birth_date
-        self.strain = strain
-        self.gene_bkgd = gene_bkgd
-        self.manipulation = []
+    def save_to_dict(self):
+        data = super(Mouse,self).save_to_dict()
+        data['mouse_version'] = self.mouse_version.__str__()
+        data['gender'] = self.gender
+        data['birth_date'] = datetime.datetime.strftime(self.birth_date, DATETIME_TO_STR)
+        data['strain'] = self.strain
+        data['gene_bkgd'] = self.gene_bkgd
+        data['manipulation'] = self.manipulation
+        return data
 
     def __repr__(self):
         return "Mouse with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
@@ -255,19 +314,6 @@ class Mouse(Subject):
     def allowed_gene_bkgd(self):
         return ['WT', 'Pvalb-cre', 'Pvalb-COP4-EYFP', 'Somst-cre']
 
-
-class DefaultMouse(Mouse):
-
-    def __init__(self):
-        self.ver = Ver('0.0.1')
-        super(DefaultMouse, self).__init__(subject_id='demoMouse',gender='Unknown',
-                                          birth_date='',strain='C57BL/6J',gene_bkgd='WT')
-
-    def __repr__(self):
-        return "DefaultMouse with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
-
-
-
 class Rat(Subject):
     """
         RAT has the following attributes
@@ -279,16 +325,40 @@ class Rat(Subject):
         manipulation              : three-ple list
     """
 
+    rat_version = Ver('0.0.1')
+    gender = ''
+    birth_date = None
+    strain = ''
+    gene_bkgd = ''
+    manipulation = []
 
-    def __init__(self, subject_id, gender, birth_date, strain, gene_bkgd, **kwargs):
-        self.ver = Ver('0.0.1')
+    def __init__(self, **kwargs):
+        super(Rat,self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        else:
+            pass
 
-        super(Rat, self).__init__(subject_id, **kwargs)
-        self.gender = gender
-        self.birth_date = birth_date
-        self.strain = strain
-        self.gene_bkgd = gene_bkgd
-        self.manipulation = []
+    def load_from_dict(self, data):
+        self.rat_version = Ver(data['rat_version'])
+        self.gender = data['gender']
+        self.birth_date = datetime.datetime.strptime(data['birth_date'])
+        self.strain = data['strain']
+        self.gene_bkgd = data['gene_bkgd']
+        self.manipulation = data['manipulation']
+        return self
+
+    def save_to_dict(self):
+        data = super(Rat,self).save_to_dict()
+        data['rat_version'] = self.rat_version.__str__()
+        data['gender'] = self.gender
+        data['birth_date'] = datetime.datetime.strftime(self.birth_date, DATETIME_TO_STR)
+        data['strain'] = self.strain
+        data['gene_bkgd'] = self.gene_bkgd
+        data['manipulation'] = self.manipulation
+        return data
 
     def __repr__(self):
         return "Rat with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
@@ -308,30 +378,28 @@ class Rat(Subject):
     def allowed_gene_bkgd(self):
         return ['WT']
 
-
-class DefaultRat(Rat):
-
-    def __init__(self,subject_id='demoRat'):
-        self.ver = Ver('0.0.1')
-
-        super(DefaultRat, self).__init__(subject_id=subject_id,gender='Unknown',
-                                          birth_date='',strain='Long-Evans',gene_bkgd='WT')
-
-    def __repr__(self):
-        return "DefaultRat with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
-
-
 class VirtualSubject(Subject):
     """
         VIRTUALSUBJECT has the following attributes
         subjectID                 : string ID sent to SUBJECT
     """
+    virtual_version = Ver('0.0.1')
+    def __init__(self, **kwargs):
+        super(VirtualSubject,self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        else:
+            pass
 
+    def load_from_dict(self, data):
+        self.virtual_version = Ver(data['virtual_version'])
+        return self
 
-    def __init__(self, subject_id, **kwargs):
-        self.ver = Ver('0.0.1')
-
-        super(VirtualSubject, self).__init__(subject_id, **kwargs)
+    def save_to_dict(self):
+        data = super(VirtualSubject,self).save_to_dict()
+        return data
 
     def __repr__(self):
         return "VirtualSubject with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
@@ -351,18 +419,6 @@ class VirtualSubject(Subject):
     def allowed_gene_bkgd(self):
         return None
 
-
-class DefaultVirtual(VirtualSubject):
-
-    def __init__(self,subject_id='demo_virtual',**kwargs):
-        self.ver = Ver('0.0.1')
-
-        super(DefaultVirtual, self).__init__(subject_id, **kwargs)
-
-    def __repr__(self):
-        return "DefaultVirtual with id:%s, rewarded at %s ms and punishment at %s ms" % (self.subject_id, self.reward, self.timeout)
-
-
 class Human(Subject):
     """
         HUMAN has the following attributes
@@ -375,16 +431,40 @@ class Human(Subject):
         anonymize                 : True/False
     """
 
-    def __init__(self, subject_id, gender, birth_date, first_name, last_name, anonymize=False, **kwargs):
-        self.ver = Ver('0.0.1')
+    human_version = Ver('0.0.1')
+    gender = ''
+    birth_date = None
+    firt_name = ''
+    last_name = ''
+    initials = ''
 
-        super(Human, self).__init__(subject_id, **kwargs)
-        self.gender = gender
-        self.birth_date = birth_date
-        self.first_name = first_name
-        self.last_name = last_name
-        self.initials = self.first_name[0] + '.' + self.last_name[0] + '.'
-        self.anonymize = anonymize
+    def __init__(self, **kwargs):
+        super(Human,self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        else:
+            pass
+
+    def load_from_dict(self, data):
+        self.human_version = Ver(data['human_version'])
+        self.gender = data['gender']
+        self.birth_date = datetime.datetime.strptime(data['birth_date'])
+        self.firt_name = data['firt_name']
+        self.last_name = data['last_name']
+        self.anonymize = data['anonymize']
+        return self
+
+    def save_to_dict(self):
+        data = super(Human,self).save_to_dict()
+        data['human_version'] = self.human_version.__str__()
+        data['gender'] = self.gender
+        data['birth_date'] = datetime.datetime.strftime(self.birth_date, DATETIME_TO_STR)
+        data['firt_name'] = self.firt_name
+        data['last_name'] = self.last_name
+        data['anonymize'] = self.anonymize
+        return data
 
     def __repr__(self):
         return "Human (%s), rewarded at %s ms and punishment at %s ms" % (self.initials, self.reward, self.timeout)
@@ -403,44 +483,6 @@ class Human(Subject):
 
     def allowed_gene_bkgd(self):
         return None
-
-
-class DefaultHuman(Human):
-
-    def __init__(self):
-        self.ver = Ver('0.0.1')
-
-        super(DefaultHuman, self).__init__(subject_id='', birth_date='1970-01-01', first_name='Joe', last_name='Smith',
-                                          anonymize=False, gender='Unknown')
-
-def get_subject(inp):
-    """
-        GET_SUBJECT( {'species':'Mouse',
-                      'subject_id':'demo1',
-                      'gender':'M',
-                      'birth_date':'Aug-21-2018',
-                      'strain':'C57BL/6J',
-                      'gene_bkgd':'WT',
-                      'reward': 50,
-                      'timeout': 2000,
-                      }
-    """
-    if inp['species']=='Mouse':
-        OBJ = Mouse
-    elif inp['species']=='Rat':
-        OBJ = Rat
-    else:
-        NotImplementedError('get_subject() assumes you are creating a mouse or a rat')
-
-    return OBJ(subject_id = inp['subject_id'],
-               gender = inp['gender'],
-               birth_date = inp['birth_date'],
-               strain = inp['strain'],
-               gene_bkgd = inp['gene_bkgd'],
-               reward = inp['reward'],
-               timeout = inp['timeout'],
-               )
-
 
 if __name__ == '__main__':
     print('Will create an example MOUSE for comparison')
