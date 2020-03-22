@@ -25,23 +25,6 @@ __status__ = "Production"
 PPORT_LO = 0
 PPORT_HI = 1
 
-def add_or_find_in_LUT(LUT,value):
-    n = len(LUT)
-    found = False
-    for i,val in enumerate(LUT):
-        try:
-            if value == val:
-                idx = i
-                found = True
-                break
-        except TypeError:
-            pass
-            # cannot compare error
-    if not found:
-         idx=n
-         LUT.append(value)
-    return idx,LUT
-
 def compile_records(compiled_record, trial_record):
     regular_fields = ["session_number",
     "trial_number",
