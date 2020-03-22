@@ -6,7 +6,7 @@ import copy
 import zmq
 
 from verlib import NormalizedVersion as Ver
-from bcore import get_base_path, get_ip_addr, get_time_stamp
+from bcore import get_base_path, get_ip_addr, get_time_stamp, DATETIME_TO_STR
 from bcore.classes.Subject import Subject
 
 __author__ = "Balaji Sriram"
@@ -45,9 +45,9 @@ class BServer(object):
     
     def __init__(self, **kwargs):
         if not kwargs:
-            pass
-        elif 'dict' in kwargs:
-            self = self.load_from_dict(kwargs['dict'],convert=False)
+            self.creation_time = datetime.datetime.now()
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'],convert=False)
         else:
             pass
                 
@@ -55,19 +55,20 @@ class BServer(object):
         self.version = Ver(data['version']) # needed
         self.server_id = data['server_id'] # needed
         self.server_data_path = data['server_data_path'] # needed
-        self.creation_time = datetime.datetime.strptime(data['creation_time'],'%B-%m-%Y::%H:%M:%S') # Month-dd-YYYY::Hr:Min:Sec
+        self.creation_time = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR) # Month-dd-YYYY::Hr:Min:Sec
         for sub in data['subjects']:
             self.subjects.append(Subject.load_from_dict(sub))
         for stn in data['stations']:
             self.stations.append(Station.load_from_dict(stn))
         self.assignments = data['assignemnts']
+        return self
 
     def save_to_dict(self):
         data = dict()
         data['version'] = self.version.__str__()
         data['server_id'] = self.server_id
         data['server_data_path'] = self.server_data_path
-        data['creation_time'] = datetime.datetime.strftime(self.creation_time,'%B-%m-%Y::%H:%M:%S')
+        data['creation_time'] = datetime.datetime.strftime(self.creation_time,DATETIME_TO_STR)
 
         subjects = []
         for sub in self.subjects:
