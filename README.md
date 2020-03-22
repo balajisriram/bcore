@@ -18,12 +18,15 @@ BCore is a Behavior training library built originally for training rodents but i
      - [x] save `bcore.config` to `get_config_path`
  - [ ] add $BCOREPATH to path
  - [ ] configuration setup for bserver and bclient
-	 - [ ] specify base path. [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
-	 - [ ] create .bcore in the basepath to contain relevant cofguration details for the installation
-	 - [ ] create bcore data paths as required [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
+	 - [x] specify base path. [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
+	 - [x] create .bcore in the basepath to contain relevant cofguration details for the installation
+	 - [x] create bcore data paths as required [See here](https://github.com/balajisriram/bcore/blob/master/bcore/docs/1.DataModelForBCore.md#2)
+	 - [ ] Split basic configure and configure server/client/standalone. That way we can use separate confiration for each as required
  - [ ] How are heats implemented?
+ - [ ] How are project folders implemented? In subject?
  - [ ] Trial data - how to operationalize saving previous data and current data: pandas adding records is super slow
  - [ ] setting up paths in BCore
 	 - [x] `bcore.get_base_path`: Where `BCoreData` folder is placed. Determined by configuration script. DONE March 17 2020
 	 - [x] `bcore.get_config_path`: Always below the bcore code base in a folder called `.bcore` which will contain `bcore.config`. DONE March 17 2020
-	 - [ ] `bcore.get_codebase_path`: not sure what the use of this is
+	 - [x] `bcore.get_codebase_path`: not sure what the use of this is
+ - [ ] need to update the inits, load_from_dict and save_to_dicts for DefaultMouse, DefaultRat, DefaultVirtual, and DefaultHuman
