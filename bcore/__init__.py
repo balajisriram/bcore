@@ -16,6 +16,9 @@ __maintainer__ = "Balaji Sriram"
 __email__ = "balajisriram@gmail.com"
 __status__ = "Production"
 
+DATETIME_TO_STR = '%B-%m-%Y::%H:%M:%S'
+
+
 def get_codebase_path():
     # returns the directory under the BCore directory
     base = os.path.split(os.path.abspath(__file__))
