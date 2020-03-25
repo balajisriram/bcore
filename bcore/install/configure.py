@@ -5,7 +5,7 @@ import npyscreen as nps
 import json
 import os
 
-from bcore import get_ip_addr
+from bcore import get_ip_addr, get_mac_addr
 
 ################################################################################
 ##############################       UTILITY      ##############################
@@ -35,6 +35,8 @@ class BaseConfigForm(nps.ActionForm):
         self.base_path = self.add(nps.TitleFilenameCombo, name="Provide data base path:",value=get_database_path(),select_dir=True,must_exist=True,confirm_if_exists=True)
         self.bcore_mode = self.add(nps.TitleSelectOne, max_height=5, value = [1,], name="How will this BCore installation work? Pick One:",values = ["Server","Client","Stand Alone"], scroll_exit=True)
         self.ip_addr = self.add(nps.TitleText, name="Your IP address (you can change this is the detailsed config form):",value = get_ip_addr(), scroll_exit=False,editable=False)
+        self.mac_addr = self.add(nps.TitleText, name="Your MAC address :",value = get_mac_addr(), scroll_exit=False,editable=False)
+        self.port = self.add(nps.TitleText, name="Your communication port :",value = '5550', scroll_exit=False,editable=False)
         self.detail_config = self.add(nps.CheckBox,name="Further configure install?")
         
     def on_ok(self):
@@ -42,6 +44,8 @@ class BaseConfigForm(nps.ActionForm):
         configuration['base_path'] = self.base_path.value
         configuration['mode'] = self.bcore_mode.values[self.bcore_mode.value[0]]
         configuration['ip_addr'] = self.ip_addr.value
+        configuration['mac_addr'] = self.mac_addr.value
+        configuration['port'] = int(self.port.value)
         
         configuration_text = "base_path::{0}\nmode::{1}\n".format(self.base_path.value,self.bcore_mode.values[self.bcore_mode.value[0]])
         if self.detail_config.value:
