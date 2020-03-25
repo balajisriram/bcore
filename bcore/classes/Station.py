@@ -4,14 +4,16 @@ from psychopy import event
 import psychopy.logging
 import psychopy.parallel
 import psychopy.visual
+import json
 psychopy.logging.console.setLevel(psychopy.logging.WARNING)
 import numpy as np
+
 from psychopy import prefs
 prefs.general['audioLib'] = ['sounddevice']
-import psychopy.sound
 
+import psychopy.sound
 import bcore.classes.Hardware.Displays as displays
-from bcore import get_base_path, get_ip_addr, get_mac_address
+from bcore import get_base_path, get_config_path, DATETIME_TO_STR
 from verlib import NormalizedVersion as Ver
 
 __author__ = "Balaji Sriram"
@@ -87,6 +89,18 @@ def compile_records(compiled_record, trial_record):
     return compiled_record
 
 
+def get_mac_address():
+    configuration = json.config(os.path.join(get_config_path(),'bcore.config'))
+    return configuration['mac_addr']
+
+def get_ip_address():
+    configuration = json.config(os.path.join(get_config_path(),'bcore.config'))
+    return configuration['ip_addr']
+
+def get_port():
+    configuration = json.config(os.path.join(get_config_path(),'bcore.config'))
+    return configuration['ip_addr']
+
 ####################################################################
 ####################### CLASSES FOR STATIONS #######################
 ####################################################################
@@ -106,21 +120,43 @@ class Station(object):
     _stims = {}
     _clocks = {}
     _parallel_port_conn = None
+    creation_time = ''
+    station_version = Ver('0.0.1')
+    station_id = None
+    station_name = ''
+    station_path = ''
+    station_location = None
 
-    def __init__(self, station_id= 0, station_name='Station0', station_location=(0,0,0)):
-        """ Use Station as an abstract class - do not allow setting of
-        anything except the basic details"""
-        self.ver = Ver('0.0.1')
-        self.station_id = station_id
-        self.station_name = station_name
-        self.station_path = os.path.join(
-            get_base_path(), 'BCoreData', 'StationData', str(self.station_id))
-        self.station_location = station_location
 
-        self._setup_paths()
+    def __init__(self, **kwargs):
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        else:
+            pass
+
+    def load_from_dict(self, data):
+        self.station_version = Ver(data['station_version'])
+        self.creation_time = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR)
+        self.station_id = data['station_id']
+        self.station_name = data['station_name']
+        self.station_path = os.path.join(get_base_path(), 'BCoreData', 'StationData', str(self.station_id))
+        self.station_location = data['station_location']
+
         self.mac_address = get_mac_address()
         self.ip_address = get_ip_addr()
-        self.port = 5005  # standard for all stations.
+        self.port = get_port()
+        return self
+
+    def save_to_dict(self):
+        data = dict()
+        data['station_version'] = self.station_version.__str__()
+        data['station_id'] = self.station_id
+        data['station_name'] = self.station_name
+        data['station_location'] = self.station_location
+        data['creation_time'] = datetime.datetime.strftime(self.creation_time,DATETIME_TO_STR)
+        return data
 
     def __repr__(self):
         return "Station object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
@@ -132,18 +168,6 @@ class Station(object):
     def _setup_paths(self):
         if not os.path.isdir(self.station_path):
             os.makedirs(self.station_path)
-
-    def load(self):
-        pass
-
-    def save(self):
-        pass
-
-    def load_station(self):
-        pass
-
-    def save_station(self):
-        pass
 
     def do_trials(self, **kwargs):
         raise NotImplementedError('Run doTrials() on a subclass')
@@ -242,21 +266,47 @@ class StandardVisionBehaviorStation(Station):
     _session = None
     _server_conn = None
 
-    def __init__(self,
-                 sound_on=False,
-                 station_id= 0,
-                 station_location=(0,0,0),
-                 parallel_port='standardVisionBehaviorDefault',
-                 parallel_port_address = '/dev/parport0'):
-        self.ver = Ver('0.0.1')
-        super(StandardVisionBehaviorStation, self).__init__(station_location=station_location)
-        self.station_id = station_id
-        self.station_name = "Station" + str(station_id)
-        self.sound_on = sound_on
-        self.parallel_port = parallel_port
-        self.parallel_port_address = parallel_port_address
+    svbstation_version = Ver('0.0.1')
+    sound_on = False
+    io_type = ''
+    parallel_port = None
+    parallel_port_address = ''
+    display_name = ''
+    display_type = ''
+    display = None
+
+
+    def __init__(self,**kwargs):
+        super(StandardVisionBehaviorStation, self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data]'])
+        else:
+            pass
         self.display = self.get_display()
         self.parallel_port = self.get_parport_mappings()
+
+    def load_from_dict(self,data):
+        self.svbstation_version = Ver(data['svbstation_version'])
+        self.sound_on = data['sound_on']
+        self.io_type = data['io_type']
+        self.parallel_port = data['parallel_port']
+        self.parallel_port_address = data['parallel_port_address']
+        self.display_name = data['display_name']
+        self.display_type = data['display_type']
+        return self
+
+    def save_to_dict(self):
+        data = super(StandardVisionBehaviorStation,self).save_to_dict()
+        data['svbstation_version'] = self.svbstation_version
+        data['sound_on'] = self.sound_on
+        data['io_type'] = self.io_type
+        data['parallel_port'] = self.parallel_port
+        data['parallel_port_address'] = self.parallel_port_address
+        data['display_name'] = self.display_name
+        data['display_type'] = self.display_type
+        return data
 
     def __repr__(self):
         return "StandardVisionBehaviorStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
@@ -615,16 +665,26 @@ class StandardVisionHeadfixStation(StandardVisionBehaviorStation):
         parallel_port['led_1'] = 7
     """
 
-    def __init__(self,
-                 sound_on=False,
-                 station_id= 0,
-                 station_location=(0,0,0),
-                 parallel_port='standardHeadfixBehaviorDefault'):
-        self.ver = Ver('0.0.1')
-        super(StandardVisionHeadfixStation, self).__init__(station_location=station_location,
-                                                           sound_on=sound_on,
-                                                           station_id=station_id,
-                                                           parallel_port=parallel_port)
+    svhfstation_version = Ver('0.0.1')
+
+
+    def __init__(self,**kwargs):
+        super(StandardVisionHeadfixStation, self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data]'])
+        else:
+            pass
+
+    def load_from_dict(self,data):
+        self.svhfstation_version = Ver(data['svhfstation_version'])
+        return self
+
+    def save_to_dict(self):
+        data = super(StandardVisionHeadfixStation,self).save_to_dict()
+        data['svhfstation_version'] = self.svhfstation_version
+        return data
 
     def __repr__(self):
         return "StandardVisionHeadfixStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)
@@ -673,13 +733,26 @@ class StandardKeyboardStation(StandardVisionBehaviorStation):
 
     """
 
-    def __init__(self,
-                 sound_on=False,
-                 station_id= 0,
-                 station_location=(0,0,0)):
-        self.ver = Ver('0.0.1')
-        super(StandardKeyboardStation, self).__init__(station_location=station_location,sound_on=sound_on, station_id = station_id, parallel_port=None)
-        self.display = None
+    skstation_version = Ver('0.0.1')
+
+
+    def __init__(self,**kwargs):
+        super(StandardKeyboardStation, self).__init__(**kwargs)
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data]'])
+        else:
+            pass
+
+    def load_from_dict(self,data):
+        self.skstation_version = Ver(data['skstation_version'])
+        return self
+
+    def save_to_dict(self):
+        data = super(StandardKeyboardStation,self).save_to_dict()
+        data['skstation_version'] = self.skstation_version
+        return data
 
     def __repr__(self):
         return "StandardKeyboardStation object with id:%s, location:%s and ip:%s" %(self.station_id, self.station_location, self.ip_address)

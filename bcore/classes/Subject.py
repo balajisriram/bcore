@@ -57,7 +57,7 @@ class Subject(object):
     def load_from_dict(self,data)
         self.subject_version = Ver(data['subject_version'])
         self.subject_id = data['subject_id']
-        self.creation_date = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR)
+        self.creation_time = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR)
         self.iacuc_protocol_id = data['iacuc_protocol_id']
         self.reward = data['reward']
         self.timeout = data['timeout']
@@ -273,7 +273,7 @@ class Mouse(Subject):
         if not kwargs:
             pass
         elif 'data' in kwargs:
-            self = self.load_from_dict(kwargs['data]'])
+            self = self.load_from_dict(kwargs['data'])
         else:
             pass
 

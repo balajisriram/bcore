@@ -30,3 +30,5 @@ BCore is a Behavior training library built originally for training rodents but i
 	 - [x] `bcore.get_config_path`: Always below the bcore code base in a folder called `.bcore` which will contain `bcore.config`. DONE March 17 2020
 	 - [x] `bcore.get_codebase_path`: not sure what the use of this is
  - [ ] need to update the inits, load_from_dict and save_to_dicts for DefaultMouse, DefaultRat, DefaultVirtual, and DefaultHuman
+ - [ ] How are stations initialized during trial time? parallel_port_connection/display initialization?
+ - [ ] find instances of 'data]' which is a typo
