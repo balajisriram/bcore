@@ -23,7 +23,5 @@ dependencies:
     - zmq
     - json-tricks
     - netifaces
-    - npyscreen
-    - windows-curses
     - kivy
     - kivy-garden.graph
