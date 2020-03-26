@@ -21,3 +21,5 @@ dependencies:
     - json-tricks
     - netifaces
     - npyscreen
+    - kivy
+    - kivy-garden.graph

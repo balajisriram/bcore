@@ -25,3 +25,5 @@ dependencies:
     - netifaces
     - npyscreen
     - windows-curses
+    - kivy
+    - kivy-garden.graph
