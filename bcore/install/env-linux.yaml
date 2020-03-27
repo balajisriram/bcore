@@ -22,3 +22,4 @@ dependencies:
     - netifaces
     - kivy
     - kivy-garden.graph
+    - KivyCalendar
