@@ -32,3 +32,5 @@ BCore is a Behavior training library built originally for training rodents but i
  - [ ] need to update the inits, load_from_dict and save_to_dicts for DefaultMouse, DefaultRat, DefaultVirtual, and DefaultHuman
  - [ ] How are stations initialized during trial time? parallel_port_connection/display initialization?
  - [ ] find instances of 'data]' which is a typo
+ - [ ] 11182020 - How am I storing the Station config files?
+ - [ ] 11182020 - How would station know if it is a station?

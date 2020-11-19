@@ -99,7 +99,7 @@ def get_ip_address():
 
 def get_port():
     configuration = json.config(os.path.join(get_config_path(),'bcore.config'))
-    return configuration['ip_addr']
+    return configuration['ip_port']
 
 ####################################################################
 ####################### CLASSES FOR STATIONS #######################
@@ -141,12 +141,11 @@ class Station(object):
         self.creation_time = datetime.datetime.strptime(data['creation_time'],DATETIME_TO_STR)
         self.station_id = data['station_id']
         self.station_name = data['station_name']
-        self.station_path = os.path.join(get_base_path(), 'BCoreData', 'StationData', str(self.station_id))
+        self.station_path = data['station_path']
         self.station_location = data['station_location']
-
-        self.mac_address = get_mac_address()
-        self.ip_address = get_ip_addr()
-        self.port = get_port()
+        self.mac_address = data['mac_address']
+        self.ip_address = data['ip_address']
+        self.port = data['port']
         return self
 
     def save_to_dict(self):
@@ -154,8 +153,12 @@ class Station(object):
         data['station_version'] = self.station_version.__str__()
         data['station_id'] = self.station_id
         data['station_name'] = self.station_name
+        data['station_path'] = self.station_path
         data['station_location'] = self.station_location
         data['creation_time'] = datetime.datetime.strftime(self.creation_time,DATETIME_TO_STR)
+        data['mac_address'] = self.mac_address
+        data['ip_address'] = self.ip_address
+        data['port'] = self.port
         return data
 
     def __repr__(self):

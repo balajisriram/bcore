@@ -47,7 +47,7 @@ class BServer(object):
         if not kwargs:
             self.creation_time = datetime.datetime.now()
         elif 'data' in kwargs:
-            self = self.load_from_dict(kwargs['data'],convert=False)
+            self = self.load_from_dict(kwargs['data'])
         else:
             pass
                 
@@ -81,6 +81,7 @@ class BServer(object):
         data['stations'] = stations
 
         data['assignments'] = self.assignments
+        return data
         
     def __repr__(self):
         return "BServer with id:%s, name:%s, created on:%s)" % (self.server_id, self.server_name, time.strftime("%b-%d-%Y", self.creation_time))
@@ -103,7 +104,7 @@ class BServer(object):
         dbLoc = os.path.join(get_base_path(), 'BCoreData', 'ServerData', 'db.BServer')
         if os.path.isfile(dbLoc):
             with open(dbLoc, 'rb') as f:
-                server = json.load(f)
+                server = BServer.load_from_dict(json.load(f))
             print('BServer loaded')
         else:
             raise RuntimeError('db.Server not found. Ensure it exists before calling loadServer')
@@ -116,28 +117,27 @@ class BServer(object):
         self.save_server()
 
     def save_server(self):
-        srcDir = os.path.join(get_base_path(), 'BCoreData', 'ServerData')
-        desDir = os.path.join(get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
+        src_dir = os.path.join(get_base_path(), 'BCoreData', 'ServerData')
+        des_dir = os.path.join(get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
 
         if not os.path.isdir(self.server_data_path):
             # assume that these are never made alone...
             self._setup_paths()
 
-        if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
+        if os.path.isfile(os.path.join(src_dir, 'db.BServer')):  # old db exists
             print(('Old db.Bserver found. moving to backup'))
-            old = BServer()  # standardLoad to old
-            des_name = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
-            shutil.copyfile(os.path.join(srcDir, 'db.BServer'),  os.path.join(desDir, des_name))
+            des_name = 'db_' + get_time_stamp() + '.BServer'
+            shutil.copyfile(os.path.join(src_dir, 'db.BServer'),  os.path.join(des_dir, des_name))
             print(('Moved to backup... deleting old copy'))
-            os.remove(os.path.join(srcDir, 'db.BServer'))
+            os.remove(os.path.join(src_dir, 'db.BServer'))
 
         # there might be some attributes that need to be deleted
         # delete them here before continuing
         print(('Cleaning and pickling object'))
         cleanedBServer = copy.deepcopy(self)
         cleanedBServer.station_connections = {}
-        with open(os.path.join(srcDir, 'db.BServer'), 'wb') as f:
-            pickle.dump(cleanedBServer, f)
+        with open(os.path.join(sr_dir, 'db.BServer'), 'wb') as f:
+            json.dump(BServer.save_to_dict(cleanedBServer), f)
 
     def load_backup(self):
         """
@@ -145,20 +145,23 @@ class BServer(object):
             db.BServer and replacement with an older backup. Only the latest
             back up is used.
         """
-        desDir = os.path.join(
+        des_dir = os.path.join(
             get_base_path(), 'BCoreData', 'ServerData')
-        srcDir = os.path.join(
+        src_dir = os.path.join(
             get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
         # delete the original database
-        os.remove(os.path.join(desDir, 'db.BServer'))
+        os.remove(os.path.join(des_dir, 'db.BServer'))
         # find the latest file in the backupDBs
-        newestBkup = max(os.listdir(srcDir), key=os.path.getctime)
+        newestBkup = max(os.listdir(src_dir), key=os.path.getctime)
         shutil.copyfile(
-            os.path.join(srcDir, newestBkup),  # source
-            os.path.join(desDir, 'db.BServer')  # destination
+            os.path.join(src_dir, newestBkup),  # source
+            os.path.join(des_dir, 'db.BServer')  # destination
         )
         # delete the newest backup
-        os.remove(os.path.join(srcDir, newestBkup))
+        os.remove(os.path.join(src_dir, newestBkup))
+        with open(os.path.join(des_dir,'db.BServer'), 'rb') as f:
+            server = BServer.load_from_dict(json.load(f))
+        return server
 
     def _setup_paths(server):
         # create 'BServerData'
@@ -224,137 +227,24 @@ class BServer(object):
         return subject_ids
 
 
-class BServerLocal(object):
+class BServerLocal(BServer):
     """
-        BSERVERLOCAL  is a BServer which defaults to using *localhost*,
+        BSERVERLOCAL  keeps track of all the stations that it commands,
         which subjects are allowed in which station and data storage locations.
-            serverID            : string Identifier
-            serverDataPath      : path set by the object automatically
+            version             : string identifier
+            server_id           : string Identifier
+            server_data_path    : allowed data storage location
+            server_ip           : 'http://localhost'
+            creation_time       : time.time()
             stations            : list of stations
             subjects            : list of subjects
             assignments         : dictionary with keys being subjectID
-                                and values being list of stationIDs
+                                  and values being list of stationIDs
     """
-
-    def __init__(self):
-        self.server_id = 0
-        self.server_data_path = os.path.join(get_base_path(), 'BCoreData', 'ServerData')
-        self.server_ip = 'http://localhost'
-        self.creation_time = time.time()
-        self.stations = []
-        self.subjects = []
-        self.assignments = {}
-
-        print("BSERVER:BSERVERLOCAL:__INIT__:Initialized new BServerLocal object")
+    server_ip = 'http://localhost'
 
     def __repr__(self):
         return "BServerLocal with id:%s, name:%s, created on:%s)" % (self.server_id, self.server_name, time.strftime("%b-%d-%Y", self.creation_time))
-
-    @staticmethod
-    def load():
-        """
-            Alias for BServerLocal.load_server
-        """
-        return BServerLocal.load_server()
-
-    @staticmethod
-    def load_server(path = None):
-        # if path not provided, use standard location for path,
-        # make sure to never modify server here:
-        if not path:
-            dbLoc = os.path.join(
-                get_base_path(), 'BCoreData', 'ServerData', 'db.BServer')
-        else:
-            dbLoc = path
-        if os.path.isfile(dbLoc):
-            with open(dbLoc, 'rb') as f:
-                server = pickle.load(f)
-            print("BSERVER:BSERVERLOCAL:LOAD_SERVER:Loading server")
-        else:
-            raise RuntimeError('db.Server not found. Ensure it exists before \
-                calling loadServer')
-
-        return server
-
-    def save(self):
-        """
-            Alias for server.save_server
-        """
-        self.save_server()
-
-    def save_server(self):
-        srcDir = os.path.join(
-            get_base_path(), 'BCoreData', 'ServerData')
-        desDir = os.path.join(
-            get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
-
-        if not os.path.isdir(self.server_data_path):
-            # assume that these are never made alone...
-            self._setup_paths()
-
-        if os.path.isfile(os.path.join(srcDir, 'db.BServer')):  # old db exists
-            print(('Old db.Bserver found. moving to backup'))
-            old = BServerLocal()  # standardLoad to old
-            desName = 'db_' + get_time_stamp(old.creation_time) + '.BServer'
-            shutil.copyfile(
-                os.path.join(srcDir, 'db.BServer'),  # source
-                os.path.join(desDir, desName)  # destination
-                )
-            print("BSERVER:BSERVERLOCAL:SAVE_SERVER:Moved to backup... deleting old copy")
-            os.remove(os.path.join(srcDir, 'db.BServer'))
-
-        # there might be some attributes that need to be deleted
-        # delete them here before continuing
-        print("BSERVER:BSERVERLOCAL:SAVE_SERVER:Cleaning and pickling object")
-        cleanedBServer = copy.deepcopy(self)
-        cleanedBServer.StationConnections = {}
-        with open(os.path.join(srcDir, 'db.BServer'), 'wb') as f:
-            pickle.dump(cleanedBServer, f)
-
-    def load_backup(self):
-        """
-            Use this only if you specifically require the deletion of current
-            db.BServer and replacement with an older backup. Only the latest
-            back up is used.
-        """
-        desDir = os.path.join(
-            BCore.get_base_path(), 'BCoreData', 'ServerData')
-        srcDir = os.path.join(
-            BCore.get_base_path(), 'BCoreData', 'ServerData', 'backupDBs')
-        # delete the original database
-        os.remove(os.path.join(desDir, 'db.BServer'))
-        # find the latest file in the backupDBs
-        newestBkup = max(os.listdir(srcDir), key=os.path.getctime)
-        shutil.copyfile(
-                os.path.join(srcDir, newestBkup),  # source
-                os.path.join(desDir, 'db.BServer')  # destination
-                )
-        # delete the newest backup
-        os.remove(os.path.join(srcDir, newestBkup))
-        # load the backup and return it ## TOBEDONE
-
-    def _setup_paths(self, force_delete=False):
-        if force_delete:
-            import shutil
-            shutil.rmtree(os.path.join(get_base_path(),'BCoreData'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','ServerData')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData','ServerData'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','ServerData','backupDBs')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData','ServerData','backupDBs'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords'))
-
-        if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','CompiledTrialRecords')):
-            os.mkdir(os.path.join(get_base_path(),'BCoreData','SubjectData','CompiledTrialRecords'))
 
     def add_subject_permanent_trial_record_store(self,subject_id):
         if not os.path.exists(os.path.join(get_base_path(),'BCoreData','SubjectData','SessionRecords',subject_id)):

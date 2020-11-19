@@ -22,13 +22,38 @@ class TrainingStep(object):
         will need a trialManager. A SessionManager to determine when to show trials.
         And a Criterion to determine when to graduate.
     """
+    version = Ver('0.0.1')
+    name = ''
+    trial_manager = None 
+    session_manager = None 
+    criterion = None 
 
-    def __init__(self, name, trial_manager, session_manager, criterion):
-        self.ver = Ver('0.0.1')
-        self.name = name
-        self.trial_manager = trial_manager
-        self.session_manager = session_manager
-        self.criterion = criterion
+
+    def __init__(self, **kwargs):
+        if not kwargs:
+            pass
+        elif 'data' in kwargs:
+            self = self.load_from_dict(kwargs['data'])
+        else:
+            pass
+
+    def load_from_dict(self,data):
+        self.version = Ver(data['version']) # needed
+        self.name = data['name'] # needed
+
+        trialmgr_data = data['trial_mgr']
+        T = importlib.import_module(trialmgr_data['__class__'])
+        self.trial_manager = P(data=trialmgr_data)
+
+        sessionmgr_data = data['session_mgr']
+        S = importlib.import_module(sessionmgr_data['__class__'])
+        self.session_manager = S(data=sessionmgr_data)
+
+        criterion_data = data['criterion']
+        C = importlib.import_module(criterion_data['__class__'])
+        self.criterion = C(data=criterion_data)
+
+        return self
 
     def __repr__(self):
         return "TrainingStep object, name:%s" % self.name
